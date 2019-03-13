@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta content="telephone=no" name="format-detection" />
+    <title>测试页面</title>
+    <script src="tcb-js-sdk.js"></script>
+    <script type="text/javascript">
+        var app = tcb.init({
+            appid: 'wxacfb81f2ced64e70',
+            // env: 'tcbenv-mPIgjhnq'
+        });
+        app.auth().weixinAuthProvider({scope: 'snsapi_base'}).signIn();
+
+        app.callFunction({ name: 'test', data: { hello: 'world' } }, function (err, res) {
+            console.log(res)
+        });
+        
+        var db = app.database();
+        var coll = db.collection('coll-1');
+        coll.add({a: 1}, function(err, res) {
+            console.log(err, res)
+        })
+    </script>
+</head>
+
+<body>
+    <h1>file upload</h1>
+
+    <form role="form" class="form" onsubmit="return false;">
+      <div class="form-group">
+        <label for="file">File</label>
+        <input id="file" type="file" class="form-control"/>
+      </div>
+      <button id="upload" type="button" class="btn btn-primary">Upload</button>
+    </form>
+
+    <div id="output" class="container"></div>
+</body>
+<script>
+    document.getElementById('upload').onclick = function () {
+        app.uploadFile({
+            fileContent: document.getElementById('file').files[0],
+            cloudPath: 'aaaa'
+        }, {
+          onResponseReceived: (response) => {
+            console.log(response);
+          }
+        }, function(err, res) {
+            console.log(err, res);
+        })
+    }
+</script>
+</html>

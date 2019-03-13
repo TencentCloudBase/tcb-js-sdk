@@ -1,5 +1,10 @@
 {
-    "plugins": [],
+    "plugins": [
+        ["transform-runtime", {
+            "polyfill": false,
+            "regenerator": true
+          }]
+    ],
     "presets": [
         ["es2015", {"loose": true, "modules": false}]
     ]

@@ -26,9 +26,6 @@ TCB.prototype.init = function (config: {
     timeout: config.timeout || 15000
   };
 
-  // const login = new Login(config);
-  // login.checkLogin();
-
   return new TCB(this.config);
 };
 

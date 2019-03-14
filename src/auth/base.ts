@@ -15,15 +15,15 @@ export default class {
     this.cache.removeStore(JWT_KEY);
   }
 
-  protected traceUser(): any {
+  protected traceUser(loginType?: string): any {
     const action = 'auth.traceUser';
 
-    return this.httpRequest.send(action, {});
+    return this.httpRequest.send(action, { loginType });
   }
 
-  protected getJwt(): any {
+  protected getJwt(loginType?: string): any {
     const action = 'auth.getJwt';
 
-    return this.httpRequest.send(action, {});
+    return this.httpRequest.send(action, { loginType });
   }
 }

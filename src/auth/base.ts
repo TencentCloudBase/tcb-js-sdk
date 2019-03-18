@@ -15,12 +15,6 @@ export default class {
     this.cache.removeStore(JWT_KEY);
   }
 
-  protected traceUser(loginType?: string): any {
-    const action = 'auth.traceUser';
-
-    return this.httpRequest.send(action, { loginType });
-  }
-
   protected getJwt(loginType?: string): any {
     const action = 'auth.getJwt';
 

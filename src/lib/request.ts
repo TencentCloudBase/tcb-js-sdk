@@ -42,7 +42,7 @@ class Request {
     }, 3000);
 
     let promise = Promise.resolve(null);
-    if (!token && (action !== 'auth.getJwt' && action !== 'auth.traceUser')) { //生成token接口未返回，等待
+    if (!token && (action !== 'auth.getJwt')) { //生成token接口未返回，等待
       promise = this.waitToken();
     }
 
@@ -57,7 +57,6 @@ class Request {
           action,
           env: this.config.env,
           appid: this.config.appid,
-          traceUser: this.config.traceUser,
           token: this.cache.getStore(JWT_KEY),
           code
         });

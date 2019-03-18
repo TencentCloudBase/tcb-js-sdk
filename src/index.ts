@@ -12,7 +12,6 @@ function TCB(config?: object) {
 TCB.prototype.init = function (config: {
   env: string;
   appid: string;
-  traceUser: boolean;
   timeout: number;
 }) {
   if (!config.appid) {
@@ -22,7 +21,6 @@ TCB.prototype.init = function (config: {
   this.config = {
     appid: config.appid,
     env: config.env,
-    traceUser: config.traceUser === false ? false : true,
     timeout: config.timeout || 15000
   };
 

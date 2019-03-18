@@ -2,7 +2,6 @@ export interface Config {
     env?: string;
     appid?: string;
     token?: string;
-    traceUser?: boolean;
     timeout?: number;
     proxy?: string;
 }

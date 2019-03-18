@@ -5,16 +5,16 @@ import axios from 'axios';
 /*
 * 上传文件
 * @param {string} cloudPath 上传后的文件路径
-* @param {fs.ReadStream} fileContent  上传文件的二进制流
+* @param {fs.ReadStream} filePath  上传文件的临时路径
 */
-export const uploadFile = function ({ cloudPath, fileContent }, { onResponseReceived }, callback?: any) {
+export const uploadFile = function ({ cloudPath, filePath }, { onResponseReceived }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   const action = 'storage.uploadFile';
 
   const params = {
     path: cloudPath,
-    file: fileContent,
+    file: filePath,
     onResponseReceived
   };
 

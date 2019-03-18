@@ -12,6 +12,7 @@
     <script type="text/javascript">
         var app = tcb.init({
             appid: 'wxacfb81f2ced64e70',
+            traceUser: false
             // env: 'tcbenv-mPIgjhnq'
         });
         app.auth().weixinAuthProvider({scope: 'snsapi_base'}).signIn();
@@ -44,7 +45,7 @@
 <script>
     document.getElementById('upload').onclick = function () {
         app.uploadFile({
-            fileContent: document.getElementById('file').files[0],
+            filePath: document.getElementById('file').files[0],
             cloudPath: 'aaaa'
         }, {
           onResponseReceived: (response) => {

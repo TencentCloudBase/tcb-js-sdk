@@ -183,11 +183,6 @@ const collection = db.collection('user');
 
   Null 相当于一个占位符，表示一个字段存在但是值为空。
 
-### 新增集合
-该方法没有参数，如果集合已存在，则报错
-
-db.createCollection(collName)
-
 
 ### 新增文档
 
@@ -200,9 +195,19 @@ db.createCollection(collName)
 | data | object | 是   | {_id: '10001', 'name': 'Ben'} _id 非必填 |
 
 ```js
+//es6
 collection.add({
   name: 'Ben'
+}).then((res) => {
+
 });
+
+//es5
+collection.add({
+  name: 'Ben'
+}, function(err, res) {
+
+})
 ```
 
 方法2： collection.doc().set(data)

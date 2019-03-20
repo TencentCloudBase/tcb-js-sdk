@@ -4,9 +4,7 @@ import { CollectionReference } from './collection';
 import { Command } from './command';
 import { ServerDateConstructor } from './serverDate';
 import { RegExpConstructor } from './regexp';
-import { Request } from '../lib/request';
 import { Config } from '../types';
-import { createPromiseCallback } from '../lib/util';
 
 /**
  * 地理位置类型
@@ -64,35 +62,4 @@ export class Db {
     }
     return new CollectionReference(this, collName);
   }
-
-  /**
-   * 创建集合
-   */
-  createCollection(collName: string, callback?: any): Promise<any> {
-    callback = callback || createPromiseCallback();
-    let request = new Request(this.config);
-
-    const params = {
-      collectionName: collName
-    };
-
-    request.send('database.addCollection', params).then((res) => {
-      callback(0, res);
-    }).catch((err) => {
-      callback(err);
-    });
-
-    return callback.promise;
-  }
-
-  // /**
-  //  * 获取全部集合列表
-  //  *
-  //  * @internal
-  //  * @todo
-  //  * @description 后续版本规划
-  //  */
-  // private getCollections(): void {
-
-  // }
 }

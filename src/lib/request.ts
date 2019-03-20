@@ -48,7 +48,7 @@ class Request {
 
     try {
       return promise.then(() => {
-        let onUploadProgress = data['onResponseReceived'] || undefined;
+        let onUploadProgress = data['onUploadProgress'] || undefined;
 
         let params: FormData | string;
         let contentType = 'application/x-www-form-urlencoded';
@@ -64,7 +64,7 @@ class Request {
         if (action === 'storage.uploadFile') {
           params = new FormData();
           for (let key in tmpObj) {
-            if (tmpObj.hasOwnProperty(key) && tmpObj[key] !== undefined && key !== 'onResponseReceived') {
+            if (tmpObj.hasOwnProperty(key) && tmpObj[key] !== undefined && key !== 'onUploadProgress') {
               params.append(key, tmpObj[key]);
             }
           }

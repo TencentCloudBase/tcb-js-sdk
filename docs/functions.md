@@ -23,17 +23,23 @@ callFunction(object)
 示例代码
 
 ```javascript
-//ES5
-let result = await app.callFunction({
+//ES6
+app.callFunction({
     name: "test",
     data: { a: 1 }
-}, function(res) {
-    console.log(res)
+}).then((res) => {
+    
 });
 
-//ES6
-let result = await app.callFunction({
+//ES5
+app.callFunction({
     name: "test",
     data: { a: 1 }
+}, function(err, res) {
+    if(err) {
+        console.error(err)
+    } else {
+        console.log(res)
+    }
 });
 ```

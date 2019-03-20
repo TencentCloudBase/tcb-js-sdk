@@ -7,7 +7,7 @@ import axios from 'axios';
 * @param {string} cloudPath 上传后的文件路径
 * @param {fs.ReadStream} filePath  上传文件的临时路径
 */
-export const uploadFile = function ({ cloudPath, filePath }, { onResponseReceived }, callback?: any) {
+export const uploadFile = function ({ cloudPath, filePath, onUploadProgress }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   const action = 'storage.uploadFile';
@@ -15,7 +15,7 @@ export const uploadFile = function ({ cloudPath, filePath }, { onResponseReceive
   const params = {
     path: cloudPath,
     file: filePath,
-    onResponseReceived
+    onUploadProgress
   };
 
   let httpRequest = new Request(this.config);

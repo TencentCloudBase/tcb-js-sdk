@@ -12,6 +12,7 @@ uploadFile(object)
 | --- | --- | --- | --- |
 | cloudPath | string | 是 | 文件的绝对路径，包含文件名。例如foo/bar.jpg、foo/bar/baz.jpg等，不能包含除[0-9 , a-z , A-Z]、/、!、-、_、.、、*和中文以外的字符，使用 / 字符来实现类似传统文件系统的层级结构。[查看详情](https://cloud.tencent.com/document/product/436/13324)
 | filePath | HTML upload file | 是 | 要上传的文件对象
+| onUploadProgress | function | 否 | 上传进度回调
 
 响应参数
 
@@ -25,9 +26,26 @@ uploadFile(object)
 示例代码
 
 ```javascript
+//es6
 let result = await app.uploadFile({
     cloudPath: "test-admin.jpeg",
-    filePath: document.getElementById('file').files[0]
+    filePath: document.getElementById('file').files[0],
+    onUploadProgress:function (progressEvent) {
+      console.log(progressEvent) 
+      var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+    }
+});
+
+//es5
+await app.uploadFile({
+    cloudPath: "test-admin.jpeg",
+    filePath: document.getElementById('file').files[0],
+    onUploadProgress:function (progressEvent) {
+      console.log(progressEvent) 
+      var percentCompleted = Math.round( (progressEvent.loaded * 100) / progressEvent.total );
+    }
+}, function(err, res) {
+    
 });
 ```
 
@@ -68,9 +86,19 @@ fileList
 示例代码
 
 ```javascript
-let result = await app.getTempFileURL({
+//es6
+app.getTempFileURL({
     fileList: ['cloud://test-28farb/a.png']
+}).then((res) => {
+
 });
+
+//es5
+app.getTempFileURL({
+    fileList: ['cloud://test-28farb/a.png']
+}, function(err, res) {
+
+})
 ```
 
 ### 删除文件
@@ -102,11 +130,23 @@ fileList
 示例代码
 
 ```javascript
-let result = await app.deleteFile({
+//es6
+app.deleteFile({
     fileList: [
-        "HHOeahVQ0fRTDsums4GVgMCsF6CE3wb7kmIkZbX+yilTJE4NPSQQW5EYks"
+        "cloud://jimmytest-088bef/1534576354877.jpg"
     ]
+}).then((res) => {
+
 });
+
+//es5
+app.deleteFile({
+    fileList: [
+        "cloud://jimmytest-088bef/1534576354877.jpg"
+    ]
+}, function(res) {
+
+})
 ```
 
 ### 下载文件

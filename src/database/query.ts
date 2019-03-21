@@ -149,7 +149,7 @@ export class Query {
     // console.log("this._queryOptions", this._queryOptions);
     // console.log(param);
     return new Promise<any>(resolve => {
-      this._request.send("database.queryDocument", param).then(res => {
+      this._request.send('database.queryDocument', param).then(res => {
         if (res.code) {
           resolve(res);
         } else {
@@ -182,7 +182,7 @@ export class Query {
       param.query = this._fieldFilters;
     }
     return new Promise<any>(resolve => {
-      this._request.send("database.countDocument", param).then(res => {
+      this._request.send('database.countDocument', param).then(res => {
         // console.log(res);
         if (res.code) {
           resolve(res);
@@ -310,7 +310,7 @@ export class Query {
     };
 
     return new Promise<any>(resolve => {
-      this._request.send("database.updateDocument", param).then(res => {
+      this._request.send('database.updateDocument', param).then(res => {
         if (res.code) {
           resolve(res);
         } else {
@@ -368,7 +368,7 @@ export class Query {
     // console.log("this._queryOptions", this._queryOptions);
     // console.log(param);
     return new Promise<any>(resolve => {
-      this._request.send("database.deleteDocument", param).then(res => {
+      this._request.send('database.deleteDocument', param).then(res => {
         // console.log(res)
         if (res.code) {
           resolve(res);

@@ -42,7 +42,8 @@ export default class extends Base {
     }
 
     if (code) {
-      let promise: Promise<any> = this.getJwt();
+      const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
+      let promise: Promise<any> = this.getJwt(loginType);
 
       promise.then(res => {
         callback(0);

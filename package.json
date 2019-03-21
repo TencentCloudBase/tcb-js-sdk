@@ -11,7 +11,7 @@
     "start": "webpack-dev-server --hot --open",
     "eslint": "eslint \"./**/*.js\" \"./**/*.ts\"",
     "eslint-fix": "eslint --fix \"./**/*.js\" \"./**/*.ts\"",
-    "dev": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 1234 --disableHostCheck true"
+    "dev": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true"
   },
   "repository": {
     "type": "git",

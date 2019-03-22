@@ -20,6 +20,13 @@
       errorCallback = function (err) {
         console.assert(false, err)
       },
+      log = function (bool) {
+        if (bool) {
+          console.log('test passed', ...arguments);
+        } else {
+          console.assert(false, ...arguments);
+        }
+      },
       assert = function (messageObj, err, res) {
         let bool;
         if (arguments.length === 3) {
@@ -30,11 +37,14 @@
           bool = false;
         }
 
-        if (bool) {
-          console.log('test passed', messageObj, err, res);
-        } else {
-          console.assert(false, messageObj, err, res);
-        }
+        log(bool, messageObj, err, res);
+      },
+      deepEqual = function (a, b) {
+        if (a && b && typeof a == 'object' && typeof b == 'object') {
+          if (Object.keys(a).length !== Object.keys(b).length) return false;
+          for (let key in a) if (!deepEqual(a[key], b[key])) return false;
+          return true;
+        } else return a === b
       };
 
     // init storage
@@ -183,24 +193,100 @@
     // database
     let test_database = async function (app) {
       // 获取数据库饮用
-      let db = app.database();
+      let db = app.database(),
+        _ = db.command;
       // 获取集合引用
       let coll = db.collection('coll-1');
       console.log({method: 'database:collection:name'}, coll.name);
       console.log({method: 'database:collection:doc'}, coll.doc());
 
       // 添加document
+      const initialData = {
+        name: 'aaa',
+        array: [1, 2, 3, [4, 5, 6], {a: 1, b: {c: 'fjasklfljkas', d: false}}],
+        data: {
+          a: 'a',
+          b: 'b',
+          c: 'c'
+        },
+        null: null,
+        deepObject: {
+          'l-02-01': {
+            'l-03-01': {
+              'l-04-01': {
+                level: 1,
+                name: 'l-01',
+                flag: '0'
+              }
+            }
+          }
+        }
+      };
+      let collId = "", collId2 = "";
+      // CREATE
       coll.add({a: 1}, (err, res) => {
         assert({method: 'database:collection:add', returnType: 'callback'}, err, res);
+        collId2 = res.id;
       });
-      await coll.add({a: 1}).then(function (err, res) {
+      await coll.add(initialData).then(function (err, res) {
         assert({method: 'database:collection:add', returnType: 'promise'}, err, res);
+
+        collId = res.id;
       }).catch(function (err) {
         console.assert(false, {method: 'database:collection:add', returnType: 'promise'}, err);
       });
-      // 更新document
-
-
+      // READ
+      await coll.where({
+        _id: collId,
+      }).get().then(function (res) {
+        let bool = deepEqual(res.data[0], initialData);
+        log(bool, {method: 'database:collection:get'}, res);
+      });
+      // UPDATE
+      await coll.where({
+        _id: collId
+      }).update({
+        name: 'bbb',
+        array: [{a: 1, b: 2, c: 3}]
+      }).then(res => {
+        let bool = res.updated > 0;
+        log(bool, {method: 'database:collection:update_1'}, res);
+      });
+      await coll.where({
+        _id: collId
+      }).update({
+        data: {a: null, b: null, c: null}
+      }).then(res => {
+        let bool = res.updated > 0;
+        log(bool, {method: 'database:collection:update_2'}, res);
+      });
+      await coll.where({
+        _id: collId
+      }).get().then(res => {
+        let bool = deepEqual(res.data[0].data, {a: null, b: null, c: null});
+        log(bool, {method: 'database:collection:update_get'}, res);
+      });
+      // 数组变为对象，mongo会报错
+      await coll.where({
+        _id: collId
+      }).update({
+        array: {foo: 'bar'}
+      }).then(res => {
+        let bool = res.code === 'DATABASE_REQUEST_FAILED';
+        log(bool, {method: 'database:collection:update_error'}, res);
+      });
+      await coll.where({
+        _id: coll
+      }).get().then(function (res) {
+        let bool = deepEqual(res.data[0].array, [{a: 1, b: 2, c: 3}]);
+        log(bool, {method: 'database:collection:update_error_get'}, res);
+      });
+      // Delete
+      await coll.where({
+        _id: _.or(_.eq(collId), _.eq(collId2))
+      }).remove().then(res => {
+        log(res.deleted === 2, {method: 'database:collection:delete'}, res);
+      });
     };
   </script>
   <script type="text/javascript">

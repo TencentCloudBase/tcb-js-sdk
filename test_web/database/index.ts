@@ -1,11 +1,17 @@
 // database
 import * as assert from 'power-assert';
 
-import { registerDb } from './db';
-import { registerCollection } from './collection';
-import { registerDocument } from './document';
-import { registerDate } from './date';
 import { register } from '../index';
+
+import { registerCollection } from './collection';
+import { registerCommand } from './command';
+import { registerDate } from './date';
+import { registerDb } from './db';
+import { registerDocument } from './document';
+import { registerGeo } from './geo';
+import { registerOrder } from './order';
+import { registerRegex } from './regex';
+import { registerValidate } from './validate';
 
 export async function test_database(app) {
 
@@ -128,8 +134,13 @@ export async function test_database(app) {
     });
   });
 
-  registerDb(app);
   registerCollection(app);
-  registerDocument(app);
+  registerCommand(app);
   registerDate(app);
+  registerDb(app);
+  registerDocument(app);
+  registerGeo(app);
+  registerOrder(app);
+  registerRegex(app);
+  registerValidate();
 }

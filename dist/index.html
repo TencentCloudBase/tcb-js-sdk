@@ -2,152 +2,12 @@
 <html lang="zh-cn">
 
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta content="telephone=no" name="format-detection" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="format-detection" content="telephone=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta content="telephone=no" name="format-detection"/>
   <title>测试页面</title>
-  <script src="tcb-js-sdk.js"></script>
-  <script>
-    var successCallback = function (res) {
-      try {
-        console.assert(!res.code, res)
-      } catch (e) {
-        console.assert(false, res)
-      }
-    },
-      errorCallback = function (err) {
-        console.assert(false, err)
-      };
-
-    // database
-    var test_database = async function (app) {
-      // 获取数据库饮用
-      var db = app.database();
-      // 创建集合
-      // await db.createCollection("coll-1").then(function (res) {
-      //   try {
-      //     console.assert(res.message === 'success', res)
-      //   } catch (e) {
-      //     console.assert(res.message === 'Create Collection Fail:collection already exists', res)
-      //   }
-      // }).catch(errorCallback);
-      // 获取集合引用
-      var coll = db.collection('coll-1');
-      // 添加document
-      await coll.add({ a: 1 }).then(successCallback).catch(errorCallback)
-      // 更新document
-
-
-    };
-
-    // function
-    var test_function = async function (app) {
-      return await app.callFunction({ name: 'test', data: { hello: 'world' } }).then(successCallback).catch(errorCallback);
-    };
-
-    // storage
-    var fileIdList = [];
-    var uploadFile = async function (app) {
-      await app.uploadFile({
-        filePath: document.getElementById('file').files[0],
-        cloudPath: 'test'
-      }, {
-          onResponseReceived: (response) => {
-            console.log(response);
-          }
-        }).then(function (err, res) {
-          if (err === 0 && !res.code) {
-            successCallback(res);
-
-            var fileId = res.fileID;
-            if (fileId) {
-              fileIdList.push(fileId);
-              document.getElementById("fileId").innerHTML = fileIdList.join("<br/>");
-            }
-          } else {
-            errorCallback(err);
-          }
-        }).catch(errorCallback);
-    };
-    var getTempFileURL = async function (app) {
-      if (!fileIdList.length) {
-        alert("Please upload file first.");
-        return;
-      }
-
-      app.getTempFileURL({
-        fileList: fileIdList
-      }).then(function (err, res) {
-        if (err === 0 && !res.code) {
-          successCallback(res);
-        } else {
-          errorCallback(err);
-        }
-      }).catch(errorCallback);
-      app.getTempFileURL({
-        fileList: fileIdList.map(fileId => {
-          return {
-            fileId,
-            maxAge: 600
-          }
-        })
-      }).then(function (err, res) {
-        if (err === 0 && !res.code) {
-          successCallback(res);
-        } else {
-          errorCallback(err);
-        }
-      }).catch(errorCallback);
-    };
-    var downloadFile = async function (app) {
-      if (!fileIdList.length) {
-        alert("Please upload file first.");
-        return;
-      }
-      if (fileIdList.length > 1) {
-        console.log("Only the first file will be downloaded.")
-      }
-
-      app.downloadFile({
-        fileId: fileIdList[0]
-      })
-    };
-    var deleteFile = async function (app) {
-      if (!fileIdList.length) {
-        alert("Please upload file first.");
-        return;
-      }
-
-      app.deleteFile({
-        fileList: fileIdList
-      }).then(function (err, res) {
-        if (err === 0 && !res.code) {
-          successCallback(res);
-
-          fileIdList = [];
-          document.getElementById("fileId").innerText = "";
-        } else {
-          errorCallback(err);
-        }
-      }).catch(errorCallback)
-    };
-  </script>
-  <script type="text/javascript">
-    // 初始化
-    var app = tcb.init({
-      appid: 'wxacfb81f2ced64e70',
-      traceUser: false,
-      env: 'sdf3-1c45e7'
-      // env: 'tcbenv-mPIgjhnq'
-    });
-    app.auth().weixinAuthProvider({ scope: 'snsapi_base' }).signIn();
-
-    test_function(app);
-
-    // test_database(app);
-  </script>
 </head>
 
 <body>
@@ -156,7 +16,7 @@
   <form role="form" class="form" onsubmit="return false;">
     <div class="form-group">
       <label for="file">File</label>
-      <input id="file" type="file" class="form-control" />
+      <input id="file" type="file" class="form-control"/>
     </div>
     <button id="uploadFile" type="button" class="btn btn-primary">uploadFile</button>
     <p>
@@ -170,19 +30,6 @@
 
   <div id="output" class="container"></div>
 </body>
-<script>
-  document.getElementById('uploadFile').onclick = function () {
-    uploadFile(app);
-  };
-  document.getElementById('getTempFileURL').onclick = function () {
-    getTempFileURL(app);
-  };
-  document.getElementById('downloadFile').onclick = function () {
-    downloadFile(app);
-  };
-  document.getElementById('deleteFile').onclick = function () {
-    deleteFile(app);
-  };
-</script>
+<script src="test.js"></script>
 
 </html>

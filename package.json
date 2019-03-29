@@ -11,7 +11,8 @@
     "start": "webpack-dev-server --hot --open",
     "eslint": "eslint \"./**/*.js\" \"./**/*.ts\"",
     "eslint-fix": "eslint --fix \"./**/*.js\" \"./**/*.ts\"",
-    "dev": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true"
+    "dev": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true",
+    "test_web": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 1234 --disableHostCheck true --mode development --config webpack.test.js"
   },
   "repository": {
     "type": "git",
@@ -46,7 +47,7 @@
     "eslint-plugin-typescript": "^0.14.0",
     "espower-typescript": "^8.1.4",
     "jest": "^24.5.0",
-    "power-assert": "^1.5.0",
+    "power-assert": "^1.6.1",
     "ts-jest": "^23.10.4",
     "ts-loader": "^5.3.3",
     "tslib": "^1.7.1",

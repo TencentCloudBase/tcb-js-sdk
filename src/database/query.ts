@@ -148,7 +148,7 @@ export class Query {
     }
     // console.log("this._queryOptions", this._queryOptions);
     // console.log(param);
-    return new Promise<any>(resolve => {
+    return new Promise<any>((resolve, reject) => {
       this._request.send('database.queryDocument', param).then(res => {
         if (res.code) {
           resolve(res);
@@ -163,6 +163,8 @@ export class Query {
           if (res.Offset) result.offset = res.Offset;
           resolve(result);
         }
+      }).catch(err => {
+        reject(err);
       });
     });
   }
@@ -181,7 +183,7 @@ export class Query {
     if (this._fieldFilters) {
       param.query = this._fieldFilters;
     }
-    return new Promise<any>(resolve => {
+    return new Promise<any>((resolve, reject) => {
       this._request.send('database.countDocument', param).then(res => {
         // console.log(res);
         if (res.code) {
@@ -192,6 +194,8 @@ export class Query {
             total: res.data.total
           });
         }
+      }).catch(err => {
+        reject(err);
       });
     });
   }
@@ -309,7 +313,7 @@ export class Query {
       // data: this.convertParams(data)
     };
 
-    return new Promise<any>(resolve => {
+    return new Promise<any>((resolve, reject) => {
       this._request.send('database.updateDocument', param).then(res => {
         if (res.code) {
           resolve(res);
@@ -320,6 +324,8 @@ export class Query {
             upsertId: res.data.upsert_id
           });
         }
+      }).catch(err => {
+        reject(err);
       });
     });
   }
@@ -367,7 +373,7 @@ export class Query {
     };
     // console.log("this._queryOptions", this._queryOptions);
     // console.log(param);
-    return new Promise<any>(resolve => {
+    return new Promise<any>((resolve, reject) => {
       this._request.send('database.deleteDocument', param).then(res => {
         // console.log(res)
         if (res.code) {
@@ -378,6 +384,8 @@ export class Query {
             deleted: res.data.deleted
           });
         }
+      }).catch(err => {
+        reject(err);
       });
     });
   }

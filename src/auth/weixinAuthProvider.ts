@@ -46,12 +46,13 @@ export default class extends Base {
       let promise: Promise<any> = this.getJwt(loginType);
 
       promise.then(res => {
-        callback(0);
         if (!res || res.code) {
-          throw new Error('登录失败，请用户重试');
-        }
-        if (!jwt && res.token) {
-          this.cache.setStore(JWT_KEY, res.token, 7000 * 1000);
+          callback(new Error('登录失败，请用户重试'));
+        } else {
+          if (!jwt && res.token) {
+            this.cache.setStore(JWT_KEY, res.token, 7000 * 1000);
+          }
+          callback(0, res);
         }
       });
 

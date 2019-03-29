@@ -27,6 +27,7 @@
       - [lt](#lt)
       - [lte](#lte)
       - [in](#in)
+      - [nin](#nin)
       - [and](#and)
       - [or](#or)
     - [正则表达式查询](#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%9F%A5%E8%AF%A2)

@@ -1,24 +1,26 @@
 // function
 import * as assert from 'power-assert';
-import { isSuccess } from './util';
+import { register, callbackWithTryCatch, isSuccess } from './util';
 
-export async function test_function(app) {
-  await app.callFunction({ name: 'test', data: { hello: 'world' }}, function (err, res) {
-    assert(isSuccess(err, res), {
-      method: 'function:callFunction', returnType: 'callback', response: {
-        err,
-        res
-      }
+export function test_function(app) {
+  register('callFunction in callback', async () => {
+    await new Promise(resolve => {
+      app.callFunction({ name: 'test', data: { hello: 'world' }}, callbackWithTryCatch((err, res) => {
+        assert(isSuccess(err, res), {
+          err,
+          res
+        });
+      }, () => {
+        resolve();
+      }));
     });
   });
 
-  await app.callFunction({ name: 'test', data: { hello: 'world' }}).then(function (res) {
-    assert(isSuccess(res), {
-      method: 'function:callFunction', returnType: 'promise', response: res
-    });
-  }).catch(function (err) {
-    assert(false, {
-      method: 'function:callFunction', returnType: 'promise', response: err
-    });
+  register('callFunction in promise', async () => {
+    await app.callFunction({ name: 'test', data: { hello: 'world' }}).then(callbackWithTryCatch((res) => {
+      assert(isSuccess(res), { res });
+    })).catch(callbackWithTryCatch((err) => {
+      assert(false, { err });
+    }));
   });
 }

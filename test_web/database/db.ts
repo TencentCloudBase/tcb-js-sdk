@@ -1,6 +1,6 @@
 // database db
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 
 export function registerDb(app) {
   const db = app.database();

@@ -1,5 +1,5 @@
 // database command
-import { register } from '../index';
+import { register } from '../util';
 
 export function registerCommand(app) {
   const collName = 'coll-1';

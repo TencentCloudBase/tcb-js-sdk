@@ -1,7 +1,7 @@
 // database
 import * as assert from 'power-assert';
 
-import { register } from '../index';
+import { register } from '../util';
 
 import { registerCollection } from './collection';
 import { registerCommand } from './command';
@@ -14,6 +14,15 @@ import { registerRegex } from './regex';
 import { registerValidate } from './validate';
 
 export async function test_database(app) {
+  registerCollection(app);
+  registerCommand(app);
+  registerDate(app);
+  registerDb(app);
+  registerDocument(app);
+  registerGeo(app);
+  registerOrder(app);
+  registerRegex(app);
+  registerValidate();
 
   register('Document - CRUD', async () => {
     const db = app.database();
@@ -133,14 +142,4 @@ export async function test_database(app) {
       assert(res.deleted === 2, { method: 'database:collection:delete_query' }, res);
     });
   });
-
-  registerCollection(app);
-  registerCommand(app);
-  registerDate(app);
-  registerDb(app);
-  registerDocument(app);
-  registerGeo(app);
-  registerOrder(app);
-  registerRegex(app);
-  registerValidate();
 }

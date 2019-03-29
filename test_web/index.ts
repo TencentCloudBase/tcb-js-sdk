@@ -3,24 +3,10 @@ import { test_function } from './function';
 import { uploadFile, getTempFileURL, downloadFile, deleteFile } from './storage';
 import { test_database } from './database';
 
+import { run } from './util';
+
 import * as Tcb from '../src/index';
 
-const testUnitList = [];
-
-export function register(msg, fn) {
-  testUnitList.push({
-    msg,
-    fn
-  });
-}
-
-export async function run() {
-  for (let i = 0; i < testUnitList.length; i++) {
-    let { msg, fn } = testUnitList[i];
-    console.log(msg);
-    await fn();
-  }
-}
 
 let tcb = Tcb.default;
 let app;

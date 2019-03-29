@@ -1,6 +1,6 @@
 // database geo
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 
 export function registerGeo(app) {
   const db = app.database();

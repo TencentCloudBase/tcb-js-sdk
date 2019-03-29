@@ -1,5 +1,5 @@
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 import * as util from 'util';
 
 export function registerDate(app) {

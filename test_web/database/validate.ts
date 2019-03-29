@@ -1,5 +1,5 @@
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 import { Validate } from '../../src/database/validate';
 import { ErrorCode } from '../../src/database/constant';
 

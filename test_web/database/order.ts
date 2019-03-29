@@ -1,6 +1,6 @@
 // database order
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 
 export function registerOrder(app) {
   const db = app.database();

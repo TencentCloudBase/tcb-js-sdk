@@ -1,6 +1,6 @@
 // database regex
 import * as assert from 'power-assert';
-import { register } from '../index';
+import { register } from '../util';
 
 export function registerRegex(app) {
   const db = app.database();

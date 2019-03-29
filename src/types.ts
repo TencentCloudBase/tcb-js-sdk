@@ -8,4 +8,4 @@ export interface Config {
 
 export const JWT_KEY = 'tcbjwttoken';
 
-export const BASE_URL = 'http://tcb-web.tencentcloudapi.com:8002/web';
+export const BASE_URL = 'http://tcb-api.tencentcloudapi.com/web';

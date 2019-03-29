@@ -25,6 +25,7 @@
   "author": "jimmyjzhang",
   "license": "ISC",
   "dependencies": {
+    "@cloudbase/database": "0.0.6",
     "@types/qs": "^6.5.2",
     "axios": "^0.18.0",
     "qs": "^6.6.0"

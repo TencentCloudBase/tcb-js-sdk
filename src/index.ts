@@ -1,8 +1,9 @@
 import * as Storage from './storage';
-import { Db } from './database';
 import Auth from './auth';
 import * as Functions from './functions';
-// import Login from './login';
+import { Request } from './lib/request';
+// import { Db } from '@cloudbase/database';
+const Db = require('@cloudbase/database').Db;
 
 function TCB(config?: object) {
   // console.log(config)
@@ -28,10 +29,11 @@ TCB.prototype.init = function (config: {
 };
 
 TCB.prototype.database = function (dbConfig?: object) {
+  Db.reqClass = Request;
   return new Db({ ...this.config, ...dbConfig });
 };
 
-TCB.prototype.auth = function() {
+TCB.prototype.auth = function () {
   return new Auth(this.config);
 };
 

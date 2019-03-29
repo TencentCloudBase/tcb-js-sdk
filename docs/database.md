@@ -444,6 +444,22 @@ db.collection('goods').where({
 })
 ```
 
+##### nin
+
+字段值不在给定的数组中。
+
+筛选出内存不是 8g 或 16g 的计算机商品：
+
+```js
+const _ = db.command
+db.collection('goods').where({
+  category: 'computer',
+  type: {
+    memory: _.nin([8, 16])
+  }
+})
+```
+
 ##### and
 
 表示需同时满足指定的两个或以上的条件。

@@ -1,6 +1,6 @@
 import { test_auth } from './auth';
 import { test_function } from './function';
-import { uploadFile, getTempFileURL, downloadFile, deleteFile } from './storage';
+import { uploadFile, getTempFileURL, downloadFile, deleteFile, test_storage } from './storage';
 import { test_database } from './database';
 
 import { run } from './util';
@@ -31,20 +31,13 @@ let init = async function () {
     deleteFile(app);
   };
 
-  try {
-    await test_auth(app);
-  } catch (e) {
-  }
+  await test_auth(app);
 
-  try {
-    await test_function(app);
-  } catch (e) {
-  }
+  await test_function(app);
 
-  try {
-    await test_database(app);
-  } catch (e) {
-  }
+  await test_storage(app);
+
+  await test_database(app);
 
   run();
 };

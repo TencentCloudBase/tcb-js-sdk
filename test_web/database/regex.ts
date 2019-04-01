@@ -1,11 +1,9 @@
 // database regex
 import * as assert from 'power-assert';
-import { register } from '../util';
+import { catchCallback, register, isSuccess } from '../util';
 
-export function registerRegex(app) {
+export function registerRegex(app, collName) {
   const db = app.database();
-
-  const collName = 'coll-1';
   const collection = db.collection(collName);
   // const nameList = ["f", "b", "e", "d", "a", "c"];
 
@@ -24,90 +22,98 @@ export function registerRegex(app) {
       }
     }
   };
-  register('Document - CRUD', async () => {
-    // Create
-    const res = await collection.add(initialData);
-    console.log(res);
-    assert(res.id);
-    assert(res.requestId);
+  register('database regex: Document - CRUD', async () => {
+    await new Promise(async resolve => {
+      try {
+        // Create
+        const res = await collection.add(initialData);
+        console.log(res);
+        assert(isSuccess(res) && res.id);
+        assert(isSuccess(res) && res.requestId);
 
-    // Read
+        // Read
 
-    // // 直接使用正则表达式
-    let result = await collection
-      .where({
-        name: /^abcdef.*\d+结尾$/i
-      })
-      .get();
-    // console.log(result);
-    assert(result.data.length > 0);
+        // // 直接使用正则表达式
+        let result = await collection
+          .where({
+            name: /^abcdef.*\d+结尾$/i
+          })
+          .get();
+        // console.log(result);
+        assert(result.data.length > 0);
 
-    // new db.RegExp
-    result = await collection
-      .where({
-        name: new db.RegExp({
-          regexp: '^abcdef.*\\d+结尾$',
-          options: 'i'
-        })
-      })
-      .get();
-    console.log(result);
-    assert(result.data.length > 0);
+        // new db.RegExp
+        result = await collection
+          .where({
+            name: new db.RegExp({
+              regexp: '^abcdef.*\\d+结尾$',
+              options: 'i'
+            })
+          })
+          .get();
+        console.log(result);
+        assert(result.data.length > 0);
 
-    // db.RegExp
-    result = await collection
-      .where({
-        name: db.RegExp({
-          regexp: '^abcdef.*\\d+结尾$',
-          options: 'i'
-        })
-      })
-      .get();
-    console.log(result);
-    assert(result.data.length > 0);
+        // db.RegExp
+        result = await collection
+          .where({
+            name: db.RegExp({
+              regexp: '^abcdef.*\\d+结尾$',
+              options: 'i'
+            })
+          })
+          .get();
+        console.log(result);
+        assert(result.data.length > 0);
 
-    // // Update(TODO)
-    result = await collection
-      .where({
-        name: db.command.or(new db.RegExp({
-          regexp: '^abcdef.*\\d+结尾$',
-          options: 'i'
-        }), db.RegExp({
-          regexp: '^fffffff$',
-          options: 'i'
-        }))
-      })
-      .get();
-    console.log(result);
-    assert(result.data.length > 0);
+        // // Update(TODO)
+        result = await collection
+          .where({
+            name: db.command.or(new db.RegExp({
+              regexp: '^abcdef.*\\d+结尾$',
+              options: 'i'
+            }), db.RegExp({
+              regexp: '^fffffff$',
+              options: 'i'
+            }))
+          })
+          .get();
+        console.log(result);
+        assert(result.data.length > 0);
 
-    // Update(TODO)
-    result = await collection
-      .where({
-        name: db.command.or(db.RegExp({
-          regexp: '^abcdef.*\\d+结尾$',
-          options: 'i'
-        }), db.RegExp({
-          regexp: '^fffffff$',
-          options: 'i'
-        }))
-      })
-      .update({
-        name: 'ABCDEFxxxx5678结尾'
-      });
-    console.log(result);
-    assert(result.updated > 0);
+        // Update(TODO)
+        result = await collection
+          .where({
+            name: db.command.or(db.RegExp({
+              regexp: '^abcdef.*\\d+结尾$',
+              options: 'i'
+            }), db.RegExp({
+              regexp: '^fffffff$',
+              options: 'i'
+            }))
+          })
+          .update({
+            name: 'ABCDEFxxxx5678结尾'
+          });
+        console.log(result);
+        assert(result.updated > 0);
 
-    // Delete
-    const deleteRes = await collection
-      .where({
-        name: db.RegExp({
-          regexp: '^abcdef.*\\d+结尾$',
-          options: 'i'
-        })
-      })
-      .remove();
-    console.log(deleteRes);
-    assert(deleteRes.deleted > 0);
+        // Delete
+        const deleteRes = await collection
+          .where({
+            name: db.RegExp({
+              regexp: '^abcdef.*\\d+结尾$',
+              options: 'i'
+            })
+          })
+          .remove();
+        console.log(deleteRes);
+        assert(deleteRes.deleted > 0);
+      } catch (e) {
+        catchCallback(e);
+      } finally {
+        resolve();
+      }
+    });
   });
 }

@@ -2,10 +2,7 @@
 import * as assert from 'power-assert';
 import { register,  isSuccess, callbackWithTryCatch, catchCallback } from '../util';
 
-//import { ErrorCode } from '../../src/database/constant';
-
-export function registerCollection(app) {
-  const collName = 'coll-1';
+export function registerCollection(app, collName) {
   const db = app.database();
   const collection = db.collection(collName);
 
@@ -18,20 +15,20 @@ export function registerCollection(app) {
       collection.add({ a: 1 }, (err, res) => {
         try {
           assert(isSuccess(err, res), { err, res });
-          assert(res.id, { err, res });
-          assert(res.requestId, { err, res });
+          assert(isSuccess(res) && res.id, { err, res });
+          assert(isSuccess(res) && res.requestId, { err, res });
 
           let id = res.id;
 
           collection.doc(id).update({ age: 18 }, (err, res) => {
             try {
               assert(isSuccess(err, res), { err, res });
-              assert(res.updated > 0);
+              assert(isSuccess(res) && res.updated > 0);
 
               collection.doc(id).remove(callbackWithTryCatch((err, res) => {
                 assert(isSuccess(err, res), { err, res });
-                assert(res.deleted, { err, res });
-                assert(res.requestId, { err, res });
+                assert(isSuccess(res) && res.deleted, { err, res });
+                assert(isSuccess(res) && res.requestId, { err, res });
               }, () => {
                 resolve();
               }));
@@ -53,19 +50,19 @@ export function registerCollection(app) {
       await collection.add({ a: 1 }).then(res => {
         try {
           assert(isSuccess(res), { res });
-          assert(res.id, { res });
-          assert(res.requestId, { res });
+          assert(isSuccess(res) && res.id, { res });
+          assert(isSuccess(res) && res.requestId, { res });
 
           let id = res.id;
           collection.doc(id).update({ age: 18 }).then(res => {
             try {
               assert(isSuccess(res), { res });
-              assert(res.updated > 0);
+              assert(isSuccess(res) && res.updated > 0, { res });
 
               collection.doc(res.id).remove().then(callbackWithTryCatch(res => {
                 assert(isSuccess(res), { res });
-                assert(res.deleted, { res });
-                assert(res.requestId, { res });
+                assert(isSuccess(res) && res.deleted, { res });
+                assert(isSuccess(res) && res.requestId, { res });
               }, () => {
                 resolve();
               })).catch(callbackWithTryCatch(err => {
@@ -132,7 +129,7 @@ export function registerCollection(app) {
 
   register('database collection: API - use field', async () => {
     await collection.field({ 'age': 1 }).get().then(callbackWithTryCatch(res => {
-      assert(Array.isArray(res.data));
+      assert(Array.isArray(res.data), { res });
     })).catch(callbackWithTryCatch(err => {
       assert(false, { err });
     }));
@@ -149,22 +146,22 @@ export function registerCollection(app) {
           });
         }
 
-        let result = await collection.where({
+        let res = await collection.where({
           text
         }).get();
 
-        assert(result.data.length > 0);
+        assert(isSuccess(res) && res.data.length > 0, { res });
 
         await collection.where({
           text
         }).orderBy('text', 'asc').skip(3).remove();
 
-        result = await collection.where({
+        res = await collection.where({
           text
         }).get();
 
-        console.log(result);
-        assert(result.data.length === 0);
+        console.log(res);
+        assert(isSuccess(res) && res.data.length === 0, { res });
       } catch (e) {
         catchCallback(e);
       } finally {

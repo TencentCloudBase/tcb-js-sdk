@@ -1,11 +1,9 @@
 // database geo
 import * as assert from 'power-assert';
-import { register } from '../util';
+import { catchCallback, register, isSuccess } from '../util';
 
-export function registerGeo(app) {
+export function registerGeo(app, collName) {
   const db = app.database();
-
-  const collName = 'coll-1';
   const collection = db.collection(collName);
   // const nameList = ["f", "b", "e", "d", "a", "c"];
 
@@ -33,59 +31,68 @@ export function registerGeo(app) {
       }
     ],
   };
-  register('GEO Point - CRUD', async () => {
-    // Create
-    let res = await collection.add(initialData);
-    assert(res.id);
-    assert(res.requestId);
+  register('database geo: GEO Point - CRUD', async () => {
+    await new Promise(async resolve => {
+      try {
 
-    const res2 = await collection.doc(res.id).set(initialData);
-    console.log(res2);
-    assert.strictEqual(res2.updated, 1);
-    assert(res2.requestId);
+        // Create
+        let res = await collection.add(initialData);
+        assert(isSuccess(res) && res.id);
+        assert(isSuccess(res) && res.requestId);
 
-    // Read
-    let result = await collection
-      .where({
-        _id: res.id
-      })
-      .get();
-    console.log(result.data);
-    assert(result.data.length > 0);
-    assert.deepEqual(result.data[0].point, { longitude, latitude });
+        const res2 = await collection.doc(res.id).set(initialData);
+        console.log(res2);
+        assert.strictEqual(res2.updated, 1);
+        assert(res2.requestId);
 
-    // TODO: 现在对 GEO 进行 $eq 操作，小概率会查不到，需要修改查询的底层结构
-    // result = await collection
-    //     .where({
-    //         point: db.command.eq(point)
-    //     })
-    //     .get();
-    // console.log(point, result);
-    // assert(result.data.length > 0);
+        // Read
+        let result = await collection
+          .where({
+            _id: res.id
+          })
+          .get();
+        console.log(result.data);
+        assert(result.data.length > 0);
+        assert.deepEqual(result.data[0].point, { longitude, latitude });
 
-    // result = await collection
-    //     .where({
-    //         point: db.command.or(db.command.eq(point))
-    //     })
-    //     .get();
-    // console.log(point, result);
-    // assert(result.data.length > 0);
+        // TODO: 现在对 GEO 进行 $eq 操作，小概率会查不到，需要修改查询的底层结构
+        // result = await collection
+        //     .where({
+        //         point: db.command.eq(point)
+        //     })
+        //     .get();
+        // console.log(point, result);
+        // assert(result.data.length > 0);
 
-    // result = await collection
-    //     .where({
-    //         point: point
-    //     })
-    //     .get();
-    // console.log(result);
-    // assert(result.data.length > 0);
+        // result = await collection
+        //     .where({
+        //         point: db.command.or(db.command.eq(point))
+        //     })
+        //     .get();
+        // console.log(point, result);
+        // assert(result.data.length > 0);
 
-    // Delete
-    const deleteRes = await collection
-      .where({
-        _id: res.id
-      })
-      .remove();
-    console.log(deleteRes);
-    assert.strictEqual(deleteRes.deleted, 1);
+        // result = await collection
+        //     .where({
+        //         point: point
+        //     })
+        //     .get();
+        // console.log(result);
+        // assert(result.data.length > 0);
+
+        // Delete
+        const deleteRes = await collection
+          .where({
+            _id: res.id
+          })
+          .remove();
+        console.log(deleteRes);
+        assert.strictEqual(deleteRes.deleted, 1);
+      } catch (e) {
+        catchCallback(e);
+      } finally {
+        resolve();
+      }
+    });
   });
 }

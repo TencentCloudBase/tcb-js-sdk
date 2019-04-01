@@ -2,16 +2,15 @@
 import * as assert from 'power-assert';
 import { register } from '../util';
 
-export function registerDb(app) {
+export function registerDb(app, collName) {
   const db = app.database();
 
-  register('get collection reference', () => {
-    const collName = 'coll-1';
+  register('database db: get collection reference', () => {
     const collection = db.collection(collName);
     assert(collection.name === collName);
   });
 
-  register('Error: get collection without collection name', () => {
+  register('database db: Error: get collection without collection name', () => {
     try {
       db.collection();
     } catch (e) {

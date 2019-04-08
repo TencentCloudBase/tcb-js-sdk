@@ -1,6 +1,9 @@
 // test util
 import * as assert from 'power-assert';
+
 const testUnitList = [];
+let totalTestNum = 0;
+let failedTestNum = 0;
 
 export function register(msg, fn: Function) {
   testUnitList.push({
@@ -10,12 +13,17 @@ export function register(msg, fn: Function) {
 }
 
 export async function run() {
+  totalTestNum = testUnitList.length;
+  failedTestNum = 0;
+
   for (let i = 0; i < testUnitList.length; i++) {
     let { msg, fn } = testUnitList[i];
     console.info('Testing: ', msg);
 
     await fn();
   }
+
+  console.log(`Test end, ${failedTestNum} assertion(s) failed in total ${totalTestNum} tests.`);
 }
 
 export function isSuccess(err, res?) {
@@ -31,6 +39,7 @@ export function isSuccess(err, res?) {
 export function catchCallback(e: Error) {
   if (e instanceof assert.AssertionError) {
     console.error('Test failed: ', e);
+    failedTestNum++;
   } else {
     throw e;
   }

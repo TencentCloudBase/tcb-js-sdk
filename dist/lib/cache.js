@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Cache {
-    constructor() {
+var Cache = (function () {
+    function Cache() {
         this.memStoreMap = {};
     }
-    setStore(key, value, cacheTime, version) {
+    Cache.prototype.setStore = function (key, value, cacheTime, version) {
         try {
             if (!window.localStorage) {
                 return;
@@ -13,11 +13,11 @@ class Cache {
         catch (e) {
             return;
         }
-        let content = '';
+        var content = '';
         if (!cacheTime) {
             return;
         }
-        let d = {};
+        var d = {};
         d.version = 'localCachev1';
         d.dataVersion = version;
         d.cacheTime = ((new Date()).getTime() + (cacheTime ? cacheTime : 0));
@@ -31,8 +31,8 @@ class Cache {
             return;
         }
         return;
-    }
-    getStore(key, version, forceLocal) {
+    };
+    Cache.prototype.getStore = function (key, version, forceLocal) {
         try {
             if (process && process.env && process.env.tcb_token) {
                 return process.env.tcb_token;
@@ -44,7 +44,7 @@ class Cache {
         catch (e) {
             return '';
         }
-        let content = '';
+        var content = '';
         if (forceLocal) {
             content = localStorage.getItem(key);
         }
@@ -55,7 +55,7 @@ class Cache {
             return '';
         }
         if (content.indexOf('localCachev1') >= 0) {
-            let d = JSON.parse(content);
+            var d = JSON.parse(content);
             if (d.dataVersion !== version) {
                 return '';
             }
@@ -70,8 +70,8 @@ class Cache {
         else {
             return content;
         }
-    }
-    removeStore(key) {
+    };
+    Cache.prototype.removeStore = function (key) {
         try {
             if (!window.localStorage) {
                 return this;
@@ -84,6 +84,7 @@ class Cache {
         this.memStoreMap[key] = undefined;
         delete this.memStoreMap[key];
         return this;
-    }
-}
+    };
+    return Cache;
+}());
 exports.Cache = Cache;

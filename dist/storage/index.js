@@ -1,39 +1,44 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const request_1 = require("../lib/request");
-const util_1 = require("../lib/util");
-const axios_1 = require("axios");
-exports.uploadFile = function ({ cloudPath, fileContent }, { onResponseReceived }, callback) {
+var request_1 = require("../lib/request");
+var util_1 = require("../lib/util");
+var axios_1 = require("axios");
+exports.uploadFile = function (_a, callback) {
+    var cloudPath = _a.cloudPath, filePath = _a.filePath, onUploadProgress = _a.onUploadProgress;
     callback = callback || util_1.createPromiseCallback();
-    const action = 'storage.uploadFile';
-    const params = {
+    var action = 'storage.uploadFile';
+    var params = {
         path: cloudPath,
-        file: fileContent
+        file: filePath,
+        onUploadProgress: onUploadProgress
     };
-    callback = (response) => {
-        onResponseReceived && typeof onResponseReceived === 'function' && onResponseReceived(response);
-    };
-    let httpRequest = new request_1.Request(this.config);
-    return httpRequest.send(action, params).then((res) => {
+    var httpRequest = new request_1.Request(this.config);
+    httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            return res;
+            callback(0, res);
         }
         else {
-            return {
-                fileID: res.data.fileID,
+            callback(0, {
+                fileID: res.data.fileid,
                 requestId: res.requestId
-            };
+            });
         }
+    }).catch(function (err) {
+        callback(err);
     });
+    return callback.promise;
 };
-exports.deleteFile = function ({ fileList }) {
+exports.deleteFile = function (_a, callback) {
+    var fileList = _a.fileList;
+    callback = callback || util_1.createPromiseCallback();
     if (!fileList || !Array.isArray(fileList)) {
         return {
             code: 'INVALID_PARAM',
             message: 'fileList必须是非空的数组'
         };
     }
-    for (let file of fileList) {
+    for (var _i = 0, fileList_1 = fileList; _i < fileList_1.length; _i++) {
+        var file = fileList_1[_i];
         if (!file || typeof file !== 'string') {
             return {
                 code: 'INVALID_PARAM',
@@ -41,39 +46,45 @@ exports.deleteFile = function ({ fileList }) {
             };
         }
     }
-    const action = 'storage.batchDeleteFile';
-    const params = {
+    var action = 'storage.batchDeleteFile';
+    var params = {
         fileid_list: fileList
     };
-    let httpRequest = new request_1.Request(this.config);
-    return httpRequest.send(action, params).then(res => {
+    var httpRequest = new request_1.Request(this.config);
+    httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            return res;
+            callback(0, res);
         }
         else {
-            return {
+            callback(0, {
                 fileList: res.data.delete_list,
                 requestId: res.requestId
-            };
+            });
         }
+    }).catch(function (err) {
+        callback(err);
     });
+    return callback.promise;
 };
-exports.getTempFileURL = function ({ fileList }) {
+exports.getTempFileURL = function (_a, callback) {
+    var fileList = _a.fileList;
+    callback = callback || util_1.createPromiseCallback();
     if (!fileList || !Array.isArray(fileList)) {
-        return {
+        callback(0, {
             code: 'INVALID_PARAM',
             message: 'fileList必须是非空的数组'
-        };
+        });
     }
-    let file_list = [];
-    for (let file of fileList) {
+    var file_list = [];
+    for (var _i = 0, fileList_2 = fileList; _i < fileList_2.length; _i++) {
+        var file = fileList_2[_i];
         if (typeof file === 'object') {
             if (!file.hasOwnProperty('fileID') ||
                 !file.hasOwnProperty('maxAge')) {
-                return {
+                callback(0, {
                     code: 'INVALID_PARAM',
                     message: 'fileList的元素必须是包含fileID和maxAge的对象'
-                };
+                });
             }
             file_list.push({
                 fileid: file.fileID,
@@ -86,55 +97,62 @@ exports.getTempFileURL = function ({ fileList }) {
             });
         }
         else {
-            return {
+            callback(0, {
                 code: 'INVALID_PARAM',
                 message: 'fileList的元素必须是字符串'
-            };
+            });
         }
     }
-    const action = 'storage.batchGetDownloadUrl';
-    const params = {
-        file_list
+    var action = 'storage.batchGetDownloadUrl';
+    var params = {
+        file_list: file_list
     };
-    return this.httpRequest.send(action, params).then(res => {
+    var httpRequest = new request_1.Request(this.config);
+    httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            return res;
+            callback(0, res);
         }
         else {
-            return {
+            callback(0, {
                 fileList: res.data.download_list,
                 requestId: res.requestId
-            };
+            });
         }
+    }).catch(function (err) {
+        callback(err);
     });
+    return callback.promise;
 };
-exports.downloadFile = function ({ fileID }) {
-    let promise;
-    try {
-        promise = exports.getTempFileURL({
-            fileList: [
-                {
-                    fileID,
-                    maxAge: 600
-                }
-            ]
-        });
-    }
-    catch (e) {
-        throw e;
-    }
-    return promise.then((tmpUrlRes) => {
-        const res = tmpUrlRes.fileList[0];
+exports.downloadFile = function (_a, callback) {
+    var fileID = _a.fileID;
+    callback = callback || util_1.createPromiseCallback();
+    var promise;
+    promise = exports.getTempFileURL.call(this, {
+        fileList: [
+            {
+                fileID: fileID,
+                maxAge: 600
+            }
+        ]
+    });
+    promise.then(function (tmpUrlRes) {
+        var res = tmpUrlRes.fileList[0];
         if (res.code !== 'SUCCESS') {
-            return res;
+            callback(res);
+            return;
         }
-        let tmpUrl = res.tempFileURL;
+        var tmpUrl = res.download_url;
         tmpUrl = encodeURI(tmpUrl);
-        return axios_1.default({
-            url: tmpUrl,
-            method: 'POST',
-            responseType: 'stream'
-        }).then(function (_reposne) {
+        axios_1.default.get(tmpUrl, {
+            responseType: 'blob'
+        }).then(function (response) {
+            var url = window.URL.createObjectURL(new Blob([response.data]));
+            var link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'file.pdf');
+            document.body.appendChild(link);
+            link.click();
         });
     });
+    return callback.promise;
 };

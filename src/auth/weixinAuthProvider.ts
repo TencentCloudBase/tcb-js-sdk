@@ -20,11 +20,13 @@ export default class extends Base {
   private scope: string;
   private state: string;
   private loginMode: string;
+  private appid: string;
 
-  constructor(config: Config, scope: string, loginMode?: string, state?: string) {
+  constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string) {
     super(config);
 
     this.config = config;
+    this.appid = appid;
     this.scope = scope;
     this.state = state || 'weixin';
     this.loginMode = loginMode || 'redirect';
@@ -68,7 +70,7 @@ export default class extends Base {
     currUrl = encodeURIComponent(currUrl);
 
     if (LoginModes[this.loginMode] === 'redirect') {
-      location.href = `//open.weixin.qq.com/connect/oauth2/authorize?appid=${this.config.appid}&redirect_uri=${currUrl}&response_type=code&scope=${this.scope}&state=${this.state}#wechat_redirect`;
+      location.href = `//open.weixin.qq.com/connect/oauth2/authorize?appid=${this.appid}&redirect_uri=${currUrl}&response_type=code&scope=${this.scope}&state=${this.state}#wechat_redirect`;
     }
   }
 }

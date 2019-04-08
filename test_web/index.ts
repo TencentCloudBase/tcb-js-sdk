@@ -13,9 +13,8 @@ let app;
 let init = async function () {
   // 初始化
   app = tcb.init({
-    appid: 'wxacfb81f2ced64e70',
     //env: 'ianhu',
-    env: 'sdf3-1c45e7'
+    env: 'web-test-jimmy-0cf5fa'
   });
 
   document.getElementById('uploadFile').onclick = function () {

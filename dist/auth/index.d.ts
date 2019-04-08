@@ -1,6 +1,6 @@
 import { Request } from '../lib/request';
 import { Config } from '../types';
-import { Cache } from '../lib/cache';
+import WeixinAuthProvider from './weixinAuthProvider';
 export interface UserInfo {
     openid: string;
     nickname?: string;
@@ -12,12 +12,15 @@ export interface UserInfo {
     privilege?: [string];
     unionid?: string;
 }
-declare class Auth {
+export default class Auth {
     httpRequest: Request;
-    cache: Cache;
+    config: Config;
     constructor(config: Config);
+    weixinAuthProvider({ appid, scope, loginMode, state }: {
+        appid: any;
+        scope: any;
+        loginMode: any;
+        state: any;
+    }): WeixinAuthProvider;
     getUserInfo(): any;
-    traceUser(): any;
-    getJwt(): any;
 }
-export { Auth };

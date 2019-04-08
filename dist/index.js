@@ -1,31 +1,40 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Storage = require("./storage");
-const database_1 = require("./database");
-const Functions = require("./functions");
-const login_1 = require("./login");
+var Storage = require("./storage");
+var auth_1 = require("./auth");
+var Functions = require("./functions");
+var request_1 = require("./lib/request");
+var Db = require('@cloudbase/database').Db;
 function TCB(config) {
     this.config = config ? config : this.config;
 }
 TCB.prototype.init = function (config) {
-    if (!config.appid) {
-        throw new Error('缺少必要参数公众号appid，请前往微信公众平台获取');
-    }
     this.config = {
-        appid: config.appid,
         env: config.env,
-        traceUser: config.traceUser === false ? false : true,
         timeout: config.timeout || 15000
     };
-    const login = new login_1.default(config);
-    login.checkLogin();
     return new TCB(this.config);
 };
 TCB.prototype.database = function (dbConfig) {
-    return new database_1.Db(Object.assign({}, this, dbConfig));
+    Db.reqClass = request_1.Request;
+    return new Db(__assign({}, this.config, dbConfig));
+};
+TCB.prototype.auth = function () {
+    return new auth_1.default(this.config);
 };
 function each(obj, fn) {
-    for (let i in obj) {
+    for (var i in obj) {
         if (obj.hasOwnProperty(i)) {
             fn(obj[i], i);
         }
@@ -39,9 +48,10 @@ function extend(target, source) {
 }
 extend(TCB.prototype, Functions);
 extend(TCB.prototype, Storage);
-if (window === undefined) {
-    window.tcb = exports.Tcb = new TCB();
+var tcb = new TCB();
+try {
+    window.tcb = tcb;
 }
-else {
-    exports.Tcb = new TCB();
-}
+catch (e) { }
+exports.default = tcb;
+module.exports = tcb;

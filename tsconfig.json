@@ -10,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "importHelpers": false,
     "module": "commonjs",
-    "declarationDir": "types",
+    // "declarationDir": "types",
     "noEmitOnError": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
@@ -22,11 +22,15 @@
     "stripInternal": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "target": "es6",
+    "target": "es5",
     "moduleResolution": "node",
     "types": [
       "node",
       "jest"
+    ],
+    "lib": [
+      "es2015",
+      "dom"
     ]
   },
   "include": [

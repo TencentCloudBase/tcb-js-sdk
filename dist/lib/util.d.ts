@@ -1,3 +1,3 @@
-export declare const getQuery: (name: string, url?: string) => string;
+export declare const getQuery: (name: string, url?: string) => string | false;
 export declare const removeParam: (key: string, sourceURL: string) => string;
 export declare const createPromiseCallback: () => any;

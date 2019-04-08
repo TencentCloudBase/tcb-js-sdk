@@ -1,15 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const request_1 = require("../lib/request");
-const cache_1 = require("../lib/cache");
-class Auth {
-    constructor(config) {
+var request_1 = require("../lib/request");
+var weixinAuthProvider_1 = require("./weixinAuthProvider");
+var Auth = (function () {
+    function Auth(config) {
         this.httpRequest = new request_1.Request(config);
-        this.cache = new cache_1.Cache();
+        this.config = config;
     }
-    getUserInfo() {
-        const action = 'auth.getUserInfo';
-        return this.httpRequest.send(action, {}).then(res => {
+    Auth.prototype.weixinAuthProvider = function (_a) {
+        var appid = _a.appid, scope = _a.scope, loginMode = _a.loginMode, state = _a.state;
+        return new weixinAuthProvider_1.default(this.config, appid, scope, loginMode, state);
+    };
+    Auth.prototype.getUserInfo = function () {
+        var action = 'auth.getUserInfo';
+        return this.httpRequest.send(action, {}).then(function (res) {
             if (res.code) {
                 return res;
             }
@@ -19,14 +23,7 @@ class Auth {
                 };
             }
         });
-    }
-    traceUser() {
-        const action = 'auth.traceUser';
-        return this.httpRequest.send(action, {});
-    }
-    getJwt() {
-        const action = 'auth.getJwt';
-        return this.httpRequest.send(action, {});
-    }
-}
-exports.Auth = Auth;
+    };
+    return Auth;
+}());
+exports.default = Auth;

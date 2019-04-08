@@ -25,7 +25,7 @@ export const uploadFile = function ({ cloudPath, filePath, onUploadProgress }, c
       callback(0, res);
     } else {
       callback(0, {
-        fileID: res.data.fileID,
+        fileID: res.data.fileid,
         requestId: res.requestId
       });
     }
@@ -132,7 +132,9 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
   };
   // console.log(params);
 
-  this.httpRequest.send(action, params).then(res => {
+  let httpRequest = new Request(this.config);
+
+  httpRequest.send(action, params).then(res => {
     // console.log(res);
     if (res.code) {
       callback(0, res);
@@ -154,7 +156,7 @@ export const downloadFile = function ({ fileID }, callback?: any) {
 
   let promise: Promise<any>;
 
-  promise = getTempFileURL({
+  promise = getTempFileURL.call(this, {
     fileList: [
       {
         fileID,
@@ -171,15 +173,18 @@ export const downloadFile = function ({ fileID }, callback?: any) {
       return;
     }
 
-    let tmpUrl = res.tempFileURL;
+    let tmpUrl = res.download_url;
     tmpUrl = encodeURI(tmpUrl);
 
-    axios({
-      url: tmpUrl,
-      method: 'POST',
-      responseType: 'stream'
-    }).then(function (_reposne) {
-      // response.data.pipe(fs.createWriteStream(tempFilePath))
+    axios.get(tmpUrl, {
+      responseType: 'blob'
+    }).then(function (response) {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'file.pdf');
+      document.body.appendChild(link);
+      link.click();
     });
   });
   return callback.promise;

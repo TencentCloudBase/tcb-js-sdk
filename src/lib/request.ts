@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as qs from 'qs';
+// import * as qs from 'qs';
 
 import { Config, BASE_URL, JWT_KEY } from '../types';
 import { Cache } from './cache';
@@ -50,13 +50,12 @@ class Request {
       return promise.then(() => {
         let onUploadProgress = data['onUploadProgress'] || undefined;
 
-        let params: FormData | string;
+        let params: any;
         let contentType = 'application/x-www-form-urlencoded';
 
         const tmpObj = Object.assign({}, data, {
           action,
           env: this.config.env,
-          appid: this.config.appid,
           token: this.cache.getStore(JWT_KEY),
           code
         });
@@ -70,20 +69,24 @@ class Request {
           }
           contentType = 'multipart/form-data';
         } else {
-          params = qs.stringify(tmpObj);
+          // Object.keys(tmpObj).forEach((key) => {
+          //   if ((typeof tmpObj[key]) === 'object') {
+          //     tmpObj[key] = JSON.stringify(tmpObj[key]); // 这里必须使用内置JSON对象转换
+          //   }
+          // });
+          // params = qs.stringify(tmpObj); // 这里必须使用qs库进行转换
+          contentType = 'application/json;charset=UTF-8';
+          params = tmpObj;
         }
 
         let opts = {
-          baseURL: BASE_URL,
-          data: params,
-          method: 'post',
           headers: {
             'content-type': contentType
           },
           onUploadProgress
         };
 
-        return axios(opts).then((response) => {
+        return axios.post(BASE_URL, params, opts).then((response) => {
           if (response.statusText === 'OK') {
             return response.data;
           }

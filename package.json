@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
+  "typescript": {
+    "definition": "./dist/index.d.ts"
+  },
+  "types": "./dist/index.d.ts",
+  "files": ["lib/**/*"],
   "scripts": {
     "build": "webpack",
     "tsc": "tsc -p tsconfig.json",
@@ -11,7 +16,6 @@
     "start": "webpack-dev-server --hot --open",
     "eslint": "eslint \"./**/*.js\" \"./**/*.ts\"",
     "eslint-fix": "eslint --fix \"./**/*.js\" \"./**/*.ts\"",
-    "dev": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true",
     "test_web": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 1234 --disableHostCheck true --mode development --config webpack.test.js"
   },
   "repository": {

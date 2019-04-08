@@ -1,19 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getQuery = function (name, url) {
-    let u = url || window.location.search;
-    let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
-    let r = u.substr(u.indexOf('\?') + 1).match(reg);
+    if (typeof window === 'undefined') {
+        return false;
+    }
+    var u = url || window.location.search;
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = u.substr(u.indexOf('\?') + 1).match(reg);
     return r != null ? r[2] : '';
 };
 exports.removeParam = function (key, sourceURL) {
-    let rtn = sourceURL.split('?')[0];
-    let param;
-    let params_arr = [];
-    let queryString = (sourceURL.indexOf('?') !== -1) ? sourceURL.split('?')[1] : '';
+    var rtn = sourceURL.split('?')[0];
+    var param;
+    var params_arr = [];
+    var queryString = (sourceURL.indexOf('?') !== -1) ? sourceURL.split('?')[1] : '';
     if (queryString !== '') {
         params_arr = queryString.split('&');
-        for (let i = params_arr.length - 1; i >= 0; i -= 1) {
+        for (var i = params_arr.length - 1; i >= 0; i -= 1) {
             param = params_arr[i].split('=')[0];
             if (param === key) {
                 params_arr.splice(i, 1);
@@ -23,12 +26,12 @@ exports.removeParam = function (key, sourceURL) {
     }
     return rtn;
 };
-exports.createPromiseCallback = () => {
-    let cb;
+exports.createPromiseCallback = function () {
+    var cb;
     if (!Promise) {
-        cb = () => { };
+        cb = function () { };
         cb.promise = {};
-        const throwPromiseNotDefined = () => {
+        var throwPromiseNotDefined = function () {
             throw new Error('Your Node runtime does support ES6 Promises. ' +
                 'Set "global.Promise" to your preferred implementation of promises.');
         };
@@ -36,8 +39,8 @@ exports.createPromiseCallback = () => {
         Object.defineProperty(cb.promise, 'catch', { get: throwPromiseNotDefined });
         return cb;
     }
-    const promise = new Promise((resolve, reject) => {
-        cb = (err, data) => {
+    var promise = new Promise(function (resolve, reject) {
+        cb = function (err, data) {
             if (err)
                 return reject(err);
             return resolve(data);

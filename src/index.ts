@@ -12,15 +12,9 @@ function TCB(config?: object) {
 
 TCB.prototype.init = function (config: {
   env: string;
-  appid: string;
   timeout: number;
 }) {
-  if (!config.appid) {
-    throw new Error('缺少必要参数公众号appid，请前往微信公众平台获取');
-  }
-
   this.config = {
-    appid: config.appid,
     env: config.env,
     timeout: config.timeout || 15000
   };
@@ -61,3 +55,4 @@ try {
 } catch (e) { }
 
 export default tcb;
+module.exports = tcb;

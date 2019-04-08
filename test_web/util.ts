@@ -21,9 +21,9 @@ export async function run() {
 export function isSuccess(err, res?) {
   let bool = false;
   if (arguments.length === 2) {
-    bool = !(!err || err.code || err instanceof Error || res.code);
+    bool = !(err !== 0 || err.code || err instanceof Error || res.code);
   } else if (arguments.length === 1) {
-    bool = !(!err || err.code || err instanceof Error);
+    bool = !(err !== 0 || err.code || err instanceof Error);
   }
   return bool;
 }

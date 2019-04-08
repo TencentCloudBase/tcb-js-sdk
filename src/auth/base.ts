@@ -15,9 +15,9 @@ export default class {
     this.cache.removeStore(JWT_KEY);
   }
 
-  protected getJwt(loginType?: string): any {
+  protected getJwt(appid: string, loginType?: string): any {
     const action = 'auth.getJwt';
 
-    return this.httpRequest.send(action, { loginType });
+    return this.httpRequest.send(action, { appid, loginType });
   }
 }

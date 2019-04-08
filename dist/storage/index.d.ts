@@ -1,18 +1,14 @@
-export declare const uploadFile: ({ cloudPath, fileContent }: {
+export declare const uploadFile: ({ cloudPath, filePath, onUploadProgress }: {
     cloudPath: any;
-    fileContent: any;
-}, { onResponseReceived }: {
-    onResponseReceived: any;
-}, callback: any) => Promise<any>;
+    filePath: any;
+    onUploadProgress: any;
+}, callback?: any) => any;
 export declare const deleteFile: ({ fileList }: {
     fileList: any;
-}) => Promise<any> | {
-    code: string;
-    message: string;
-};
+}, callback?: any) => any;
 export declare const getTempFileURL: ({ fileList }: {
     fileList: any;
-}) => any;
+}, callback?: any) => any;
 export declare const downloadFile: ({ fileID }: {
     fileID: any;
-}) => Promise<any>;
+}, callback?: any) => any;

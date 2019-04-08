@@ -23,8 +23,8 @@ export default class Auth {
     this.config = config;
   }
 
-  weixinAuthProvider({ scope, loginMode, state }) {
-    return new WeixinAuthProvider(this.config, scope, loginMode, state);
+  weixinAuthProvider({ appid, scope, loginMode, state }) {
+    return new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
   }
 
   getUserInfo(): any {

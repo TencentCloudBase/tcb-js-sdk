@@ -2,14 +2,15 @@
 import * as assert from 'power-assert';
 import { isSuccess } from './util';
 
-let fileIdList = [];
+window['fileIdList'] = [];
 
 export async function uploadFile(app) {
   await app.uploadFile({
     filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
-    cloudPath: 'test',
-    onUploadProgress: (response) => {
-      console.log(response);
+    cloudPath: 'cos.jpeg',
+    onUploadProgress: (progressEvent) => {
+      const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      console.log({ progress });
     }
   }, function (err, res) {
     let bool = isSuccess(err, res);
@@ -20,19 +21,20 @@ export async function uploadFile(app) {
     });
 
     if (bool) {
-      let fileId = res.fileID;
-      if (fileId) {
-        fileIdList.push(fileId);
-        document.getElementById('fileId').innerHTML = fileIdList.join('<br/>');
+      let fileID = res.fileID;
+      if (fileID) {
+        window['fileIdList'].push(fileID);
+        document.getElementById('fileID').innerHTML = window['fileIdList'].join('<br/>');
       }
     }
   });
 
   await app.uploadFile({
     filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
-    cloudPath: 'test',
-    onUploadProgress: (response) => {
-      console.log(response);
+    cloudPath: 'cos.jpeg',
+    onUploadProgress: (progressEvent) => {
+      const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      console.log({ progress });
     }
   }).then(function (err, res) {
     let bool = isSuccess(err, res);
@@ -43,10 +45,10 @@ export async function uploadFile(app) {
     });
 
     if (bool) {
-      let fileId = res.fileID;
-      if (fileId) {
-        fileIdList.push(fileId);
-        document.getElementById('fileId').innerHTML = fileIdList.join('<br/>');
+      let fileID = res.fileID;
+      if (fileID) {
+        window['fileIdList'].push(fileID);
+        document.getElementById('fileID').innerHTML = window['fileIdList'].join('<br/>');
       }
     }
   }).catch(function (err) {
@@ -59,13 +61,13 @@ export async function uploadFile(app) {
 }
 
 export async function getTempFileURL(app) {
-  if (!fileIdList.length) {
+  if (!window['fileIdList'].length) {
     alert('Please upload file first.');
     return;
   }
 
   app.getTempFileURL({
-    fileList: fileIdList
+    fileList: window['fileIdList']
   }).then(function (err, res) {
     assert(isSuccess(err, res), {
       method: 'storage:getTempFileUrl', fileListItemType: 'string', response: {
@@ -82,9 +84,9 @@ export async function getTempFileURL(app) {
   });
 
   app.getTempFileURL({
-    fileList: fileIdList.map(fileId => {
+    fileList: window['fileIdList'].map(fileID => {
       return {
-        fileId,
+        fileID,
         maxAge: 600
       };
     })
@@ -105,27 +107,27 @@ export async function getTempFileURL(app) {
 }
 
 export async function downloadFile(app) {
-  if (!fileIdList.length) {
+  if (!window['fileIdList'].length) {
     alert('Please upload file first.');
     return;
   }
-  if (fileIdList.length > 1) {
+  if (window['fileIdList'].length > 1) {
     console.log('Only the first file will be downloaded.');
   }
 
   app.downloadFile({
-    fileId: fileIdList[0]
+    fileID: window['fileIdList'][0]
   });
 }
 
 export async function deleteFile(app) {
-  if (!fileIdList.length) {
+  if (!window['fileIdList'].length) {
     alert('Please upload file first.');
     return;
   }
 
   app.deleteFile({
-    fileList: fileIdList
+    fileList: window['fileIdList']
   }).then(function (err, res) {
     let bool = isSuccess(err, res);
     assert(bool, {
@@ -137,8 +139,8 @@ export async function deleteFile(app) {
 
     if (bool) {
 
-      fileIdList = [];
-      document.getElementById('fileId').innerText = '';
+      window['fileIdList'] = [];
+      document.getElementById('fileID').innerText = '';
     }
   }).catch(err => {
     assert(false, {

@@ -7,7 +7,7 @@ function registerAuthTest(app, scope) {
 
   register('signIn in callback, scope: ' + scope, async () => {
     await new Promise((resolve) => {
-      auth.weixinAuthProvider({ scope: scope }).signIn(callbackWithTryCatch((err, res) => {
+      auth.weixinAuthProvider({ appid: 'wxacfb81f2ced64e70', scope: scope }).signIn(callbackWithTryCatch((err, res) => {
         assert(isSuccess(err, res), { err, res });
       }, () => {
         resolve();
@@ -16,7 +16,7 @@ function registerAuthTest(app, scope) {
   });
 
   register('signIn in promise, scope: ' + scope, async () => {
-    await auth.weixinAuthProvider({ scope: scope }).signIn().then(callbackWithTryCatch((res) => {
+    await auth.weixinAuthProvider({ appid: 'wxacfb81f2ced64e70', scope: scope }).signIn().then(callbackWithTryCatch((res) => {
       assert(isSuccess(res), { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });

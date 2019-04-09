@@ -5,66 +5,74 @@ import { callbackWithTryCatch, catchCallback, isSuccess, register } from './util
 window['fileIdList'] = [];
 
 export async function uploadFile(app, returnType) {
-  try {
-    switch (returnType) {
-      case 'callback': {
-        await app.uploadFile({
-          filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
-          cloudPath: 'cos.jpeg',
-          onUploadProgress: (progressEvent) => {
-            let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log('uploadFile progress: ' + percentCompleted, progressEvent);
-          }
-        }, function (err, res) {
-          let bool = isSuccess(err, res) && res.fileId;
+  switch (returnType) {
+    case 'callback': {
+      await app.uploadFile({
+        filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
+        cloudPath: 'cos.jpeg',
+        onUploadProgress: (progressEvent) => {
+          let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log('uploadFile progress: ' + percentCompleted, progressEvent);
+        }
+      }, function (err, res) {
+        let bool = isSuccess(err, res) && res.fileId;
+        try {
           assert(bool, {
             method: 'storage: uploadFile', returnType: 'callback', err, res
           });
+        } catch (e) {
+          catchCallback(e);
+        }
 
-          if (bool) {
-            let fileId = res.fileID;
-            window['fileIdList'].push(fileId);
-            document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
-            document.getElementById('output').innerText = '上传文件 测试成功';
-          } else {
-            document.getElementById('output').innerText = '上传文件 测试失败';
-          }
-        });
-        break;
-      }
-      case 'promise': {
-        await app.uploadFile({
-          filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
-          cloudPath: 'cos.jpeg',
-          onUploadProgress: (progressEvent) => {
-            let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log('uploadFile progress: ' + percentCompleted, progressEvent);
-          }
-        }).then(function (res) {
-          let bool = isSuccess(res) && res.fileId;
+        if (bool) {
+          let fileId = res.fileID;
+          window['fileIdList'].push(fileId);
+          document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
+          document.getElementById('output').innerText = '上传文件 测试成功';
+        } else {
+          document.getElementById('output').innerText = '上传文件 测试失败';
+        }
+      });
+      break;
+    }
+    case 'promise': {
+      await app.uploadFile({
+        filePath: (<HTMLInputElement>document.getElementById('file')).files[0],
+        cloudPath: 'cos.jpeg',
+        onUploadProgress: (progressEvent) => {
+          let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log('uploadFile progress: ' + percentCompleted, progressEvent);
+        }
+      }).then(function (res) {
+        let bool = isSuccess(res) && res.fileId;
+        try {
           assert(bool, {
             method: 'storage: uploadFile', returnType: 'promise', res
           });
+        } catch (e) {
+          catchCallback(e);
+        }
 
-          if (bool) {
-            let fileId = res.fileID;
-            window['fileIdList'].push(fileId);
-            document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
-            document.getElementById('output').innerText = '上传文件 测试成功';
-          } else {
-            document.getElementById('output').innerText = '上传文件 测试失败';
-          }
-        }).catch(function (err) {
+        if (bool) {
+          let fileId = res.fileID;
+          window['fileIdList'].push(fileId);
+          document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
+          document.getElementById('output').innerText = '上传文件 测试成功';
+        } else {
+          document.getElementById('output').innerText = '上传文件 测试失败';
+        }
+      }).catch(function (err) {
+        try {
           assert(false, {
             method: 'storage: uploadFile', returnType: 'promise', err
           });
-          document.getElementById('output').innerText = '上传文件 测试失败';
-        });
-        break;
-      }
+        } catch (e) {
+          catchCallback(e);
+        }
+        document.getElementById('output').innerText = '上传文件 测试失败';
+      });
+      break;
     }
-  } catch (e) {
-    catchCallback(e);
   }
 }
 
@@ -74,55 +82,63 @@ export async function getTempFileURL(app, returnType) {
     return;
   }
 
-  try {
-    switch (returnType) {
-      case 'callback': {
-        app.getTempFileURL({
-          fileList: window['fileIdList']
-        }, (err, res) => {
-          let bool = isSuccess(err, res) && res.fileList.length === window['fileIdList'].length;
+  switch (returnType) {
+    case 'callback': {
+      app.getTempFileURL({
+        fileList: window['fileIdList']
+      }, (err, res) => {
+        let bool = isSuccess(err, res) && res.fileList.length === window['fileIdList'].length;
+        try {
           assert(bool, {
             method: 'storage: getTempFileUrl', returnType: 'callback', err, res
           });
+        } catch (e) {
+          catchCallback(e);
+        }
 
-          if (bool) {
-            document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
+        if (bool) {
+          document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
               && res.fileList.map(item => {
                 return `<p><a href="${item.tempFileURL}">${item.tempFileURL}</a></p>`;
               }));
-          } else {
-            document.getElementById('output').innerText = '获取文件下载链接 测试失败';
-          }
-        });
-        break;
-      }
-      case 'promise': {
-        app.getTempFileURL({
-          fileList: window['fileIdList']
-        }).then(function (res) {
-          let bool = isSuccess(res) && res.fileList.length === window['fileIdList'].length;
+        } else {
+          document.getElementById('output').innerText = '获取文件下载链接 测试失败';
+        }
+      });
+      break;
+    }
+    case 'promise': {
+      app.getTempFileURL({
+        fileList: window['fileIdList']
+      }).then(function (res) {
+        let bool = isSuccess(res) && res.fileList.length === window['fileIdList'].length;
+        try {
           assert(bool, {
             method: 'storage: getTempFileUrl', returnType: 'promise', res
           });
+        } catch (e) {
+          catchCallback(e);
+        }
 
-          if (bool) {
-            document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
+        if (bool) {
+          document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
               && res.fileList.map(item => {
                 return `<p><a href="${item.tempFileURL}">${item.tempFileURL}</a></p>`;
               }));
-          } else {
-            document.getElementById('output').innerText = '获取文件下载链接 测试失败';
-          }
-        }).catch(err => {
+        } else {
+          document.getElementById('output').innerText = '获取文件下载链接 测试失败';
+        }
+      }).catch(err => {
+        try {
           assert(false, {
             method: 'storage: getTempFileUrl', returnType: 'promise', err
           });
-          document.getElementById('output').innerText = '获取文件下载链接 测试失败';
-        });
-      }
+        } catch (e) {
+          catchCallback(e);
+        }
+        document.getElementById('output').innerText = '获取文件下载链接 测试失败';
+      });
     }
-  } catch (e) {
-    catchCallback(e);
   }
 }
 
@@ -136,13 +152,9 @@ export async function downloadFile(app) {
     console.log('Only the first file will be downloaded.');
   }
 
-  try {
-    app.downloadFile({
-      fileID: window['fileIdList'][0]
-    });
-  } catch (e) {
-    catchCallback(e);
-  }
+  app.downloadFile({
+    fileID: window['fileIdList'][0]
+  });
 }
 
 export async function deleteFile(app, returnType) {
@@ -161,24 +173,30 @@ export async function deleteFile(app, returnType) {
           fileList: window['fileIdList']
         }).then(function (err, res) {
           let bool = isSuccess(err, res);
-          assert(bool, {
-            method: 'storage: deleteFile', response: {
-              err,
-              res
-            }
-          });
+          try {
+            assert(bool, {
+              method: 'storage: deleteFile', err, res
+            });
+          } catch (e) {
+            catchCallback(e);
+          }
 
           if (bool) {
-
             window['fileIdList'] = [];
             document.getElementById('fileId').innerText = '';
+            document.getElementById('output').innerText = '删除文件 测试成功';
+          } else {
+            document.getElementById('output').innerText = '删除 测试失败';
           }
         }).catch(err => {
-          assert(false, {
-            method: 'storage: deleteFile', response: {
-              err
-            }
-          });
+          try {
+            assert(false, {
+              method: 'storage: deleteFile', err
+            });
+          } catch (e) {
+            catchCallback(e);
+          }
+          document.getElementById('output').innerText = '删除 测试失败';
         });
         break;
       }

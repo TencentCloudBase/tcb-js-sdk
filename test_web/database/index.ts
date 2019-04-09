@@ -1,7 +1,7 @@
 // database
 import * as assert from 'power-assert';
 
-import {register, isSuccess, catchCallback, callbackWithTryCatch} from '../util';
+import { register, isSuccess, catchCallback, callbackWithTryCatch } from '../util';
 
 import { registerCollection } from './collection';
 import { registerCommand } from './command';
@@ -53,49 +53,48 @@ export async function test_database(app) {
         };
 
         // Create
-        const res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
+        let res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id);
-        assert(isSuccess(res) && res.requestId);
+        assert(isSuccess(res) && res.id, { res });
 
         // Read
         const { id } = res;
-        let result = await collection.where({
+        res = await collection.where({
           _id: id,
         }).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert.deepStrictEqual(result.data[0].name, initialData.name);
-        assert.deepStrictEqual(result.data[0].array, initialData.array);
-        assert.deepStrictEqual(result.data[0].deepObject, initialData.deepObject);
+        assert.deepStrictEqual(res.data[0].name, initialData.name, { res });
+        assert.deepStrictEqual(res.data[0].array, initialData.array, { res });
+        assert.deepStrictEqual(res.data[0].deepObject, initialData.deepObject, { res });
 
-        result = await collection.where({
+        res = await collection.where({
           null: _.or(_.eq(null))
         }).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert.deepStrictEqual(result.data[0].name, initialData.name);
-        assert.deepStrictEqual(result.data[0].array, initialData.array);
-        assert.deepStrictEqual(result.data[0].deepObject, initialData.deepObject);
+        assert.deepStrictEqual(res.data[0].name, initialData.name, { res });
+        assert.deepStrictEqual(res.data[0].array, initialData.array, { res });
+        assert.deepStrictEqual(res.data[0].deepObject, initialData.deepObject, { res });
 
         const doc = await collection.doc(id).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert.deepStrictEqual(doc.data[0].name, initialData.name);
-        assert.deepStrictEqual(doc.data[0].array, initialData.array);
-        assert.deepStrictEqual(doc.data[0].deepObject, initialData.deepObject);
+        assert.deepStrictEqual(doc.data[0].name, initialData.name, { res });
+        assert.deepStrictEqual(doc.data[0].array, initialData.array, { res });
+        assert.deepStrictEqual(doc.data[0].deepObject, initialData.deepObject, { res });
 
         // Update
-        result = await collection.where({
+        res = await collection.where({
           _id: id
         }).update({
           name: 'bbb',
@@ -105,9 +104,9 @@ export async function test_database(app) {
         }, () => {
           resolve();
         }));
-        assert(result.updated > 0);
+        assert(res.updated > 0, { res });
 
-        result = await collection.where({
+        res = await collection.where({
           _id: id
         }).update({
           data: { a: null, b: null, c: null }
@@ -116,18 +115,18 @@ export async function test_database(app) {
         }, () => {
           resolve();
         }));
-        assert(result.updated > 0);
+        assert(res.updated > 0, { res });
 
-        result = await collection.where({ _id: id }).get().catch(callbackWithTryCatch(err => {
+        res = await collection.where({ _id: id }).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(result.data[0]);
-        assert.deepStrictEqual(result.data[0].data, { a: null, b: null, c: null });
+        assert(res.data[0], { res });
+        assert.deepStrictEqual(res.data[0].data, { a: null, b: null, c: null }, { res });
 
         // 数组变为对象，mongo会报错
-        result = await collection.where({
+        res = await collection.where({
           _id: id
         }).update({
           array: { foo: 'bar' }
@@ -136,16 +135,16 @@ export async function test_database(app) {
         }, () => {
           resolve();
         }));
-        assert.strictEqual(result.code, 'DATABASE_REQUEST_FAILED');
+        assert.strictEqual(res.code, 'DATABASE_REQUEST_FAILED', { res });
 
-        result = await collection.where({
+        res = await collection.where({
           _id: id
         }).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert.deepStrictEqual(result.data[0].array, [{ a: 1, b: 2, c: 3 }]);
+        assert.deepStrictEqual(res.data[0].array, [{ a: 1, b: 2, c: 3 }], { res });
 
         // Delete
         const deleteRes = await collection.doc(id).remove().catch(callbackWithTryCatch(err => {
@@ -153,7 +152,7 @@ export async function test_database(app) {
         }, () => {
           resolve();
         }));
-        assert.strictEqual(deleteRes.deleted, 1);
+        assert.strictEqual(deleteRes.deleted, 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -183,17 +182,21 @@ export async function test_database(app) {
           }))
         ]);
         const query = _.or([{ b: _.and(_.gte(1), _.lte(10)) }, { b: _.and(_.gt(99), _.lte(101)) }]);
-        await collection.where(query).get().then((res) => {
-          assert(isSuccess(res) && res.data.length >= 2, { method: 'database:collection:get_query' }, res);
-        }).catch(callbackWithTryCatch(err => {
+        await collection.where(query).get().then(callbackWithTryCatch((res) => {
+          assert(isSuccess(res) && res.data.length >= 2, { res });
+        }, () => {
+          resolve();
+        })).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
         // Delete
-        await collection.where(query).remove().then(res => {
-          assert(isSuccess(res) && res.deleted === 2, { method: 'database:collection:delete_query' }, res);
-        }).catch(callbackWithTryCatch(err => {
+        await collection.where(query).remove().then(callbackWithTryCatch(res => {
+          assert(isSuccess(res) && res.deleted === 2, { res });
+        }, () => {
+          resolve();
+        })).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();

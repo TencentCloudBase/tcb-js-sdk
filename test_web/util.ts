@@ -17,6 +17,8 @@ export async function runSelectedTestCase(i: number) {
   console.info('Testing: ', msg);
 
   await fn();
+
+  console.info('Test case finish: ', msg);
 }
 
 export async function runAllTestCases() {
@@ -27,17 +29,11 @@ export async function runAllTestCases() {
     await runSelectedTestCase(i);
   }
 
-  console.log(`Test end, ${failedTestNum} assertion(s) failed in total ${totalTestNum} tests.`);
+  console.log(`All test cases end, ${failedTestNum} assertion(s) failed in total ${totalTestNum} tests.`);
 }
 
 export function isSuccess(err, res?) {
-  let bool = false;
-  if (arguments.length === 2) {
-    bool = !(err !== 0 || err.code || err instanceof Error || res.code);
-  } else if (arguments.length === 1) {
-    bool = !(err !== 0 || err.code || err instanceof Error);
-  }
-  return bool;
+  return !(err !== 0 || err.code || err instanceof Error || (res && res.code));
 }
 
 export function catchCallback(e: Error) {

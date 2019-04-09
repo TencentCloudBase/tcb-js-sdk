@@ -26,18 +26,17 @@ export function registerRegex(app, collName) {
     await new Promise(async resolve => {
       try {
         // Create
-        const res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
+        let res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id);
-        assert(isSuccess(res) && res.requestId);
+        assert(isSuccess(res) && res.id, { res });
 
         // Read
 
         // // 直接使用正则表达式
-        let result = await collection
+        res = await collection
           .where({
             name: /^abcdef.*\d+结尾$/i
           })
@@ -46,10 +45,10 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(result.data.length > 0);
+        assert(res.data.length > 0, { res });
 
         // new db.RegExp
-        result = await collection
+        res = await collection
           .where({
             name: new db.RegExp({
               regexp: '^abcdef.*\\d+结尾$',
@@ -61,10 +60,10 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(result.data.length > 0);
+        assert(res.data.length > 0, { res });
 
         // db.RegExp
-        result = await collection
+        res = await collection
           .where({
             name: db.RegExp({
               regexp: '^abcdef.*\\d+结尾$',
@@ -76,10 +75,10 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(result.data.length > 0);
+        assert(res.data.length > 0, { res });
 
         // // Update(TODO)
-        result = await collection
+        res = await collection
           .where({
             name: db.command.or(new db.RegExp({
               regexp: '^abcdef.*\\d+结尾$',
@@ -94,10 +93,10 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(result.data.length > 0);
+        assert(res.data.length > 0, { res });
 
         // Update(TODO)
-        result = await collection
+        res = await collection
           .where({
             name: db.command.or(db.RegExp({
               regexp: '^abcdef.*\\d+结尾$',
@@ -114,7 +113,7 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(result.updated > 0);
+        assert(res.updated > 0, { res });
 
         // Delete
         const deleteRes = await collection
@@ -129,7 +128,7 @@ export function registerRegex(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(deleteRes.deleted > 0);
+        assert(deleteRes.deleted > 0, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

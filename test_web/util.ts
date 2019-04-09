@@ -1,26 +1,30 @@
 // test util
 import * as assert from 'power-assert';
 
-const testUnitList = [];
+window['testCaseList'] = [];
 let totalTestNum = 0;
 let failedTestNum = 0;
 
 export function register(msg, fn: Function) {
-  testUnitList.push({
+  window['testCaseList'].push({
     msg,
     fn
   });
 }
 
-export async function run() {
-  totalTestNum = testUnitList.length;
+export async function runSelectedTestCase(i: number) {
+  let { msg, fn } = window['testCaseList'][i];
+  console.info('Testing: ', msg);
+
+  await fn();
+}
+
+export async function runAllTestCases() {
+  totalTestNum = window['testCaseList'].length;
   failedTestNum = 0;
 
-  for (let i = 0; i < testUnitList.length; i++) {
-    let { msg, fn } = testUnitList[i];
-    console.info('Testing: ', msg);
-
-    await fn();
+  for (let i = 0; i < window['testCaseList'].length; i++) {
+    await runSelectedTestCase(i);
   }
 
   console.log(`Test end, ${failedTestNum} assertion(s) failed in total ${totalTestNum} tests.`);
@@ -38,7 +42,7 @@ export function isSuccess(err, res?) {
 
 export function catchCallback(e: Error) {
   if (e instanceof assert.AssertionError) {
-    console.error('Test failed: ', e);
+    console.error('Test failed: ', e.message);
     failedTestNum++;
   } else {
     throw e;

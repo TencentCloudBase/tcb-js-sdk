@@ -11,25 +11,36 @@
 </head>
 
 <body>
-  <h1>file upload</h1>
+  <div>
+    <h4>TCB JSSDK 自动化测试页面</h4>
+    <p>本页面支持在微信环境中运行，支持自动化测试 初始化、存储、云函数、数据库 功能。</p>
+    <p><a href="./storage.html">TCB JSSDK 存储 手动操作测试页面</a></p>
 
-  <form role="form" class="form" onsubmit="return false;">
-    <div class="form-group">
-      <label for="file">File</label>
-      <input id="file" type="file" class="form-control"/>
+    <select id="testCaseSelect"></select>
+
+    <button id="runSelectedTestCase">执行选中用例</button>
+
+    <!--<select id="testCaseTypeSelect">
+      <option value="auth">初始化</option>
+      <option value="storage">存储</option>
+      <option value="function">云函数</option>
+      <option value="database">数据库</option>
+    </select>
+
+    <button id="runSelectedTestCaseType">执行选中类别的全部用例</button>-->
+
+    <button id="runAllTestCases">执行全部用例</button>
+
+
+    <p>操作结果请见console</p>
+    <div id="output" class="container">
+
     </div>
-    <button id="uploadFile" type="button" class="btn btn-primary">uploadFile</button>
-    <p>
-      file id:
-      <span id="fileId"></span>
-    </p>
-    <button id="getTempFileURL" type="button" class="btn btn-primary">getTempFileURL</button>
-    <button id="downloadFile" type="button" class="btn btn-primary">downloadFile</button>
-    <button id="deleteFile" type="button" class="btn btn-primary">deleteFile</button>
-  </form>
+  </div>
 
-  <div id="output" class="container"></div>
+  <script src="test.js"></script>
+  <script>
+    window['initIndex']();
+  </script>
 </body>
-<script src="test.js"></script>
-
 </html>

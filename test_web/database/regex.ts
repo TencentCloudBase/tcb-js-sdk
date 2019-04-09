@@ -1,6 +1,6 @@
 // database regex
 import * as assert from 'power-assert';
-import { catchCallback, register, isSuccess } from '../util';
+import {catchCallback, register, isSuccess, callbackWithTryCatch} from '../util';
 
 export function registerRegex(app, collName) {
   const db = app.database();
@@ -26,8 +26,11 @@ export function registerRegex(app, collName) {
     await new Promise(async resolve => {
       try {
         // Create
-        const res = await collection.add(initialData);
-        console.log(res);
+        const res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
+          assert(false, { err });
+        }, () => {
+          resolve();
+        }));
         assert(isSuccess(res) && res.id);
         assert(isSuccess(res) && res.requestId);
 
@@ -38,8 +41,11 @@ export function registerRegex(app, collName) {
           .where({
             name: /^abcdef.*\d+结尾$/i
           })
-          .get();
-        // console.log(result);
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(result.data.length > 0);
 
         // new db.RegExp
@@ -50,8 +56,11 @@ export function registerRegex(app, collName) {
               options: 'i'
             })
           })
-          .get();
-        console.log(result);
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(result.data.length > 0);
 
         // db.RegExp
@@ -62,8 +71,11 @@ export function registerRegex(app, collName) {
               options: 'i'
             })
           })
-          .get();
-        console.log(result);
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(result.data.length > 0);
 
         // // Update(TODO)
@@ -77,8 +89,11 @@ export function registerRegex(app, collName) {
               options: 'i'
             }))
           })
-          .get();
-        console.log(result);
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(result.data.length > 0);
 
         // Update(TODO)
@@ -94,8 +109,11 @@ export function registerRegex(app, collName) {
           })
           .update({
             name: 'ABCDEFxxxx5678结尾'
-          });
-        console.log(result);
+          }).catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(result.updated > 0);
 
         // Delete
@@ -106,8 +124,11 @@ export function registerRegex(app, collName) {
               options: 'i'
             })
           })
-          .remove();
-        console.log(deleteRes);
+          .remove().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
         assert(deleteRes.deleted > 0);
       } catch (e) {
         catchCallback(e);

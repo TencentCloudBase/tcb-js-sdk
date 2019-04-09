@@ -1,6 +1,6 @@
 // database geo
 import * as assert from 'power-assert';
-import { catchCallback, register, isSuccess } from '../util';
+import { catchCallback, register, isSuccess, callbackWithTryCatch } from '../util';
 
 export function registerGeo(app, collName) {
   const db = app.database();
@@ -34,25 +34,32 @@ export function registerGeo(app, collName) {
   register('database geo: GEO Point - CRUD', async () => {
     await new Promise(async resolve => {
       try {
-
         // Create
-        let res = await collection.add(initialData);
-        assert(isSuccess(res) && res.id);
-        assert(isSuccess(res) && res.requestId);
+        let res = await collection.add(initialData).catch(callbackWithTryCatch(err => {
+          assert(false, { err });
+        }, () => {
+          resolve();
+        }));
+        assert(isSuccess(res) && res.id, { res });
 
-        const res2 = await collection.doc(res.id).set(initialData);
-        console.log(res2);
-        assert.strictEqual(res2.updated, 1);
-        assert(res2.requestId);
+        const res2 = await collection.doc(res.id).set(initialData).catch(callbackWithTryCatch(err => {
+          assert(false, { err });
+        }, () => {
+          resolve();
+        }));
+        assert(isSuccess(res2) && res2.updated === 1, { res: res2 });
 
         // Read
         let result = await collection
           .where({
             _id: res.id
           })
-          .get();
-        console.log(result.data);
-        assert(result.data.length > 0);
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
+        assert(isSuccess(result) && result.data.length > 0, { res: result });
         assert.deepEqual(result.data[0].point, { longitude, latitude });
 
         // TODO: 现在对 GEO 进行 $eq 操作，小概率会查不到，需要修改查询的底层结构
@@ -86,8 +93,7 @@ export function registerGeo(app, collName) {
             _id: res.id
           })
           .remove();
-        console.log(deleteRes);
-        assert.strictEqual(deleteRes.deleted, 1);
+        assert(isSuccess(deleteRes) && deleteRes.deleted === 1, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

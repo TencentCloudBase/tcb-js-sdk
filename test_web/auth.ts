@@ -2,12 +2,12 @@
 import * as assert from 'power-assert';
 import { register, callbackWithTryCatch, isSuccess } from './util';
 
-function registerAuthTest(app, scope) {
+function registerAuthTest(app, appid, scope) {
   let auth = app.auth();
 
-  register('signIn in callback, scope: ' + scope, async () => {
+  register('auth: signIn in callback, scope: ' + scope, async () => {
     await new Promise((resolve) => {
-      auth.weixinAuthProvider({ appid: 'wxacfb81f2ced64e70', scope: scope }).signIn(callbackWithTryCatch((err, res) => {
+      auth.weixinAuthProvider({ appid, scope }).signIn(callbackWithTryCatch((err, res) => {
         assert(isSuccess(err, res), { err, res });
       }, () => {
         resolve();
@@ -15,15 +15,15 @@ function registerAuthTest(app, scope) {
     });
   });
 
-  register('signIn in promise, scope: ' + scope, async () => {
-    await auth.weixinAuthProvider({ appid: 'wxacfb81f2ced64e70', scope: scope }).signIn().then(callbackWithTryCatch((res) => {
+  register('auth: signIn in promise, scope: ' + scope, async () => {
+    await auth.weixinAuthProvider({ appid, scope }).signIn().then(callbackWithTryCatch((res) => {
       assert(isSuccess(res), { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });
     }));
   });
 
-  register('getUserInfo, scope: ' + scope, async () => {
+  register('auth: getUserInfo, scope: ' + scope, async () => {
     await auth.getUserInfo().then(callbackWithTryCatch((res) => {
       assert(isSuccess(res), { res });
     })).catch(callbackWithTryCatch((err) => {
@@ -32,7 +32,7 @@ function registerAuthTest(app, scope) {
   });
 }
 
-export function test_auth(app) {
+export function test_auth(app, appid: string) {
   let AllowedScopes = ['snsapi_base', 'snsapi_userinfo', 'snsapi_login'];
   let i;
   let scope;
@@ -40,6 +40,6 @@ export function test_auth(app) {
   for (i = 0; i < AllowedScopes.length; i++) {
     scope = AllowedScopes[i];
 
-    registerAuthTest(app, scope);
+    registerAuthTest(app, appid, scope);
   }
 }

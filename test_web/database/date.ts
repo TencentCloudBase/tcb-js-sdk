@@ -108,7 +108,7 @@ export function registerDate(app, collName) {
         }, () => {
           resolve();
         }));
-        assert.strictEqual(deleteRes.deleted, 1);
+        assert(deleteRes.deleted === 1, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

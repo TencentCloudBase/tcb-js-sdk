@@ -1,6 +1,6 @@
 // database order
 import * as assert from 'power-assert';
-import { catchCallback, register, isSuccess } from '../util';
+import { catchCallback, register, isSuccess, callbackWithTryCatch } from '../util';
 
 export function registerOrder(app, collName) {
   const db = app.database();
@@ -15,24 +15,34 @@ export function registerOrder(app, collName) {
           const res = await collection.add({
             category: '类别B',
             value: Math.random()
-          });
-          assert(isSuccess(res) && res.id);
-          assert(isSuccess(res) && res.requestId);
+          }).catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
+          assert(isSuccess(res) && res.id, { res });
         }
 
         for (let i = 0; i < 3; i++) {
           const res = await collection.add({
             category: '类别C',
             value: Math.random()
-          });
-          assert(isSuccess(res) && res.id);
-          assert(isSuccess(res) && res.requestId);
+          }).catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
+          assert(isSuccess(res) && res.id, { res });
         }
 
         await collection.add({
           category: '类别A',
           value: Math.random()
-        });
+        }).catch(callbackWithTryCatch(err => {
+          assert(false, { err });
+        }, () => {
+          resolve();
+        }));
 
         // Read
         let result = await collection
@@ -40,10 +50,14 @@ export function registerOrder(app, collName) {
             category: /^类别/i
           })
           .orderBy('category', 'asc')
-          .get();
-        assert(result.data.length >= 11);
-        assert(result.data[0].category === '类别A');
-        assert(result.data[result.data.length - 1].category === '类别C');
+          .get().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
+        assert(isSuccess(result) && result.data.length >= 11, { res: result });
+        assert(isSuccess(result) && result.data[0].category === '类别A', { res: result });
+        assert(isSuccess(result) && result.data[result.data.length - 1].category === '类别C', { res: result });
 
         // Delete
         const deleteRes = await collection
@@ -52,9 +66,12 @@ export function registerOrder(app, collName) {
               regexp: '^类别'
             })
           })
-          .remove();
-        console.log(deleteRes);
-        assert(deleteRes.deleted >= 11);
+          .remove().catch(callbackWithTryCatch(err => {
+            assert(false, { err });
+          }, () => {
+            resolve();
+          }));
+        assert(isSuccess(deleteRes) && deleteRes.deleted >= 11, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

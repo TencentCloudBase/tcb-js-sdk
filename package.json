@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
-  "typescript": {
-    "definition": "./dist/index.d.ts"
-  },
   "types": "./dist/index.d.ts",
   "files": ["lib/**/*"],
   "scripts": {

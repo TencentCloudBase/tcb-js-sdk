@@ -177,22 +177,20 @@ export async function test_database(app) {
             assert(false, { err });
           }))
         ]);
+
         const query = _.or([{ b: _.and(_.gte(1), _.lte(10)) }, { b: _.and(_.gt(99), _.lte(101)) }]);
-        await collection.where(query).get().then(callbackWithTryCatch((res) => {
-          assert(isSuccess(0, res) && res.data.length >= 2, { res });
-        })).catch(callbackWithTryCatch(err => {
+        let res = await collection.where(query).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }));
+        assert(isSuccess(0, res) && res.data.length >= 2, { res });
+
         // Delete
-        await collection.where(query).remove().then(callbackWithTryCatch(res => {
-          assert(isSuccess(0, res) && res.deleted === 2, { res });
-        }, () => {
-          resolve();
-        })).catch(callbackWithTryCatch(err => {
+        res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
+        assert(isSuccess(0, res) && res.deleted === 2, { res });
       } catch (e) {
         catchCallback(e);
       } finally {

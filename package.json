@@ -4,7 +4,9 @@
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["lib/**/*"],
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
     "build": "webpack",
     "tsc": "tsc -p tsconfig.json",
@@ -26,7 +28,7 @@
   "author": "jimmyjzhang",
   "license": "ISC",
   "dependencies": {
-    "@cloudbase/database": "0.0.6",
+    "@cloudbase/database": "0.0.8",
     "@types/qs": "^6.5.2",
     "axios": "^0.18.0",
     "qs": "^6.6.0"

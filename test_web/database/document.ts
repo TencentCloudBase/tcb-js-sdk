@@ -31,7 +31,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && Array.isArray(res.data));
+        assert(isSuccess(0, res) && Array.isArray(res.data));
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -57,7 +57,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.updated === 1, { res });
+        assert(isSuccess(0, res) && res.updated === 1, { res });
 
         res = await db.collection(collName).doc(docId).set({
           data: { arr: [1, 2, 3], foo: 123 },
@@ -67,7 +67,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.updated === 1, { res });
+        assert(isSuccess(0, res) && res.updated === 1, { res });
 
         res = await db.collection(collName).doc(docId).update({
           data: { arr: db.command.push([4, 5, 6]), foo: db.command.inc(1) },
@@ -77,7 +77,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.updated === 1, { res });
+        assert(isSuccess(0, res) && res.updated === 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -95,7 +95,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && !res.deleted, { res });
+        assert(isSuccess(0, res) && !res.deleted, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -119,7 +119,7 @@ export function registerDocument(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted === 1, { res });
+        assert(isSuccess(0, res) && res.deleted === 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {

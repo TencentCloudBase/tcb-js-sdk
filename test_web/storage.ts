@@ -15,7 +15,7 @@ export async function uploadFile(app, returnType) {
           console.log('uploadFile progress: ' + percentCompleted, progressEvent);
         }
       }, function (err, res) {
-        let bool = isSuccess(err, res) && res.fileId;
+        let bool = isSuccess(err, res) && res.fileID;
         try {
           assert(bool, {
             method: 'storage: uploadFile', returnType: 'callback', err, res
@@ -44,7 +44,7 @@ export async function uploadFile(app, returnType) {
           console.log('uploadFile progress: ' + percentCompleted, progressEvent);
         }
       }).then(function (res) {
-        let bool = isSuccess(res) && res.fileId;
+        let bool = isSuccess(0, res) && res.fileID;
         try {
           assert(bool, {
             method: 'storage: uploadFile', returnType: 'promise', res
@@ -111,7 +111,7 @@ export async function getTempFileURL(app, returnType) {
       app.getTempFileURL({
         fileList: window['fileIdList']
       }).then(function (res) {
-        let bool = isSuccess(res) && res.fileList.length === window['fileIdList'].length;
+        let bool = isSuccess(0, res) && res.fileList.length === window['fileIdList'].length;
         try {
           assert(bool, {
             method: 'storage: getTempFileUrl', returnType: 'promise', res
@@ -222,7 +222,7 @@ export function test_storage(app) {
         }
       }, async (err, res) => {
         try {
-          assert(isSuccess(err, res) && res.fileId, { err, res });
+          assert(isSuccess(err, res) && res.fileID, { err, res });
 
           let fileId = res.fileID;
 
@@ -267,14 +267,14 @@ export function test_storage(app) {
         }
       }).then(async res => {
         try {
-          assert(isSuccess(res) && res.fileId, { res });
+          assert(isSuccess(0, res) && res.fileID, { res });
 
           let fileId = res.fileID;
 
           await Promise.all([
             new Promise(resolve1 => {
               app.getTempFileURL({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
-                assert(isSuccess(res) && res.fileList, { res });
+                assert(isSuccess(0, res) && res.fileList, { res });
               }, () => {
                 resolve1();
               })).catch(callbackWithTryCatch(err => {
@@ -286,7 +286,7 @@ export function test_storage(app) {
             //TODO 下载的实现未确定
             /*new Promise(resolve2 => {
               app.downloadFile({ fileId }).then(callbackWithTryCatch(res => {
-                assert(isSuccess(res), { res });
+                assert(isSuccess(0, res), { res });
               }, () => {
                 resolve2();
               })).catch(callbackWithTryCatch(err => {
@@ -298,9 +298,9 @@ export function test_storage(app) {
           ]);
 
           app.deleteFile({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
-            assert(isSuccess(res) && res.fileList, { res });
+            assert(isSuccess(0, res) && res.fileList, { res });
           })).catch(callbackWithTryCatch(err => {
-            assert(isSuccess(res) && res.fileList, { err });
+            assert(isSuccess(0, res) && res.fileList, { err });
           }));
         } catch (e) {
           catchCallback(e);

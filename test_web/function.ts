@@ -18,7 +18,7 @@ export function test_function(app) {
 
   register('function: callFunction in promise', async () => {
     await app.callFunction({ name: 'test', data: { hello: 'world' }}).then(callbackWithTryCatch((res) => {
-      assert(isSuccess(res), { res });
+      assert(isSuccess(0, res), { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });
     }));

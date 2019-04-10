@@ -17,7 +17,7 @@ function registerAuthTest(app, appid, scope) {
 
   register('auth: signIn in promise, scope: ' + scope, async () => {
     await auth.weixinAuthProvider({ appid, scope }).signIn().then(callbackWithTryCatch((res) => {
-      assert(isSuccess(res), { res });
+      assert(isSuccess(0, res), { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });
     }));
@@ -25,7 +25,7 @@ function registerAuthTest(app, appid, scope) {
 
   register('auth: getUserInfo, scope: ' + scope, async () => {
     await auth.getUserInfo().then(callbackWithTryCatch((res) => {
-      assert(isSuccess(res), { res });
+      assert(isSuccess(0, res), { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });
     }));

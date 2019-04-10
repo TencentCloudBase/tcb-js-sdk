@@ -32,8 +32,8 @@ export function registerDate(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
-        assert(isSuccess(res) && res.requestId, { res });
+        assert(isSuccess(0, res) && res.id, { res });
+        assert(isSuccess(0, res) && res.requestId, { res });
 
         // Read
         const { id } = res;

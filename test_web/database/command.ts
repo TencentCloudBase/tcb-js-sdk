@@ -15,7 +15,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.eq('eq')
@@ -26,14 +26,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -50,7 +50,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.neq('neq')
@@ -61,14 +61,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -85,7 +85,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.gt(10)
@@ -96,14 +96,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -120,7 +120,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.gte(100)
@@ -131,14 +131,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -155,7 +155,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.lt(111)
@@ -166,14 +166,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -190,7 +190,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.lt(100)
@@ -201,14 +201,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -225,7 +225,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.in(10000)
@@ -236,14 +236,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -269,14 +269,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -293,7 +293,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.gt(10).and(_.lt(1000))
@@ -304,14 +304,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -328,7 +328,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.and(_.gt(10), _.lt(1000))
@@ -339,14 +339,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -363,7 +363,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.gt(1000).or(_.lt(1111))
@@ -374,14 +374,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -398,7 +398,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
           test: _.or(_.gt(1000), _.lt(111))
@@ -409,14 +409,14 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
         res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -433,7 +433,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -445,7 +445,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -453,7 +453,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -470,7 +470,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -482,7 +482,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].count, 2);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -490,7 +490,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -507,7 +507,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -519,7 +519,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].count, 7.5);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -527,7 +527,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -544,7 +544,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -556,7 +556,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -564,7 +564,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -581,7 +581,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -593,7 +593,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [100, 10000, 1000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -601,7 +601,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -618,7 +618,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -630,7 +630,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [100]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -638,7 +638,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -655,7 +655,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -667,7 +667,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [1000, 100, 10000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -675,7 +675,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {
@@ -692,7 +692,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const docId = res.id;
         const update = {
@@ -704,7 +704,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.data.length >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [10000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -712,7 +712,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.deleted >= 1, { res });
+        assert(isSuccess(0, res) && res.deleted >= 1, { res });
       } catch (e) {
         catchCallback(e);
       } finally {

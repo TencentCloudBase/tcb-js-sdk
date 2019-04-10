@@ -20,7 +20,7 @@ export function registerOrder(app, collName) {
           }, () => {
             resolve();
           }));
-          assert(isSuccess(res) && res.id, { res });
+          assert(isSuccess(0, res) && res.id, { res });
         }
 
         for (let i = 0; i < 3; i++) {
@@ -32,7 +32,7 @@ export function registerOrder(app, collName) {
           }, () => {
             resolve();
           }));
-          assert(isSuccess(res) && res.id, { res });
+          assert(isSuccess(0, res) && res.id, { res });
         }
 
         await collection.add({

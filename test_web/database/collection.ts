@@ -15,20 +15,20 @@ export function registerCollection(app, collName) {
       collection.add({ a: 1 }, (err, res) => {
         try {
           assert(isSuccess(err, res), { err, res });
-          assert(isSuccess(res) && res.id, { err, res });
-          assert(isSuccess(res) && res.requestId, { err, res });
+          assert(isSuccess(0, res) && res.id, { err, res });
+          assert(isSuccess(0, res) && res.requestId, { err, res });
 
           let id = res.id;
 
           collection.doc(id).update({ age: 18 }, (err, res) => {
             try {
               assert(isSuccess(err, res), { err, res });
-              assert(isSuccess(res) && res.updated > 0);
+              assert(isSuccess(0, res) && res.updated > 0, { err, res });
 
               collection.doc(id).remove(callbackWithTryCatch((err, res) => {
                 assert(isSuccess(err, res), { err, res });
-                assert(isSuccess(res) && res.deleted, { err, res });
-                assert(isSuccess(res) && res.requestId, { err, res });
+                assert(isSuccess(0, res) && res.deleted, { err, res });
+                assert(isSuccess(0, res) && res.requestId, { err, res });
               }, () => {
                 resolve();
               }));
@@ -49,20 +49,20 @@ export function registerCollection(app, collName) {
     await new Promise(async resolve => {
       await collection.add({ a: 1 }).then(res => {
         try {
-          assert(isSuccess(res), { res });
-          assert(isSuccess(res) && res.id, { res });
-          assert(isSuccess(res) && res.requestId, { res });
+          assert(isSuccess(0, res), { res });
+          assert(isSuccess(0, res) && res.id, { res });
+          assert(isSuccess(0, res) && res.requestId, { res });
 
           let id = res.id;
           collection.doc(id).update({ age: 18 }).then(res => {
             try {
-              assert(isSuccess(res), { res });
-              assert(isSuccess(res) && res.updated > 0, { res });
+              assert(isSuccess(0, res), { res });
+              assert(isSuccess(0, res) && res.updated > 0, { res });
 
               collection.doc(res.id).remove().then(callbackWithTryCatch(res => {
-                assert(isSuccess(res), { res });
-                assert(isSuccess(res) && res.deleted, { res });
-                assert(isSuccess(res) && res.requestId, { res });
+                assert(isSuccess(0, res), { res });
+                assert(isSuccess(0, res) && res.deleted, { res });
+                assert(isSuccess(0, res) && res.requestId, { res });
               }, () => {
                 resolve();
               })).catch(callbackWithTryCatch(err => {
@@ -112,7 +112,7 @@ export function registerCollection(app, collName) {
   register('database collection: API - use limit', async () => {
     const limit = 1;
     await collection.limit(limit).get().then(callbackWithTryCatch(res => {
-      assert(Array.isArray(res.data && res.data.length === limit), { res });
+      assert(Array.isArray(res.data) && res.data.length === limit, { res });
     })).catch(callbackWithTryCatch(err => {
       assert(false, { err });
     }));
@@ -150,7 +150,7 @@ export function registerCollection(app, collName) {
           text
         }).get();
 
-        assert(isSuccess(res) && res.data.length > 0, { res });
+        assert(isSuccess(0, res) && res.data.length > 0, { res });
 
         await collection.where({
           text
@@ -161,7 +161,7 @@ export function registerCollection(app, collName) {
         }).get();
 
         console.log(res);
-        assert(isSuccess(res) && res.data.length === 0, { res });
+        assert(isSuccess(0, res) && res.data.length === 0, { res });
       } catch (e) {
         catchCallback(e);
       } finally {

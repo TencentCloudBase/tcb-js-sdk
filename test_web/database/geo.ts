@@ -40,7 +40,7 @@ export function registerGeo(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res) && res.id, { res });
+        assert(isSuccess(0, res) && res.id, { res });
 
         const res2 = await collection.doc(res.id).set(initialData).catch(callbackWithTryCatch(err => {
           assert(false, { err });

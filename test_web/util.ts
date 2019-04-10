@@ -2,8 +2,6 @@
 import * as assert from 'power-assert';
 
 window['testCaseList'] = [];
-let totalTestNum = 0;
-let failedTestNum = 0;
 
 export function register(msg, fn: Function) {
   window['testCaseList'].push({
@@ -22,14 +20,11 @@ export async function runSelectedTestCase(i: number) {
 }
 
 export async function runAllTestCases() {
-  totalTestNum = window['testCaseList'].length;
-  failedTestNum = 0;
-
   for (let i = 0; i < window['testCaseList'].length; i++) {
     await runSelectedTestCase(i);
   }
 
-  console.log(`All test cases end, ${failedTestNum} assertion(s) failed in total ${totalTestNum} tests.`);
+  console.log(`All test cases end.`);
 }
 
 export function isSuccess(err, res?) {
@@ -38,10 +33,9 @@ export function isSuccess(err, res?) {
 
 export function catchCallback(e: Error) {
   if (e instanceof assert.AssertionError) {
-    console.error('Test failed: ', e.message);
-    failedTestNum++;
+    console.error('Test failed: ', e.message, e.stack);
   } else {
-    throw e;
+    console.error('Test failed: ', e);
   }
 }
 

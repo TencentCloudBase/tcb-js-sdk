@@ -172,24 +172,16 @@ export async function test_database(app) {
         await Promise.all([
           collection.add({ a: 1, b: 100 }).catch(callbackWithTryCatch(err => {
             assert(false, { err });
-          }, () => {
-            resolve();
           })),
           collection.add({ a: 10, b: 1 }).catch(callbackWithTryCatch(err => {
             assert(false, { err });
-          }, () => {
-            resolve();
           }))
         ]);
         const query = _.or([{ b: _.and(_.gte(1), _.lte(10)) }, { b: _.and(_.gt(99), _.lte(101)) }]);
         await collection.where(query).get().then(callbackWithTryCatch((res) => {
           assert(isSuccess(0, res) && res.data.length >= 2, { res });
-        }, () => {
-          resolve();
         })).catch(callbackWithTryCatch(err => {
           assert(false, { err });
-        }, () => {
-          resolve();
         }));
         // Delete
         await collection.where(query).remove().then(callbackWithTryCatch(res => {

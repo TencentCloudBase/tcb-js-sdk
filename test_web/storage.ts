@@ -27,7 +27,7 @@ export async function uploadFile(app, returnType) {
         if (bool) {
           let fileId = res.fileID;
           window['fileIdList'].push(fileId);
-          document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
+          document.getElementById('fileID').innerHTML = window['fileIdList'].join('<br/>');
           document.getElementById('output').innerText = '上传文件 测试成功';
         } else {
           document.getElementById('output').innerText = '上传文件 测试失败';
@@ -56,7 +56,7 @@ export async function uploadFile(app, returnType) {
         if (bool) {
           let fileId = res.fileID;
           window['fileIdList'].push(fileId);
-          document.getElementById('fileId').innerHTML = window['fileIdList'].join('<br/>');
+          document.getElementById('fileID').innerHTML = window['fileIdList'].join('<br/>');
           document.getElementById('output').innerText = '上传文件 测试成功';
         } else {
           document.getElementById('output').innerText = '上传文件 测试失败';
@@ -97,10 +97,10 @@ export async function getTempFileURL(app, returnType) {
         }
 
         if (bool) {
-          document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
+          document.getElementById('output').innerHTML = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
               && res.fileList.map(item => {
-                return `<p><a href="${item.tempFileURL}">${item.tempFileURL}</a></p>`;
-              }));
+                return `<p><a href="${item.download_url}">${item.download_url}</a></p>`;
+              }).join(''));
         } else {
           document.getElementById('output').innerText = '获取文件下载链接 测试失败';
         }
@@ -121,9 +121,9 @@ export async function getTempFileURL(app, returnType) {
         }
 
         if (bool) {
-          document.getElementById('output').innerText = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
+          document.getElementById('output').innerHTML = '<p>获取文件下载链接 测试成功</p>' + (res && res.fileList && res.fileList.length
               && res.fileList.map(item => {
-                return `<p><a href="${item.tempFileURL}">${item.tempFileURL}</a></p>`;
+                return `<p><a href="${item.download_url}">${item.download_url}</a></p>`;
               }));
         } else {
           document.getElementById('output').innerText = '获取文件下载链接 测试失败';
@@ -166,12 +166,9 @@ export async function deleteFile(app, returnType) {
   try {
     switch (returnType) {
       case 'callback': {
-        break;
-      }
-      case 'promise': {
         app.deleteFile({
           fileList: window['fileIdList']
-        }).then(function (err, res) {
+        }, function (err, res) {
           let bool = isSuccess(err, res);
           try {
             assert(bool, {
@@ -183,7 +180,30 @@ export async function deleteFile(app, returnType) {
 
           if (bool) {
             window['fileIdList'] = [];
-            document.getElementById('fileId').innerText = '';
+            document.getElementById('fileID').innerText = '';
+            document.getElementById('output').innerText = '删除文件 测试成功';
+          } else {
+            document.getElementById('output').innerText = '删除文件 测试失败';
+          }
+        });
+        break;
+      }
+      case 'promise': {
+        app.deleteFile({
+          fileList: window['fileIdList']
+        }).then(function (res) {
+          let bool = isSuccess(0, res);
+          try {
+            assert(bool, {
+              method: 'storage: deleteFile', res
+            });
+          } catch (e) {
+            catchCallback(e);
+          }
+
+          if (bool) {
+            window['fileIdList'] = [];
+            document.getElementById('fileID').innerText = '';
             document.getElementById('output').innerText = '删除文件 测试成功';
           } else {
             document.getElementById('output').innerText = '删除 测试失败';
@@ -300,7 +320,7 @@ export function test_storage(app) {
           app.deleteFile({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
             assert(isSuccess(0, res) && res.fileList, { res });
           })).catch(callbackWithTryCatch(err => {
-            assert(isSuccess(0, res) && res.fileList, { err });
+            assert(false && res.fileList, { err });
           }));
         } catch (e) {
           catchCallback(e);

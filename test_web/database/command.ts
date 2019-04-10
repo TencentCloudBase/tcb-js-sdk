@@ -428,7 +428,7 @@ export function registerCommand(app, collName) {
   register('database command: set', async () => {
     return new Promise(async resolve => {
       try {
-        let res = collection.add({ data: { a: 1, b: 2, c: 3 }}).catch(callbackWithTryCatch(err => {
+        let res = await collection.add({ data: { a: 1, b: 2, c: 3 }}).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
@@ -445,7 +445,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -465,7 +465,7 @@ export function registerCommand(app, collName) {
   register('database command: inc', async () => {
     return new Promise(async resolve => {
       try {
-        let res = collection.add({ count: 0 }).catch(callbackWithTryCatch(err => {
+        let res = await collection.add({ count: 0 }).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
@@ -482,7 +482,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].count, 2);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -502,7 +502,7 @@ export function registerCommand(app, collName) {
   register('database command: mul', async () => {
     return new Promise(async resolve => {
       try {
-        let res = collection.add({ count: 3 }).catch(callbackWithTryCatch(err => {
+        let res = await collection.add({ count: 3 }).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
@@ -519,7 +519,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].count, 7.5);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -539,7 +539,7 @@ export function registerCommand(app, collName) {
   register('database command: remove', async () => {
     return new Promise(async resolve => {
       try {
-        let res = collection.add({ data: { a: 1, b: 2, c: 3 }}).catch(callbackWithTryCatch(err => {
+        let res = await collection.add({ data: { a: 1, b: 2, c: 3 }}).catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
@@ -556,7 +556,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -593,7 +593,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [100, 10000, 1000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -630,7 +630,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [100]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -667,7 +667,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [1000, 100, 10000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
@@ -704,7 +704,7 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(0, res) && res.data.length >= 1, { res });
+        assert(isSuccess(0, res) && res.updated >= 1, { res });
         assert.deepStrictEqual(res.data[0].test, [10000]);
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {

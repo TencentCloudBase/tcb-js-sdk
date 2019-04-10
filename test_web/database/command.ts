@@ -228,7 +228,7 @@ export function registerCommand(app, collName) {
         assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
-          test: _.in(10000)
+          test: _.in([10000, 1000])
         };
 
         res = await collection.where(query).get().catch(callbackWithTryCatch(err => {
@@ -238,7 +238,7 @@ export function registerCommand(app, collName) {
         }));
         assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
-        res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
+        res = await collection.where({ test: [100, 10000] }).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();
@@ -260,8 +260,10 @@ export function registerCommand(app, collName) {
         }, () => {
           resolve();
         }));
+        assert(isSuccess(0, res) && res.id, { res });
+
         const query = {
-          test: _.nin(1000)
+          test: _.nin([1000, 100])
         };
 
         res = await collection.where(query).get().catch(callbackWithTryCatch(err => {
@@ -271,7 +273,7 @@ export function registerCommand(app, collName) {
         }));
         assert(isSuccess(0, res) && res.data.length >= 1, { res });
 
-        res = await collection.where(query).remove().catch(callbackWithTryCatch(err => {
+        res = await collection.where({ test: [100, 10000] }).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }, () => {
           resolve();

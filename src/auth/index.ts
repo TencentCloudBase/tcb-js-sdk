@@ -35,8 +35,8 @@ export default class Auth {
         return res;
       } else {
         return {
-          ...res.data.tcbUserInfo,
-          requestId: res.requestId
+          ...res.data,
+          requestId: res.seqId
         };
       }
     });

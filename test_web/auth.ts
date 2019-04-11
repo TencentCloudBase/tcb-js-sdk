@@ -25,7 +25,7 @@ function registerAuthTest(app, appid, scope) {
 
   register('auth: getUserInfo, scope: ' + scope, async () => {
     await auth.getUserInfo().then(callbackWithTryCatch((res) => {
-      assert(isSuccess(0, res), { res });
+      assert(isSuccess(0, res) && res.appid, { res });
     })).catch(callbackWithTryCatch((err) => {
       assert(false, { err });
     }));

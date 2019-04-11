@@ -47,7 +47,7 @@ export function registerGeo(app, collName) {
         }, () => {
           resolve();
         }));
-        assert(isSuccess(res2) && res2.updated === 1, { res: res2 });
+        assert(isSuccess(0, res2) && res2.updated >= 1, { res: res2 });
 
         // Read
         let result = await collection
@@ -59,7 +59,7 @@ export function registerGeo(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(isSuccess(result) && result.data.length > 0, { res: result });
+        assert(isSuccess(0, result) && result.data.length > 0, { res: result });
         assert.deepEqual(result.data[0].point, { longitude, latitude });
 
         // TODO: 现在对 GEO 进行 $eq 操作，小概率会查不到，需要修改查询的底层结构
@@ -93,7 +93,7 @@ export function registerGeo(app, collName) {
             _id: res.id
           })
           .remove();
-        assert(isSuccess(deleteRes) && deleteRes.deleted === 1, { res: deleteRes });
+        assert(isSuccess(0, deleteRes) && deleteRes.deleted === 1, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

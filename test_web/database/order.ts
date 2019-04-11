@@ -55,9 +55,9 @@ export function registerOrder(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(isSuccess(result) && result.data.length >= 11, { res: result });
-        assert(isSuccess(result) && result.data[0].category === '类别A', { res: result });
-        assert(isSuccess(result) && result.data[result.data.length - 1].category === '类别C', { res: result });
+        assert(isSuccess(0, result) && result.data.length >= 11, { res: result });
+        assert(isSuccess(0, result) && result.data[0].category === '类别A', { res: result });
+        assert(isSuccess(0, result) && result.data[result.data.length - 1].category === '类别C', { res: result });
 
         // Delete
         const deleteRes = await collection
@@ -71,7 +71,7 @@ export function registerOrder(app, collName) {
           }, () => {
             resolve();
           }));
-        assert(isSuccess(deleteRes) && deleteRes.deleted >= 11, { res: deleteRes });
+        assert(isSuccess(0, deleteRes) && deleteRes.deleted >= 11, { res: deleteRes });
       } catch (e) {
         catchCallback(e);
       } finally {

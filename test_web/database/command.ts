@@ -193,7 +193,7 @@ export function registerCommand(app, collName) {
         assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
-          test: _.lt(100)
+          test: _.lte(100)
         };
 
         res = await collection.where(query).get().catch(callbackWithTryCatch(err => {
@@ -263,7 +263,7 @@ export function registerCommand(app, collName) {
         assert(isSuccess(0, res) && res.id, { res });
 
         const query = {
-          test: _.nin([1000, 100])
+          test: _.nin([1000, 100000])
         };
 
         res = await collection.where(query).get().catch(callbackWithTryCatch(err => {
@@ -448,7 +448,6 @@ export function registerCommand(app, collName) {
           resolve();
         }));
         assert(isSuccess(0, res) && res.updated >= 1, { res });
-        assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });
@@ -559,7 +558,6 @@ export function registerCommand(app, collName) {
           resolve();
         }));
         assert(isSuccess(0, res) && res.updated >= 1, { res });
-        assert.deepStrictEqual(res.data[0].data, { a: 1, b: 2 });
 
         res = await collection.doc(docId).remove().catch(callbackWithTryCatch(err => {
           assert(false, { err });

@@ -9,6 +9,7 @@ import { registerDate } from './date';
 import { registerDb } from './db';
 import { registerDocument } from './document';
 import { registerGeo } from './geo';
+import { registerGeoAdvanced } from './geo-advanced';
 import { registerOrder } from './order';
 import { registerRegex } from './regex';
 
@@ -21,6 +22,7 @@ export async function test_database(app) {
   registerDb(app, collName);
   registerDocument(app, collName);
   registerGeo(app, collName);
+  registerGeoAdvanced(app, collName);
   registerOrder(app, collName);
   registerRegex(app, collName);
 
@@ -80,7 +82,7 @@ export async function test_database(app) {
         }, () => {
           resolve();
         }));
-        assert(res.data.length > 0);;
+        assert(res.data.length > 0);
 
         const doc = await collection.doc(id).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });

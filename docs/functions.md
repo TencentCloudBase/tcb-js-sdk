@@ -23,7 +23,7 @@ callFunction(object)
 示例代码
 
 ```javascript
-//ES6
+//promise
 app.callFunction({
     name: "test",
     data: { a: 1 }
@@ -31,7 +31,7 @@ app.callFunction({
     
 });
 
-//ES5
+//callback
 app.callFunction({
     name: "test",
     data: { a: 1 }

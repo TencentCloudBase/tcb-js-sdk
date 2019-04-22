@@ -196,14 +196,14 @@ const collection = db.collection('user');
 | data | object | 是   | {_id: '10001', 'name': 'Ben'} _id 非必填 |
 
 ```js
-//es6
+//promise
 collection.add({
   name: 'Ben'
 }).then((res) => {
 
 });
 
-//es5
+//callback
 collection.add({
   name: 'Ben'
 }, function(err, res) {
@@ -217,8 +217,16 @@ collection.add({
 如果文档不存在，`set` 方法会创建一个新文档。
 
 ```js
+//promise
 collection.doc().set({
   name: "Hey"
+});
+
+//callback
+collection.doc().set({
+  name: "Hey"
+}, function(err, res) {
+
 });
 ```
 
@@ -261,12 +269,25 @@ collection.count()
 
 参数
 ```js
+//promise
 db.collection('goods').where({
   category: 'computer',
   type: {
     memory: 8,
   }
-}).count()
+}).count().then(function(res) {
+
+})
+
+//callback
+db.collection('goods').where({
+  category: 'computer',
+  type: {
+    memory: 8,
+  }
+}).count(function(err, res) {
+
+})
 ```
 
 响应参数
@@ -292,7 +313,15 @@ collection.limit()
 使用示例
 
 ```js
-collection.limit(1).get();
+//promise
+collection.limit(1).get().then(function(res) {
+
+});
+
+//callback
+collection.limit(1).get(function(err, res) {
+
+});
 ```
 
 #### 设置起始位置
@@ -307,7 +336,15 @@ collection.skip()
 使用示例
 
 ```js
-collection.skip(4).get();
+//promise
+collection.skip(4).get().then(function(res) {
+
+});
+
+//callback
+collection.skip(4).get(function(err, res) {
+
+})
 ```
 
 #### 对结果排序
@@ -323,7 +360,15 @@ collection.orderBy()
 使用示例
 
 ```js
-collection.orderBy("name", "asc").get();
+//promise
+collection.orderBy("name", "asc").get().then(function(res) {
+
+});
+
+//callback
+collection.orderBy("name", "asc").get(function(err, res) {
+
+});
 ```
 
 #### 指定返回字段
@@ -499,7 +544,7 @@ const _ = db.command
 db.collection('goods').where({
   category: 'computer',
   type: {
-    price: _.lt(4000).or(_.gt(6000).and(_.lt(8000)))
+    price:_.lt(4000).or(_.gt(6000).and(_.lt(8000)))
   }
 })
 ```
@@ -580,9 +625,20 @@ collection.where().remove()
 
 ```js
 // 删除字段a的值大于2的文档
+//promise
 collection.where({
   a: _.gt(2)
-}).remove()
+}).remove().then(function(res) {
+  
+})
+
+//callback
+//promise
+collection.where({
+  a: _.gt(2)
+}).remove(function(err, res) {
+  
+})
 ```
 
 ### 更新文档
@@ -601,8 +657,18 @@ collection.doc('doc-id').update({
 collection.doc().set()
 
 ```js
+//promise
 collection.doc('doc-id').set({
   name: "Hey"
+}).then(function(res) {
+  
+});
+
+//callback
+collection.doc('doc-id').set({
+  name: "Hey"
+}, function(err, res) {
+  
 });
 ```
 
@@ -610,8 +676,17 @@ collection.doc('doc-id').set({
 collection.update()
 
 ```js
+//promise
 collection.where({name: _.eq('hey')}).update({
   age: 18,
+}).then(function(res) {
+  
+});
+//callback
+collection.where({name: _.eq('hey')}).update({
+  age: 18,
+}, function(err, res) {
+  
 });
 ```
 
@@ -623,6 +698,7 @@ collection.where({name: _.eq('hey')}).update({
 
 ```js
 // 以下方法只会更新 property.location 和 property.size，如果 property 对象中有
+//promise
 db.collection('photo').doc('doc-id').update({
   data: {
     property: {
@@ -630,6 +706,19 @@ db.collection('photo').doc('doc-id').update({
       size: 8
     }
   }
+}).then(function(res) {
+  
+})
+//callback
+db.collection('photo').doc('doc-id').update({
+  data: {
+    property: {
+      location: 'guangzhou',
+      size: 8
+    }
+  }
+}, function(err, res) {
+  
 })
 ```
 
@@ -646,12 +735,25 @@ db.collection('photo').doc('doc-id').update({
 
 ```js
 const _ = db.command
+//promise
 db.collection('user').where({
   _openid: 'my-open-id'
 }).update({
   count: {
     favorites: _.inc(1)
   }
+}).then(function(res) {
+  
+})
+//callback
+db.collection('user').where({
+  _openid: 'my-open-id'
+}).update({
+  count: {
+    favorites: _.inc(1)
+  }
+}, function(err, res) {
+  
 })
 ```
 
@@ -665,9 +767,20 @@ db.collection('user').where({
 更新指令。用于表示删除某个字段。如某人删除了自己一条商品评价中的评分：
 
 ```js
+//promise
 const _ = db.command
 db.collection('comments').doc('comment-id').update({
   rating: _.remove()
+}).then(function(res) {
+  
+})
+
+//callback
+const _ = db.command
+db.collection('comments').doc('comment-id').update({
+  rating: _.remove()
+}, function(err, res) {
+  
 })
 ```
 
@@ -676,9 +789,20 @@ db.collection('comments').doc('comment-id').update({
 
 ```js
 const _ = db.command
+//promise
 db.collection('comments').doc('comment-id').update({
   // users: _.push('aaa')
   users: _.push(['aaa', 'bbb'])
+}).then(function(res) {
+  
+})
+
+//callback
+db.collection('comments').doc('comment-id').update({
+  // users: _.push('aaa')
+  users: _.push(['aaa', 'bbb'])
+}, function(err, res) {
+  
 })
 ```
 
@@ -687,8 +811,18 @@ db.collection('comments').doc('comment-id').update({
 
 ```js
 const _ = db.command
+//promise
 db.collection('comments').doc('comment-id').update({
   users: _.pop()
+}).then(function(res) {
+  
+})
+
+//callback
+db.collection('comments').doc('comment-id').update({
+  users: _.pop()
+}, function(err, res) {
+  
 })
 ```
 ##### unshift

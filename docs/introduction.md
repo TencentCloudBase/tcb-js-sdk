@@ -5,7 +5,7 @@ tcb 提供开发应用所需服务和基础设施。js SDK 让你可以在网页
 ## 使用方式
 
 <br>
-1. tcb js SDK 可以通过npm安装 [tcb-js-sdk](https://github.com/TencentCloudBase/tcb-js-sdk) 来访问：
+1. tcb js SDK 可以通过npm安装：
 
 ```bash
     npm install --save tcb-js-sdk@latest

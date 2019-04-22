@@ -1,6 +1,12 @@
 ## 存储
 
-<!-- TOC -->autoauto- [存储](#存储)auto    - [上传文件](#上传文件)auto    - [获取文件下载链接](#获取文件下载链接)auto    - [删除文件](#删除文件)auto    - [下载文件](#下载文件)autoauto<!-- /TOC -->
+<!-- TOC -->
+- [存储](#存储)    
+- [上传文件](#上传文件)
+- [获取文件下载链接](#获取文件下载链接)
+- [删除文件](#删除文件)
+<!-- - [下载文件](#下载文件) -->
+<!-- /TOC -->
 
 ### 上传文件
 
@@ -26,7 +32,7 @@ uploadFile(object)
 示例代码
 
 ```javascript
-//es6
+//promise
 let result = await app.uploadFile({
     cloudPath: "test-admin.jpeg",
     filePath: document.getElementById('file').files[0],
@@ -36,7 +42,7 @@ let result = await app.uploadFile({
     }
 });
 
-//es5
+//callback
 await app.uploadFile({
     cloudPath: "test-admin.jpeg",
     filePath: document.getElementById('file').files[0],
@@ -86,14 +92,14 @@ fileList
 示例代码
 
 ```javascript
-//es6
+//promise
 app.getTempFileURL({
     fileList: ['cloud://test-28farb/a.png']
 }).then((res) => {
 
 });
 
-//es5
+//callback
 app.getTempFileURL({
     fileList: ['cloud://test-28farb/a.png']
 }, function(err, res) {
@@ -130,7 +136,7 @@ fileList
 示例代码
 
 ```javascript
-//es6
+//promise
 app.deleteFile({
     fileList: [
         "cloud://jimmytest-088bef/1534576354877.jpg"
@@ -139,7 +145,7 @@ app.deleteFile({
 
 });
 
-//es5
+//callback
 app.deleteFile({
     fileList: [
         "cloud://jimmytest-088bef/1534576354877.jpg"
@@ -149,7 +155,7 @@ app.deleteFile({
 })
 ```
 
-### 下载文件
+<!-- ### 下载文件
 
 downloadFile(object)
 
@@ -176,4 +182,4 @@ let result = await tcb.downloadFile({
     fileID: "cloud://aa-99j9f/my-photo.png",
     // tempFilePath: '/tmp/test/storage/my-photo.png'
 });
-```
+``` -->

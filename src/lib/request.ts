@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import * as qs from 'qs';
 
 import { Config, BASE_URL, JWT_KEY } from '../types';
 import { Cache } from './cache';

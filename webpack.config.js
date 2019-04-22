@@ -1,6 +1,9 @@
 const webpack = require('webpack');
+const path = require('path');
+const package = require('./package.json');
+const Visualizer = require('webpack-visualizer-plugin');
 
-const modName = 'tcb-js-sdk';
+const modName = 'tcb';
 
 module.exports = {
   mode: 'production',
@@ -10,7 +13,8 @@ module.exports = {
   // devtool: 'inline-source-map',
   devtool: false,
   output: {
-    filename: `./${modName}.js`,
+    path: path.resolve(__dirname, 'tcbjs'),
+    filename: `${package.version}/${modName}.js`,
     library: modName,
     libraryTarget: 'umd',
     umdNamedDefine: true
@@ -28,6 +32,9 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new Visualizer({
+      filename: './statistics.html'
+    })
   ]
 };

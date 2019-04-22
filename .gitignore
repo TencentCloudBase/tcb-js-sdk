@@ -4,3 +4,4 @@ coverage
 .idea
 dist
 database_bak
+tcbjs/statistics.html

@@ -3,7 +3,9 @@ import * as assert from 'power-assert';
 import { register, callbackWithTryCatch, isSuccess } from './util';
 
 function registerAuthTest(app, appid, scope) {
-  let auth = app.auth();
+  let auth = app.auth({
+    persistence: 'none'
+  });
 
   register('auth: signIn in callback, scope: ' + scope, async () => {
     await new Promise((resolve) => {

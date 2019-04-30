@@ -1,6 +1,14 @@
 import { Request } from '../lib/request';
-import { Config } from '../types';
 import WeixinAuthProvider from './weixinAuthProvider';
+
+import { Cache } from '../lib/cache';
+import { JWT_KEY, Config } from '../types';
+
+// enum Persistence {
+//   local = 'local',
+//   session = 'session',
+//   none = 'none'
+// }
 
 export interface UserInfo {
   openid: string;
@@ -25,6 +33,11 @@ export default class Auth {
 
   weixinAuthProvider({ appid, scope, loginMode, state }) {
     return new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
+  }
+
+  signOut() {
+    let cache = new Cache(this.config.persistence);
+    cache.removeStore(`${JWT_KEY}_${this.config.env}`);
   }
 
   getUserInfo(): any {

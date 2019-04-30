@@ -1,4 +1,4 @@
-import { JWT_KEY, Config } from '../types';
+import { Config } from '../types';
 import * as util from '../lib/util';
 import Base from './base';
 
@@ -35,7 +35,7 @@ export default class extends Base {
   signIn(callback?: any) {
     callback = callback || util.createPromiseCallback();
 
-    let jwt = this.cache.getStore(JWT_KEY);
+    let jwt = this.cache.getStore(this.localKey);
     let code = util.getQuery('code');
 
     if (jwt) {
@@ -47,13 +47,11 @@ export default class extends Base {
       const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
       let promise: Promise<any> = this.getJwt(this.appid, loginType);
 
+      let self = this;
       promise.then(res => {
         if (!res || res.code) {
-          callback(new Error('登录失败，请用户重试'));
+          self.redirect();
         } else {
-          if (!jwt && res.token) {
-            this.cache.setStore(JWT_KEY, res.token, 7000 * 1000);
-          }
           callback(0, res);
         }
       });
@@ -65,6 +63,10 @@ export default class extends Base {
       throw new Error('错误的scope类型');
     }
 
+    this.redirect();
+  }
+
+  redirect() {
     let currUrl = util.removeParam('code', location.href);
     currUrl = util.removeParam('state', currUrl);
     currUrl = encodeURIComponent(currUrl);

@@ -3,6 +3,7 @@ export interface Config {
     token?: string;
     timeout?: number;
     proxy?: string;
+    persistence?: string;
 }
 
 export const JWT_KEY = 'tcbjwttoken';

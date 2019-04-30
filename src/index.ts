@@ -27,7 +27,8 @@ TCB.prototype.database = function (dbConfig?: object) {
   return new Db({ ...this.config, ...dbConfig });
 };
 
-TCB.prototype.auth = function () {
+TCB.prototype.auth = function ({ persistence }: { persistence?: string; } = {}) {
+  Object.assign(this.config, { persistence: persistence || 'session' });
   return new Auth(this.config);
 };
 

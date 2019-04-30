@@ -10,6 +10,7 @@ import * as util from './util';
 class Request {
   config: Config;
   cache: Cache;
+  localKey: string;
 
   /**
    * 初始化
@@ -19,7 +20,8 @@ class Request {
    */
   constructor(config?: Config) {
     this.config = config;
-    this.cache = new Cache();
+    this.cache = new Cache(config.persistence);
+    this.localKey = `${JWT_KEY}_${config.env}`;
   }
 
   /**
@@ -29,7 +31,7 @@ class Request {
    * @param data  - 参数
    */
   send(action?: string, data?: Object): Promise<any> {
-    let token = this.cache.getStore(JWT_KEY);
+    let token = this.cache.getStore(this.localKey);
 
     let code: string | false;
     if (!token) {
@@ -55,7 +57,7 @@ class Request {
         const tmpObj = Object.assign({}, data, {
           action,
           env: this.config.env,
-          token: this.cache.getStore(JWT_KEY),
+          token: this.cache.getStore(this.localKey),
           code
         });
 
@@ -105,7 +107,7 @@ class Request {
     let waitedTime = 0;
     return new Promise((resolve, reject) => {
       const intervalId = setInterval(() => {
-        if (self.cache.getStore(JWT_KEY)) {
+        if (self.cache.getStore(this.localKey)) {
           clearInterval(intervalId);
           resolve();
         }

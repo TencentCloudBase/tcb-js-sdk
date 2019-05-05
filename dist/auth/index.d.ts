@@ -1,6 +1,6 @@
 import { Request } from '../lib/request';
-import { Config } from '../types';
 import WeixinAuthProvider from './weixinAuthProvider';
+import { Config } from '../types';
 export interface UserInfo {
     openid: string;
     nickname?: string;
@@ -22,5 +22,6 @@ export default class Auth {
         loginMode: any;
         state: any;
     }): WeixinAuthProvider;
+    signOut(): void;
     getUserInfo(): any;
 }

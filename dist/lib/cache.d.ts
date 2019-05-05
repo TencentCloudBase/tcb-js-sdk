@@ -1,8 +1,8 @@
 declare class Cache {
-    memStoreMap: object;
-    constructor();
-    setStore(key: string, value: any, cacheTime?: number, version?: any): void;
-    getStore(key: string, version?: string, forceLocal?: boolean): any;
-    removeStore(key: any): this;
+    storageClass: any;
+    constructor(persistence: string);
+    setStore(key: string, value: any, version?: any): void;
+    getStore(key: string, version?: string): any;
+    removeStore(key: any): void;
 }
 export { Cache };

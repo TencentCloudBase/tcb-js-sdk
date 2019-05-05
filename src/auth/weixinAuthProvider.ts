@@ -71,8 +71,13 @@ export default class extends Base {
     currUrl = util.removeParam('state', currUrl);
     currUrl = encodeURIComponent(currUrl);
 
+    let host = '//open.weixin.qq.com/connect/oauth2/authorize';
+    if (this.scope === 'snsapi_login') {
+      host = '//open.weixin.qq.com/connect/qrconnect';
+    }
+
     if (LoginModes[this.loginMode] === 'redirect') {
-      location.href = `//open.weixin.qq.com/connect/oauth2/authorize?appid=${this.appid}&redirect_uri=${currUrl}&response_type=code&scope=${this.scope}&state=${this.state}#wechat_redirect`;
+      location.href = `${host}?appid=${this.appid}&redirect_uri=${currUrl}&response_type=code&scope=${this.scope}&state=${this.state}#wechat_redirect`;
     }
   }
 }

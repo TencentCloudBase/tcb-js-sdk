@@ -36,5 +36,7 @@ let app = tcb.init({
 app.auth().weixinAuthProvider({
     appid: 'wx73932328juof23',
     scope: 'snsapi_base'
+}).signIn(function(err, res) {
+    
 })
 ```

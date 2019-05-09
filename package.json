@@ -1,6 +1,6 @@
 {
-  "name": "tcb-js-sdk",
-  "version": "0.1.0",
+  "name": "@cloudbase/tcb-js-sdk",
+  "version": "1.0.0-beta.0",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",

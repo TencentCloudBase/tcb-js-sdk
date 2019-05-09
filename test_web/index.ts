@@ -13,8 +13,8 @@ let init = async function () {
   // 初始化
   app = tcb.init({
     //env: 'ianhu',
-    // env: 'web-test-jimmy-0cf5fa'
-    env: 'jimmytest-088bef'
+    // env: 'jimmytest-088bef'
+    env: 'webtestjimmy-5328c3'
   });
   appid = 'wxacfb81f2ced64e70';
 

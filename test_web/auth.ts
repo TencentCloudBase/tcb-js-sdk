@@ -4,7 +4,7 @@ import { register, callbackWithTryCatch, isSuccess } from './util';
 
 function registerAuthTest(app, appid, scope) {
   let auth = app.auth({
-    persistence: 'none'
+    persistence: 'local'
   });
 
   register('auth: signIn in callback, scope: ' + scope, async () => {

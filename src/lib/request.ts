@@ -1,8 +1,11 @@
 import axios from 'axios';
 
-import { Config, BASE_URL, JWT_KEY } from '../types';
+import { Config, BASE_URL, ACCESS_TOKEN, ACCESS_TOKEN_Expire, REFRESH_TOKEN } from '../types';
 import { Cache } from './cache';
 import * as util from './util';
+import { activateEvent } from '../auth/listener';
+
+const Max_Retry_Times = 5
 
 /**
  * @internal
@@ -10,7 +13,9 @@ import * as util from './util';
 class Request {
   config: Config;
   cache: Cache;
-  localKey: string;
+  accessTokenKey: string;
+  accessTokenExpireKey: string;
+  refreshTokenKey: string;
 
   /**
    * 初始化
@@ -21,7 +26,10 @@ class Request {
   constructor(config?: Config) {
     this.config = config;
     this.cache = new Cache(config.persistence);
-    this.localKey = `${JWT_KEY}_${config.env}`;
+
+    this.accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
+    this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
+    this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
   }
 
   /**
@@ -30,11 +38,27 @@ class Request {
    * @param action   - 接口
    * @param data  - 参数
    */
-  send(action?: string, data?: Object): Promise<any> {
-    let token = this.cache.getStore(this.localKey);
+  send(action?: string, data?: Object, retryTimes?: number): Promise<any> {
+    let initData = Object.assign({}, data)
+    retryTimes = retryTimes || 0
+    if (retryTimes > Max_Retry_Times) {
+      activateEvent('LoginStateExpire')
+      throw new Error('LoginStateExpire')
+    }
+    retryTimes++
+
+    let accessToken = this.cache.getStore(this.accessTokenKey);
+    let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey)
+    if (accessTokenExpire && accessTokenExpire < Date.now()) {
+      this.cache.removeStore(this.accessTokenKey)
+      this.cache.removeStore(this.accessTokenExpireKey)
+      accessToken = null
+    }
+    let refreshToken = this.cache.getStore(this.refreshTokenKey);
 
     let code: string | false;
-    if (!token) {
+
+    if (!refreshToken) {
       code = util.getWeixinCode();
     }
 
@@ -43,7 +67,7 @@ class Request {
     }, 3000);
 
     let promise = Promise.resolve(null);
-    if (!token && (action !== 'auth.getJwt')) { //生成token接口未返回，等待
+    if (!refreshToken && action !== 'auth.getJwt' && action !== 'auth.logout') { //生成token接口未返回，等待
       promise = this.waitToken();
     }
 
@@ -54,13 +78,18 @@ class Request {
         let params: any;
         let contentType = 'application/x-www-form-urlencoded';
 
-        const tmpObj = Object.assign({}, data, {
+        const tmpObj: any = Object.assign({}, data, {
           action,
           env: this.config.env,
-          token: this.cache.getStore(this.localKey),
           code,
           dataVersion: '2019-05-30'
         });
+        if (accessToken) {
+          tmpObj.access_token = this.cache.getStore(this.accessTokenKey)
+        } else if (refreshToken) {
+          tmpObj.refresh_token = this.cache.getStore(this.refreshTokenKey)
+          tmpObj.action = 'auth.getJwt'
+        }
 
         if (action === 'storage.uploadFile') {
           params = new FormData();
@@ -88,14 +117,55 @@ class Request {
           onUploadProgress
         };
 
-        return axios.post(BASE_URL, params, opts).then((response) => {
-          if (Number(response.status) === 200) {
-            return response.data;
-          }
-          throw new Error('network request error');
-        }).catch((err) => {
-          return err;
-        });
+        let self = this
+        let urlPre = BASE_URL
+        // let paramsPre = params
+        // let optsPre = opts
+        function postRequest() {
+          return axios.post(urlPre, params, opts).then((response) => {
+            if (Number(response.status) === 200) {
+              if (retryTimes > Max_Retry_Times) {
+                activateEvent('LoginStateExpire')
+                console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限')
+                throw new Error('LoginStateExpire')
+              }
+              if (response.data) {
+                if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+                  activateEvent('LoginStateExpire')
+                  self.cache.removeStore(self.refreshTokenKey)
+                } else if (response.data.code === 'CHECK_LOGIN_FAILED') {
+                  // access_token过期，重新获取
+                  self.cache.removeStore(self.accessTokenKey)
+                  self.cache.removeStore(self.accessTokenExpireKey)
+                  return self.send(action, initData, ++retryTimes)
+                } else {
+                  if (action === 'auth.getJwt') {
+                    return response.data
+                  } else {
+                    if (response.data.access_token || response.data.refresh_token) {
+                      if (response.data.access_token) {
+                        self.cache.setStore(self.accessTokenKey, response.data.access_token);
+                        // 本地时间可能没有同步
+                        self.cache.setStore(self.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+                      }
+                      if (response.data.refresh_token) {
+                        self.cache.setStore(self.refreshTokenKey, response.data.refresh_token);
+                      }
+                      return self.send(action, initData, ++retryTimes)
+                    } else {
+                      return response.data
+                    }
+                  }
+                }
+              }
+              return response.data;
+            }
+            throw new Error('network request error');
+          }).catch((err) => {
+            return err;
+          });
+        }
+        return postRequest()
       });
     } finally {
       clearTimeout(slowQueryWarning);
@@ -108,7 +178,7 @@ class Request {
     let waitedTime = 0;
     return new Promise((resolve, reject) => {
       const intervalId = setInterval(() => {
-        if (self.cache.getStore(this.localKey)) {
+        if (self.cache.getStore(this.refreshTokenKey)) {
           clearInterval(intervalId);
           resolve();
         }

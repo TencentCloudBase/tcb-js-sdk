@@ -1,8 +1,9 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
+import { addEventListener } from './listener'
 
 import { Cache } from '../lib/cache';
-import { JWT_KEY, Config } from '../types';
+import { ACCESS_TOKEN, ACCESS_TOKEN_Expire, REFRESH_TOKEN, Config } from '../types';
 
 // enum Persistence {
 //   local = 'local',
@@ -37,7 +38,18 @@ export default class Auth {
 
   signOut() {
     let cache = new Cache(this.config.persistence);
-    cache.removeStore(`${JWT_KEY}_${this.config.env}`);
+    cache.removeStore(`${REFRESH_TOKEN}_${this.config.env}`);
+    cache.removeStore(`${ACCESS_TOKEN}_${this.config.env}`);
+    cache.removeStore(`${ACCESS_TOKEN_Expire}_${this.config.env}`);
+
+    const action = 'auth.logout';
+    return this.httpRequest.send(action, {}).then(res => {
+      return res
+    });
+  }
+
+  onLoginStateExpire(callback: Function) {
+    addEventListener('LoginStateExpire', callback)
   }
 
   getUserInfo(): any {

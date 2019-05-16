@@ -14,10 +14,12 @@ let init = async function () {
   app = tcb.init({
     //env: 'ianhu',
     // env: 'jimmytest-088bef'
-    env: 'webtestjimmy-5328c3'
+    // env: 'webtestjimmy-5328c3'
+    env: 'feature-env-billing-004'
     // env: 'web-test-jimmy-0cf5fa' //体验
   });
-  appid = 'wxacfb81f2ced64e70';
+  // appid = 'wxacfb81f2ced64e70';
+  appid = 'wxf4cf4a6bfa6320fb'
 
   await test_auth(app, appid);
 
@@ -26,9 +28,13 @@ let init = async function () {
   await test_function(app);
 
   await test_database(app);
+
+  app.auth().onLoginStateExpire(() => {
+    console.log('LoginStateExpire....')
+  })
 };
 
-window['initStorage'] = function() {
+window['initStorage'] = function () {
   document.getElementById('uploadFile').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>document.getElementById('returnType');
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
@@ -49,8 +55,8 @@ window['initStorage'] = function() {
   };
 };
 
-window['initIndex'] = function() {
-  document.getElementById('runSelectedTestCase').onclick = function() {
+window['initIndex'] = function () {
+  document.getElementById('runSelectedTestCase').onclick = function () {
     let selectEle = <HTMLSelectElement>document.getElementById('testCaseSelect');
     let selectIndex = selectEle.options[selectEle.selectedIndex].value;
     runSelectedTestCase(Number(selectIndex));
@@ -60,7 +66,7 @@ window['initIndex'] = function() {
     let selectIndex = selectEle.options[selectEle.selectedIndex].value;
     runSelectedTestCase(Number(selectIndex));
   };*/
-  document.getElementById('runAllTestCases').onclick = function() {
+  document.getElementById('runAllTestCases').onclick = function () {
     runAllTestCases();
   };
 

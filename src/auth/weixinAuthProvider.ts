@@ -35,15 +35,28 @@ export default class extends Base {
   signIn(callback?: any) {
     callback = callback || util.createPromiseCallback();
 
-    let jwt = this.cache.getStore(this.localKey);
+    let accessToken = this.cache.getStore(this.accessTokenKey);
+    let accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey)
+    let refreshToken = this.cache.getStore(this.refreshTokenKey)
     let code = util.getWeixinCode();
 
-    if (jwt) {
-      callback(null, { token: jwt });
-      return callback.promise;
+    if (accessToken) {
+      if (accessTokenExpipre && accessTokenExpipre > Date.now()) {
+        callback(0);
+        return callback.promise;
+      } else {
+        this.cache.removeStore(this.accessTokenKey)
+        this.cache.removeStore(this.accessTokenExpireKey)
+      }
     }
 
-    if (code) {
+    if (refreshToken) {
+      let promise: Promise<any> = this.getJwt(this.appid);
+      promise.then(res => {
+        callback(null, res);
+      });
+      return callback.promise;
+    } else if (code) {
       const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
       let promise: Promise<any> = this.getJwt(this.appid, loginType);
 

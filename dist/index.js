@@ -30,7 +30,9 @@ TCB.prototype.database = function (dbConfig) {
     Db.reqClass = request_1.Request;
     return new Db(__assign({}, this.config, dbConfig));
 };
-TCB.prototype.auth = function () {
+TCB.prototype.auth = function (_a) {
+    var persistence = (_a === void 0 ? {} : _a).persistence;
+    Object.assign(this.config, { persistence: persistence || 'session' });
     return new auth_1.default(this.config);
 };
 function each(obj, fn) {

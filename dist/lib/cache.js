@@ -1,12 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Cache = (function () {
-    function Cache() {
-        this.memStoreMap = {};
+    function Cache(persistence) {
+        if (persistence === 'local') {
+            this.storageClass = localStorage;
+        }
+        else if (persistence === 'none') {
+            this.storageClass = new TcbObject();
+        }
+        else {
+            this.storageClass = sessionStorage;
+        }
     }
-    Cache.prototype.setStore = function (key, value, cacheTime, version) {
+    Cache.prototype.setStore = function (key, value, version) {
         try {
-            if (!window.localStorage) {
+            if (!this.storageClass) {
                 return;
             }
         }
@@ -14,77 +22,66 @@ var Cache = (function () {
             return;
         }
         var content = '';
-        if (!cacheTime) {
-            return;
-        }
         var d = {};
-        d.version = 'localCachev1';
-        d.dataVersion = version;
-        d.cacheTime = ((new Date()).getTime() + (cacheTime ? cacheTime : 0));
+        d.version = version || 'localCachev1';
         d.content = value;
         content = JSON.stringify(d);
         try {
-            this.memStoreMap[key] = content;
-            localStorage.setItem(key, content);
+            this.storageClass.setItem(key, content);
         }
         catch (e) {
             return;
         }
         return;
     };
-    Cache.prototype.getStore = function (key, version, forceLocal) {
+    Cache.prototype.getStore = function (key, version) {
         try {
             if (process && process.env && process.env.tcb_token) {
                 return process.env.tcb_token;
             }
-            if (!window.localStorage) {
-                return false;
+            if (!this.storageClass) {
+                return;
             }
         }
         catch (e) {
             return '';
         }
-        var content = '';
-        if (forceLocal) {
-            content = localStorage.getItem(key);
-        }
-        else {
-            content = this.memStoreMap[key] || localStorage.getItem(key);
-        }
+        version = version || 'localCachev1';
+        var content = this.storageClass.getItem(key);
         if (!content) {
             return '';
         }
-        if (content.indexOf('localCachev1') >= 0) {
+        if (content.indexOf(version) >= 0) {
             var d = JSON.parse(content);
-            if (d.dataVersion !== version) {
-                return '';
-            }
-            if (d.cacheTime >= (new Date()).getTime()) {
-                return d.content;
-            }
-            else {
-                this.removeStore(key);
-                return '';
-            }
+            return d.content;
         }
         else {
-            return content;
+            return '';
         }
     };
     Cache.prototype.removeStore = function (key) {
-        try {
-            if (!window.localStorage) {
-                return this;
-            }
-        }
-        catch (e) {
-            return this;
-        }
-        localStorage.removeItem(key);
-        this.memStoreMap[key] = undefined;
-        delete this.memStoreMap[key];
-        return this;
+        this.storageClass.removeItem(key);
     };
     return Cache;
 }());
 exports.Cache = Cache;
+var TcbObject = (function () {
+    function TcbObject() {
+        if (!window['tcbObject']) {
+            window['tcbObject'] = {};
+        }
+    }
+    TcbObject.prototype.setItem = function (key, value) {
+        window['tcbObject'][key] = value;
+    };
+    TcbObject.prototype.getItem = function (key) {
+        return window['tcbObject'][key];
+    };
+    TcbObject.prototype.removeItem = function (key) {
+        delete window['tcbObject'][key];
+    };
+    TcbObject.prototype.clear = function () {
+        delete window['tcbObject'];
+    };
+    return TcbObject;
+}());

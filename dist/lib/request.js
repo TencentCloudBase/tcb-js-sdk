@@ -7,11 +7,12 @@ var util = require("./util");
 var Request = (function () {
     function Request(config) {
         this.config = config;
-        this.cache = new cache_1.Cache();
+        this.cache = new cache_1.Cache(config.persistence);
+        this.localKey = types_1.JWT_KEY + "_" + config.env;
     }
     Request.prototype.send = function (action, data) {
         var _this = this;
-        var token = this.cache.getStore(types_1.JWT_KEY);
+        var token = this.cache.getStore(this.localKey);
         var code;
         if (!token) {
             code = util.getQuery('code');
@@ -31,7 +32,7 @@ var Request = (function () {
                 var tmpObj = Object.assign({}, data, {
                     action: action,
                     env: _this.config.env,
-                    token: _this.cache.getStore(types_1.JWT_KEY),
+                    token: _this.cache.getStore(_this.localKey),
                     code: code
                 });
                 if (action === 'storage.uploadFile') {
@@ -68,11 +69,12 @@ var Request = (function () {
         }
     };
     Request.prototype.waitToken = function () {
+        var _this = this;
         var self = this;
         var waitedTime = 0;
         return new Promise(function (resolve, reject) {
             var intervalId = setInterval(function () {
-                if (self.cache.getStore(types_1.JWT_KEY)) {
+                if (self.cache.getStore(_this.localKey)) {
                     clearInterval(intervalId);
                     resolve();
                 }

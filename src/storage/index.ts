@@ -22,9 +22,9 @@ export const uploadFile = function ({ cloudPath, filePath, onUploadProgress }, c
 
   httpRequest.send(action, params).then((res) => {
     if (res.code) {
-      callback(0, res);
+      callback(null, res);
     } else {
-      callback(0, {
+      callback(null, {
         fileID: res.data.fileid,
         requestId: res.requestId
       });
@@ -68,9 +68,9 @@ export const deleteFile = function ({ fileList }, callback?: any) {
 
   httpRequest.send(action, params).then(res => {
     if (res.code) {
-      callback(0, res);
+      callback(null, res);
     } else {
-      callback(0, {
+      callback(null, {
         fileList: res.data.delete_list,
         requestId: res.requestId
       });
@@ -90,7 +90,7 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   if (!fileList || !Array.isArray(fileList)) {
-    callback(0, {
+    callback(null, {
       code: 'INVALID_PARAM',
       message: 'fileList必须是非空的数组'
     });
@@ -103,7 +103,7 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
         !file.hasOwnProperty('fileID') ||
         !file.hasOwnProperty('maxAge')
       ) {
-        callback(0, {
+        callback(null, {
           code: 'INVALID_PARAM',
           message: 'fileList的元素必须是包含fileID和maxAge的对象'
         });
@@ -118,7 +118,7 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
         fileid: file,
       });
     } else {
-      callback(0, {
+      callback(null, {
         code: 'INVALID_PARAM',
         message: 'fileList的元素必须是字符串'
       });
@@ -137,9 +137,9 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
   httpRequest.send(action, params).then(res => {
     // console.log(res);
     if (res.code) {
-      callback(0, res);
+      callback(null, res);
     } else {
-      callback(0, {
+      callback(null, {
         fileList: res.data.download_list,
         requestId: res.requestId
       });

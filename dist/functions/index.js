@@ -23,13 +23,13 @@ exports.callFunction = function (_a, callback) {
     httpRequest.send(action, params).then(function (res) {
         console.log(res);
         if (res.code) {
-            callback(0, res);
+            callback(null, res);
         }
         else {
             var result = res.data.response_data;
             try {
                 result = JSON.parse(res.data.response_data);
-                callback(0, {
+                callback(null, {
                     result: result,
                     requestId: res.requestId
                 });

@@ -1,12 +1,23 @@
-export const getQuery = function(name: string, url?: string) {
+export const getQuery = function (name: string, url?: string) {
   if (typeof window === 'undefined') {
     return false;
   }
   // 参数：变量名，url为空则表从当前页面的url中取
-  let u  = url || window.location.search;
+  let u = url || window.location.search;
   let reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
   let r = u.substr(u.indexOf('\?') + 1).match(reg);
   return r != null ? r[2] : '';
+};
+
+export const getHash = function (name: string) {
+  const arr = (window.location.hash || '').replace(/^\#/, '').split('&');
+  for (let i = 0; i < arr.length; i++) {
+    let data = arr[i].split('=');
+    if (data[0] === name) {
+      return data[1];
+    }
+  }
+  return '';
 };
 
 export const removeParam = function (key: string, sourceURL: string) {
@@ -30,7 +41,7 @@ export const removeParam = function (key: string, sourceURL: string) {
 export const createPromiseCallback = () => {
   let cb: any;
   if (!Promise) {
-    cb = () => {};
+    cb = () => { };
     cb.promise = {};
 
     const throwPromiseNotDefined = () => {

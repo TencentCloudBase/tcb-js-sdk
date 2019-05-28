@@ -1,12 +1,9 @@
 {
   "name": "tcb-js-sdk",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.5",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "lib/**/*"
-  ],
   "scripts": {
     "build": "webpack",
     "tsc": "tsc -p tsconfig.json",

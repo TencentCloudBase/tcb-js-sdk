@@ -36,10 +36,10 @@ export default class extends Base {
     callback = callback || util.createPromiseCallback();
 
     let jwt = this.cache.getStore(this.localKey);
-    let code = util.getQuery('code');
+    let code = util.getQuery('code') || util.getHash('code');
 
     if (jwt) {
-      callback(0);
+      callback(null);
       return callback.promise;
     }
 
@@ -47,13 +47,8 @@ export default class extends Base {
       const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
       let promise: Promise<any> = this.getJwt(this.appid, loginType);
 
-      let self = this;
       promise.then(res => {
-        if (!res || res.code) {
-          self.redirect();
-        } else {
-          callback(0, res);
-        }
+        callback(null, res);
       });
 
       return callback.promise;

@@ -15,10 +15,10 @@ exports.uploadFile = function (_a, callback) {
     var httpRequest = new request_1.Request(this.config);
     httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            callback(0, res);
+            callback(null, res);
         }
         else {
-            callback(0, {
+            callback(null, {
                 fileID: res.data.fileid,
                 requestId: res.requestId
             });
@@ -53,10 +53,10 @@ exports.deleteFile = function (_a, callback) {
     var httpRequest = new request_1.Request(this.config);
     httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            callback(0, res);
+            callback(null, res);
         }
         else {
-            callback(0, {
+            callback(null, {
                 fileList: res.data.delete_list,
                 requestId: res.requestId
             });
@@ -70,7 +70,7 @@ exports.getTempFileURL = function (_a, callback) {
     var fileList = _a.fileList;
     callback = callback || util_1.createPromiseCallback();
     if (!fileList || !Array.isArray(fileList)) {
-        callback(0, {
+        callback(null, {
             code: 'INVALID_PARAM',
             message: 'fileList必须是非空的数组'
         });
@@ -81,7 +81,7 @@ exports.getTempFileURL = function (_a, callback) {
         if (typeof file === 'object') {
             if (!file.hasOwnProperty('fileID') ||
                 !file.hasOwnProperty('maxAge')) {
-                callback(0, {
+                callback(null, {
                     code: 'INVALID_PARAM',
                     message: 'fileList的元素必须是包含fileID和maxAge的对象'
                 });
@@ -97,7 +97,7 @@ exports.getTempFileURL = function (_a, callback) {
             });
         }
         else {
-            callback(0, {
+            callback(null, {
                 code: 'INVALID_PARAM',
                 message: 'fileList的元素必须是字符串'
             });
@@ -110,10 +110,10 @@ exports.getTempFileURL = function (_a, callback) {
     var httpRequest = new request_1.Request(this.config);
     httpRequest.send(action, params).then(function (res) {
         if (res.code) {
-            callback(0, res);
+            callback(null, res);
         }
         else {
-            callback(0, {
+            callback(null, {
                 fileList: res.data.download_list,
                 requestId: res.requestId
             });

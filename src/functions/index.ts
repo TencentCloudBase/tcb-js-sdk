@@ -26,12 +26,12 @@ export const callFunction = function ({ name, data }, callback?: any): Promise<a
   httpRequest.send(action, params).then(res => {
     console.log(res);
     if (res.code) {
-      callback(0, res);
+      callback(null, res);
     } else {
       let result = res.data.response_data;
       try {
         result = JSON.parse(res.data.response_data);
-        callback(0, {
+        callback(null, {
           result,
           requestId: res.requestId
         });

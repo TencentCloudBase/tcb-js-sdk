@@ -13,7 +13,6 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var types_1 = require("../types");
 var util = require("../lib/util");
 var base_1 = require("./base");
 var AllowedScopes;
@@ -39,26 +38,23 @@ var default_1 = (function (_super) {
         return _this;
     }
     default_1.prototype.signIn = function (callback) {
-        var _this = this;
         callback = callback || util.createPromiseCallback();
-        var jwt = this.cache.getStore(types_1.JWT_KEY);
+        var jwt = this.cache.getStore(this.localKey);
         var code = util.getQuery('code');
         if (jwt) {
-            callback(0);
+            callback(null);
             return callback.promise;
         }
         if (code) {
             var loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
             var promise = this.getJwt(this.appid, loginType);
+            var self_1 = this;
             promise.then(function (res) {
                 if (!res || res.code) {
-                    callback(new Error('登录失败，请用户重试'));
+                    self_1.redirect();
                 }
                 else {
-                    if (!jwt && res.token) {
-                        _this.cache.setStore(types_1.JWT_KEY, res.token, 7000 * 1000);
-                    }
-                    callback(0, res);
+                    callback(null, res);
                 }
             });
             return callback.promise;
@@ -66,11 +62,18 @@ var default_1 = (function (_super) {
         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
             throw new Error('错误的scope类型');
         }
+        this.redirect();
+    };
+    default_1.prototype.redirect = function () {
         var currUrl = util.removeParam('code', location.href);
         currUrl = util.removeParam('state', currUrl);
         currUrl = encodeURIComponent(currUrl);
+        var host = '//open.weixin.qq.com/connect/oauth2/authorize';
+        if (this.scope === 'snsapi_login') {
+            host = '//open.weixin.qq.com/connect/qrconnect';
+        }
         if (LoginModes[this.loginMode] === 'redirect') {
-            location.href = "//open.weixin.qq.com/connect/oauth2/authorize?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
+            location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
         }
     };
     return default_1;

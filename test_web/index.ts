@@ -14,7 +14,8 @@ let init = async function () {
   app = tcb.init({
     //env: 'ianhu',
     // env: 'jimmytest-088bef'
-    env: 'webtestjimmy-5328c3'
+    // env: 'webtestjimmy-5328c3'
+    env: 'web-test-jimmy-0cf5fa'
   });
   appid = 'wxacfb81f2ced64e70';
 

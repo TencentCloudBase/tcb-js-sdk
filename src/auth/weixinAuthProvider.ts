@@ -39,7 +39,7 @@ export default class extends Base {
     let code = util.getQuery('code') || util.getHash('code');
 
     if (jwt) {
-      callback(null);
+      callback(null, { token: jwt });
       return callback.promise;
     }
 

@@ -6,4 +6,4 @@ export interface Config {
     persistence?: string;
 }
 export declare const JWT_KEY = "tcbjwttoken";
-export declare const BASE_URL = "http://tcb-api.tencentcloudapi.com/web";
+export declare const BASE_URL = "//tcb-api.tencentcloudapi.com/web";

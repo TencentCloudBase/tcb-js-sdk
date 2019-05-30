@@ -32,7 +32,7 @@ export async function runAllTestCases() {
 }
 
 export function isSuccess(err, res?) {
-  return !(err !== 0 || err.code || err instanceof Error || (res && res.code));
+  return err !== null || err !== 0 || (res && res.code);
 }
 
 export function catchCallback(e: Error) {

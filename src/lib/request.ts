@@ -58,7 +58,8 @@ class Request {
           action,
           env: this.config.env,
           token: this.cache.getStore(this.localKey),
-          code
+          code,
+          dataVersion: '2019-05-30'
         });
 
         if (action === 'storage.uploadFile') {

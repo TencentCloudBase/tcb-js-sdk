@@ -10,14 +10,16 @@ export const getQuery = function (name: string, url?: string) {
 };
 
 export const getHash = function (name: string) {
-  const arr = (window.location.hash || '').replace(/^\#/, '').split('&');
-  for (let i = 0; i < arr.length; i++) {
-    let data = arr[i].split('=');
-    if (data[0] === name) {
-      return data[1];
-    }
-  }
-  return '';
+  const matches = window.location.hash.match(new RegExp(`[#\?&\/]${name}=([^&#]*)`));
+  return matches ? matches[1] : '';
+  // const arr = (window.location.hash || '').replace(/^\#/, '').split('&');
+  // for (let i = 0; i < arr.length; i++) {
+  //   let data = arr[i].split('=');
+  //   if (data[0] === name) {
+  //     return data[1];
+  //   }
+  // }
+  // return '';
 };
 
 export const removeParam = function (key: string, sourceURL: string) {

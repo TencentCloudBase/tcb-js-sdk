@@ -89,7 +89,7 @@ class Request {
         };
 
         return axios.post(BASE_URL, params, opts).then((response) => {
-          if (response.statusText === 'OK') {
+          if (Number(response.status) === 200) {
             return response.data;
           }
           throw new Error('network request error');

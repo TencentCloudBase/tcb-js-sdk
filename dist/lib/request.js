@@ -56,7 +56,7 @@ var Request = (function () {
                     onUploadProgress: onUploadProgress
                 };
                 return axios_1.default.post(types_1.BASE_URL, params, opts).then(function (response) {
-                    if (response.statusText === 'OK') {
+                    if (Number(response.status) === 200) {
                         return response.data;
                     }
                     throw new Error('network request error');

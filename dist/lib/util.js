@@ -53,3 +53,6 @@ exports.createPromiseCallback = function () {
     cb.promise = promise;
     return cb;
 };
+exports.getWeixinCode = function () {
+    return exports.getQuery('code') || exports.getHash('code');
+};

@@ -15,7 +15,7 @@ var Request = (function () {
         var token = this.cache.getStore(this.localKey);
         var code;
         if (!token) {
-            code = util.getQuery('code');
+            code = util.getWeixinCode();
         }
         var slowQueryWarning = setTimeout(function () {
             console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');

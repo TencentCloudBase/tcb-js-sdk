@@ -36,7 +36,7 @@ export default class extends Base {
     callback = callback || util.createPromiseCallback();
 
     let jwt = this.cache.getStore(this.localKey);
-    let code = util.getQuery('code') || util.getHash('code');
+    let code = util.getWeixinCode();
 
     if (jwt) {
       callback(null, { token: jwt });

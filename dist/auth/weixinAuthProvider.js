@@ -40,7 +40,7 @@ var default_1 = (function (_super) {
     default_1.prototype.signIn = function (callback) {
         callback = callback || util.createPromiseCallback();
         var jwt = this.cache.getStore(this.localKey);
-        var code = util.getQuery('code') || util.getHash('code');
+        var code = util.getWeixinCode();
         if (jwt) {
             callback(null, { token: jwt });
             return callback.promise;

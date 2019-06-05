@@ -66,3 +66,7 @@ export const createPromiseCallback = () => {
   cb.promise = promise;
   return cb;
 };
+
+export const getWeixinCode = function() {
+  return getQuery('code') || getHash('code');
+};

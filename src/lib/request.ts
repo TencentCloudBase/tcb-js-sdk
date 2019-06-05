@@ -35,7 +35,7 @@ class Request {
 
     let code: string | false;
     if (!token) {
-      code = util.getQuery('code');
+      code = util.getWeixinCode();
     }
 
     const slowQueryWarning = setTimeout(() => {

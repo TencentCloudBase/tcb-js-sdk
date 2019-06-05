@@ -40,22 +40,16 @@ var default_1 = (function (_super) {
     default_1.prototype.signIn = function (callback) {
         callback = callback || util.createPromiseCallback();
         var jwt = this.cache.getStore(this.localKey);
-        var code = util.getQuery('code');
+        var code = util.getQuery('code') || util.getHash('code');
         if (jwt) {
-            callback(null);
+            callback(null, { token: jwt });
             return callback.promise;
         }
         if (code) {
             var loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
             var promise = this.getJwt(this.appid, loginType);
-            var self_1 = this;
             promise.then(function (res) {
-                if (!res || res.code) {
-                    self_1.redirect();
-                }
-                else {
-                    callback(null, res);
-                }
+                callback(null, res);
             });
             return callback.promise;
         }

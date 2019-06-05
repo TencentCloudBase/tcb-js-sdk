@@ -33,7 +33,8 @@ var Request = (function () {
                     action: action,
                     env: _this.config.env,
                     token: _this.cache.getStore(_this.localKey),
-                    code: code
+                    code: code,
+                    dataVersion: '2019-05-30'
                 });
                 if (action === 'storage.uploadFile') {
                     params = new FormData();

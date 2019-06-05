@@ -9,6 +9,10 @@ exports.getQuery = function (name, url) {
     var r = u.substr(u.indexOf('\?') + 1).match(reg);
     return r != null ? r[2] : '';
 };
+exports.getHash = function (name) {
+    var matches = window.location.hash.match(new RegExp("[#?&/]" + name + "=([^&#]*)"));
+    return matches ? matches[1] : '';
+};
 exports.removeParam = function (key, sourceURL) {
     var rtn = sourceURL.split('?')[0];
     var param;

@@ -2,3 +2,5 @@ node_modules
 tcbjs/statistics.html
 .vscode
 test
+.DS_Store
+.history/

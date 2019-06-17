@@ -8,6 +8,7 @@ const Db = require('@cloudbase/database').Db;
 function TCB(config?: object) {
   // console.log(config)
   this.config = config ? config : this.config;
+  this.authObj
 }
 
 TCB.prototype.init = function (config: {
@@ -28,8 +29,13 @@ TCB.prototype.database = function (dbConfig?: object) {
 };
 
 TCB.prototype.auth = function ({ persistence }: { persistence?: string; } = {}) {
+  if (this.authObj) {
+    console.warn('tcb实例只存在一个auth对象')
+    return this.authObj
+  }
   Object.assign(this.config, { persistence: persistence || 'session' });
-  return new Auth(this.config);
+  this.authObj = new Auth(this.config);
+  return this.authObj
 };
 
 function each(obj: object, fn: Function) {

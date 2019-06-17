@@ -1,6 +1,6 @@
-import { Request } from '../lib/request';
-import { Cache } from '../lib/cache';
-import { Config } from '../types';
+import { Request } from "../lib/request";
+import { Cache } from "../lib/cache";
+import { Config } from "../types";
 export default class {
     httpRequest: Request;
     cache: Cache;
@@ -8,5 +8,5 @@ export default class {
     accessTokenExpireKey: string;
     refreshTokenKey: string;
     constructor(config: Config);
-    protected getJwt(appid: string, loginType?: string): any;
+    getJwt(appid?: string, loginType?: string): any;
 }

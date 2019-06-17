@@ -39,13 +39,28 @@ var default_1 = (function (_super) {
     }
     default_1.prototype.signIn = function (callback) {
         callback = callback || util.createPromiseCallback();
-        var jwt = this.cache.getStore(this.localKey);
+        var accessToken = this.cache.getStore(this.accessTokenKey);
+        var accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey);
+        var refreshToken = this.cache.getStore(this.refreshTokenKey);
         var code = util.getWeixinCode();
-        if (jwt) {
-            callback(null, { token: jwt });
+        if (accessToken) {
+            if (accessTokenExpipre && accessTokenExpipre > Date.now()) {
+                callback(0);
+                return callback.promise;
+            }
+            else {
+                this.cache.removeStore(this.accessTokenKey);
+                this.cache.removeStore(this.accessTokenExpireKey);
+            }
+        }
+        if (refreshToken) {
+            var promise = this.getJwt(this.appid);
+            promise.then(function (res) {
+                callback(null, res);
+            });
             return callback.promise;
         }
-        if (code) {
+        else if (code) {
             var loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
             var promise = this.getJwt(this.appid, loginType);
             promise.then(function (res) {

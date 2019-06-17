@@ -1,6 +1,7 @@
-import { Request } from '../lib/request';
-import WeixinAuthProvider from './weixinAuthProvider';
-import { Config } from '../types';
+import { Request } from "../lib/request";
+import WeixinAuthProvider from "./weixinAuthProvider";
+import Base from "./base";
+import { Config } from "../types";
 export interface UserInfo {
     openid: string;
     nickname?: string;
@@ -12,7 +13,7 @@ export interface UserInfo {
     privilege?: [string];
     unionid?: string;
 }
-export default class Auth {
+export default class Auth extends Base {
     httpRequest: Request;
     config: Config;
     constructor(config: Config);
@@ -23,6 +24,7 @@ export default class Auth {
         state: any;
     }): WeixinAuthProvider;
     signOut(): Promise<any>;
+    getAccessToken(): Promise<{}>;
     onLoginStateExpire(callback: Function): void;
     getUserInfo(): any;
 }

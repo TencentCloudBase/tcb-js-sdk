@@ -15,9 +15,10 @@ var Storage = require("./storage");
 var auth_1 = require("./auth");
 var Functions = require("./functions");
 var request_1 = require("./lib/request");
-var Db = require('@cloudbase/database').Db;
+var Db = require("@cloudbase/database").Db;
 function TCB(config) {
     this.config = config ? config : this.config;
+    this.authObj;
 }
 TCB.prototype.init = function (config) {
     this.config = {
@@ -28,12 +29,25 @@ TCB.prototype.init = function (config) {
 };
 TCB.prototype.database = function (dbConfig) {
     Db.reqClass = request_1.Request;
+    if (!this.authObj) {
+        console.warn("需要app.auth()授权");
+        return;
+    }
+    Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
+    if (!Db.ws) {
+        Db.ws = null;
+    }
     return new Db(__assign({}, this.config, dbConfig));
 };
 TCB.prototype.auth = function (_a) {
     var persistence = (_a === void 0 ? {} : _a).persistence;
-    Object.assign(this.config, { persistence: persistence || 'session' });
-    return new auth_1.default(this.config);
+    if (this.authObj) {
+        console.warn("tcb实例只存在一个auth对象");
+        return this.authObj;
+    }
+    Object.assign(this.config, { persistence: persistence || "session" });
+    this.authObj = new auth_1.default(this.config);
+    return this.authObj;
 };
 function each(obj, fn) {
     for (var i in obj) {
@@ -52,6 +66,7 @@ extend(TCB.prototype, Functions);
 extend(TCB.prototype, Storage);
 var tcb = new TCB();
 try {
+    ;
     window.tcb = tcb;
 }
 catch (e) { }

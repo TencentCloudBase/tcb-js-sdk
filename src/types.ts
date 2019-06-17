@@ -26,6 +26,8 @@ export const ACCESS_TOKEN_Expire = 'access_token_expire'
 export const REFRESH_TOKEN = 'refresh_token'
 
 // export const BASE_URL = '//118.126.68.63/web';
-export const BASE_URL = '//tcb-api.tencentcloudapi.com/web';
+// export const BASE_URL = '//tcb-api.tencentcloudapi.com/web';
 // export const BASE_URL = '//localhost:8002/web';
 // export const BASE_URL = '//tcb-api.tencentcloudapi.com:8002/web';
+
+export const BASE_URL = "//212.129.229.68/web";

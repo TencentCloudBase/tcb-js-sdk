@@ -15,11 +15,12 @@ let init = async function () {
     //env: 'ianhu',
     // env: 'jimmytest-088bef'
     // env: 'webtestjimmy-5328c3'
-    env: 'feature-env-billing-004'
+    // env: 'feature-env-billing-004'
+    env: 'dev-withnate-604e29'
     // env: 'web-test-jimmy-0cf5fa' //体验
   });
-  // appid = 'wxacfb81f2ced64e70';
-  appid = 'wxf4cf4a6bfa6320fb'
+  appid = 'wxacfb81f2ced64e70';
+  // appid = 'wxf4cf4a6bfa6320fb'
 
   await test_auth(app, appid);
 

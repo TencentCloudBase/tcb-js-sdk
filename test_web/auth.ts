@@ -32,6 +32,14 @@ function registerAuthTest(app, appid, scope) {
       assert(false, { err });
     }));
   });
+
+  register('auth: signOut, scope: ' + scope, async () => {
+    await auth.signOut().then(callbackWithTryCatch((res) => {
+      assert(isSuccess(0, res) && res.appid, { res });
+    })).catch(callbackWithTryCatch((err) => {
+      assert(false, { err });
+    }));
+  });
 }
 
 export function test_auth(app, appid: string) {

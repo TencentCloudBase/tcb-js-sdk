@@ -38,12 +38,12 @@ export default class {
         // access_token过期，刷新access_token
         return self.getJwt(appid, loginType)
       }
-      if (res.code === 'REFRESH_TOKEN_Expired') {
+      if (res.code === 'REFRESH_TOKEN_EXPIRED') {
         self.cache.removeStore(self.refreshTokenKey)
         self.cache.removeStore(self.accessTokenKey)
         self.cache.removeStore(self.accessTokenExpireKey)
         activateEvent('LoginStateExpire')
-        return
+        return res
       }
       return res;
     });

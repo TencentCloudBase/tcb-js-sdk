@@ -22,6 +22,7 @@ export default class Auth {
         loginMode: any;
         state: any;
     }): WeixinAuthProvider;
-    signOut(): void;
+    signOut(): Promise<any>;
+    onLoginStateExpire(callback: Function): void;
     getUserInfo(): any;
 }

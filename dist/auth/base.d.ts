@@ -4,7 +4,9 @@ import { Config } from '../types';
 export default class {
     httpRequest: Request;
     cache: Cache;
-    localKey: string;
+    accessTokenKey: string;
+    accessTokenExpireKey: string;
+    refreshTokenKey: string;
     constructor(config: Config);
     protected getJwt(appid: string, loginType?: string): any;
 }

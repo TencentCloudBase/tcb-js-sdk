@@ -265,7 +265,7 @@ export function test_storage(app) {
           ]);
 
           app.deleteFile({ fileList: [fileId] }, callbackWithTryCatch((err, res) => {
-            assert(isSuccess(err, res) && res.fileList, { err, res });
+            assert(isSuccess(err, res) && res.fileList.every(ret => ret.code === 'SUCCESS'), { err, res });
           }));
         } catch (e) {
           catchCallback(e);
@@ -318,7 +318,7 @@ export function test_storage(app) {
           ]);
 
           app.deleteFile({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
-            assert(isSuccess(0, res) && res.fileList, { res });
+            assert(isSuccess(0, res) && res.fileList.every(ret => ret.code === 'SUCCESS'), { res });
           })).catch(callbackWithTryCatch(err => {
             assert(false && res.fileList, { err });
           }));

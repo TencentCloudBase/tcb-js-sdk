@@ -335,7 +335,7 @@ export function test_storage(app) {
     });
   });
 
-  register('storage: manual uplaodFile with callback', async () => {
+  register('storage(manual select file): uploadFile, getTempFileURL, downloadFile and deleteFile with callback', async () => {
     await new Promise(resolve => {
       const fileInput = <HTMLInputElement>document.getElementById('selectFile');
       const file = fileInput.files[0];
@@ -352,6 +352,22 @@ export function test_storage(app) {
       }, async (err, res) => {
         try {
           assert(isSuccess(err, res) && res.fileID, { err, res });
+
+          const fileId = res.fileID;
+
+          await Promise.all([
+            new Promise(resolve1 => {
+              app.getTempFileURL({ fileList: [fileId] }, callbackWithTryCatch((err, res) => {
+                assert(isSuccess(err, res) && res.fileList, { err, res });
+              }, () => {
+                resolve1();
+              }));
+            })
+          ]);
+
+          app.deleteFile({ fileList: [fileId] }, callbackWithTryCatch((err, res) => {
+            assert(isSuccess(err, res) && res.fileList.every(ret => ret.code === 'SUCCESS'), { err, res });
+          }));
         } catch (e) {
           catchCallback(e);
         } finally {
@@ -361,7 +377,7 @@ export function test_storage(app) {
     });
   });
 
-  register('storage: manual uplaodFile with promise', async () => {
+  register('storage(manual select file): uploadFile, getTempFileURL, downloadFile and deleteFile with promise', async () => {
     await new Promise(async resolve => {
       const fileInput = <HTMLInputElement>document.getElementById('selectFile');
       const file = fileInput.files[0];
@@ -375,9 +391,31 @@ export function test_storage(app) {
           let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           console.log('uploadFile progress: ' + percentCompleted, progressEvent);
         }
-      }).then(res => {
+      }).then(async res => {
         try {
           assert(isSuccess(0, res) && res.fileID, { res });
+
+          const fileId = res.fileID;
+
+          await Promise.all([
+            new Promise(resolve1 => {
+              app.getTempFileURL({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
+                assert(isSuccess(0, res) && res.fileList, { res });
+              }, () => {
+                resolve1();
+              })).catch(callbackWithTryCatch(err => {
+                assert(false, { err });
+              }, () => {
+                resolve1();
+              }));
+            })
+          ]);
+
+          app.deleteFile({ fileList: [fileId] }).then(callbackWithTryCatch(res => {
+            assert(isSuccess(0, res) && res.fileList.every(ret => ret.code === 'SUCCESS'), { res });
+          })).catch(callbackWithTryCatch(err => {
+            assert(false && res.fileList, { err });
+          }));
         } catch (e) {
           catchCallback(e);
         } finally {

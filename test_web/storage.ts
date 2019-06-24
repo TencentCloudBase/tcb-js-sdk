@@ -334,4 +334,60 @@ export function test_storage(app) {
       }));
     });
   });
+
+  register('storage: manual uplaodFile with callback', async () => {
+    await new Promise(resolve => {
+      const fileInput = <HTMLInputElement>document.getElementById('selectFile');
+      const file = fileInput.files[0];
+      if (!file) {
+        assert(false, 'Please select file first');
+      }
+      app.uploadFile({
+        filePath: file,
+        cloudPath: file.name,
+        onUploadProgress: (progressEvent) => {
+          let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log('uploadFile progress: ' + percentCompleted, progressEvent);
+        }
+      }, async (err, res) => {
+        try {
+          assert(isSuccess(err, res) && res.fileID, { err, res });
+        } catch (e) {
+          catchCallback(e);
+        } finally {
+          resolve();
+        }
+      });
+    });
+  });
+
+  register('storage: manual uplaodFile with promise', async () => {
+    await new Promise(async resolve => {
+      const fileInput = <HTMLInputElement>document.getElementById('selectFile');
+      const file = fileInput.files[0];
+      if (!file) {
+        assert(false, 'Please select file first');
+      }
+      await app.uploadFile({
+        filePath: file,
+        cloudPath: file.name,
+        onUploadProgress: (progressEvent) => {
+          let percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log('uploadFile progress: ' + percentCompleted, progressEvent);
+        }
+      }).then(res => {
+        try {
+          assert(isSuccess(0, res) && res.fileID, { res });
+        } catch (e) {
+          catchCallback(e);
+        } finally {
+          resolve();
+        }
+      }).catch(callbackWithTryCatch((err) => {
+        assert(false, { err });
+      }, () => {
+        resolve();
+      }));
+    });
+  });
 }

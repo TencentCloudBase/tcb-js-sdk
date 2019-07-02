@@ -52,7 +52,7 @@ export const uploadFile = function(
               requestId
             });
           } else {
-            callback(new Error('STORAGE_REQUEST_FAIL'));
+            callback(new Error(`STORAGE_REQUEST_FAIL: ${res.data}`));
           }
         })
         .catch(err => {

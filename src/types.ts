@@ -6,6 +6,20 @@ export interface Config {
   persistence?: string;
 }
 
+interface MetaData {
+  url: string;
+  token: string;
+  authorization: string;
+  fileId: string;
+  cosFileId: string;
+}
+
+export interface MetaDataRes {
+  data: MetaData;
+  requestId: string;
+}
+
+
 
 export const ACCESS_TOKEN = 'access_token'
 export const ACCESS_TOKEN_Expire = 'access_token_expire'

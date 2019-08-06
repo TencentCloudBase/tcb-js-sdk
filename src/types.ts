@@ -21,9 +21,9 @@ export interface MetaDataRes {
 
 
 
-export const ACCESS_TOKEN = 'access_token'
-export const ACCESS_TOKEN_Expire = 'access_token_expire'
-export const REFRESH_TOKEN = 'refresh_token'
+export const ACCESS_TOKEN = 'access_token';
+export const ACCESS_TOKEN_Expire = 'access_token_expire';
+export const REFRESH_TOKEN = 'refresh_token';
 
 // export const BASE_URL = '//118.126.68.63/web';
 export const BASE_URL = '//tcb-api.tencentcloudapi.com/web';

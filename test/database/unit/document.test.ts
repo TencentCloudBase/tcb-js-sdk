@@ -1,30 +1,30 @@
-import * as assert from "power-assert";
-import { Util } from "../../../src/database/util";
+import * as assert from 'power-assert';
+import { Util } from '../../../src/database/util';
 import * as tcb from '../../../';
-import * as Config from '../../config.local'
+import * as Config from '../../config.local';
 
-describe("test/unit/document.test.ts", () => {
-  const collName = "coll-2";
+describe('test/unit/document.test.ts', () => {
+  const collName = 'coll-2';
   const docIDGenerated = Util.generateDocId();
 
-  const app = tcb.init(Config)
-  const db = app.database()
+  const app = tcb.init(Config);
+  const db = app.database();
 
-  it("API - createCollection", async () => {
-    const result = await db.createCollection(collName)
-    assert(result)
-  })
+  it('API - createCollection', async () => {
+    const result = await db.createCollection(collName);
+    assert(result);
+  });
 
-  it("docID test", () => {
+  it('docID test', () => {
     const document = db.collection(collName).doc(docIDGenerated);
     assert(document.id === docIDGenerated);
   });
 
-  it("API - set data in empty document", async () => {
+  it('API - set data in empty document', async () => {
     const _ = db.command;
     const document = db.collection(collName).doc();
     await document.set({
-      name: "jude"
+      name: 'jude'
     });
     const documents = await db.collection(collName).where({
       name: _.eq('jude')
@@ -32,11 +32,11 @@ describe("test/unit/document.test.ts", () => {
     assert(Array.isArray(documents.data));
   });
 
-  it("API - set data in document existed", async () => {
+  it('API - set data in document existed', async () => {
     const documents = await db.collection(collName).limit(1).get();
     const docId = documents.data[0]._id;
     let data = await db.collection(collName).doc(docId).set({
-      data: { type: "set" }
+      data: { type: 'set' }
     });
     assert(data.updated === 1);
 
@@ -50,17 +50,17 @@ describe("test/unit/document.test.ts", () => {
       data: { arr: db.command.push([4, 5, 6]), foo: db.command.inc(1) },
       array: db.command.pop()
     });
-    console.log(data)
+    console.log(data);
     assert.strictEqual(data.updated, 1);
   });
 
-  it("API - remove document that not exist", async () => {
+  it('API - remove document that not exist', async () => {
     const document = db.collection(collName).doc(docIDGenerated);
     const data = await document.remove();
     assert(!data.deleted);
   });
 
-  it("API - remove document should success", async () => {
+  it('API - remove document should success', async () => {
     const documents = await db.collection(collName).get();
     const docId = documents.data[0]._id;
     const data = await db.collection(collName).doc(docId).remove();

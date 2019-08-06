@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 import {
   Config,
@@ -6,10 +6,10 @@ import {
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN
-} from "../types";
-import { Cache } from "./cache";
-import * as util from "./util";
-import { activateEvent } from "../auth/listener";
+} from '../types';
+import { Cache } from './cache';
+import * as util from './util';
+import { activateEvent } from '../auth/listener';
 
 const Max_Retry_Times = 5;
 
@@ -48,8 +48,8 @@ class Request {
     let initData = Object.assign({}, data);
     retryTimes = retryTimes || 0;
     if (retryTimes > Max_Retry_Times) {
-      activateEvent("LoginStateExpire");
-      throw new Error("LoginStateExpire");
+      activateEvent('LoginStateExpire');
+      throw new Error('LoginStateExpire');
     }
     retryTimes++;
 
@@ -62,7 +62,7 @@ class Request {
     } else if (
       accessToken &&
       accessTokenExpire > Date.now &&
-      action == "auth.getJwt"
+      action === 'auth.getJwt'
     ) {
       return Promise.resolve({ access_token: accessToken });
     }
@@ -76,48 +76,48 @@ class Request {
 
     const slowQueryWarning = setTimeout(() => {
       console.warn(
-        "Database operation is longer than 3s. Please check query performance and your network environment."
+        'Database operation is longer than 3s. Please check query performance and your network environment.'
       );
     }, 3000);
 
     let promise = Promise.resolve(null);
-    if (!refreshToken && action !== "auth.getJwt" && action !== "auth.logout") {
+    if (!refreshToken && action !== 'auth.getJwt' && action !== 'auth.logout') {
       //生成token接口未返回，等待
       promise = this.waitToken();
     }
 
     try {
       return promise.then(() => {
-        let onUploadProgress = data["onUploadProgress"] || undefined;
+        let onUploadProgress = data['onUploadProgress'] || undefined;
 
         let params: any;
-        let contentType = "application/x-www-form-urlencoded";
+        let contentType = 'application/x-www-form-urlencoded';
 
         const tmpObj: any = Object.assign({}, data, {
           action,
           env: this.config.env,
           code,
-          dataVersion: "2019-05-30"
+          dataVersion: '2019-05-30'
         });
         if (accessToken) {
           tmpObj.access_token = this.cache.getStore(this.accessTokenKey);
         } else if (refreshToken) {
           tmpObj.refresh_token = this.cache.getStore(this.refreshTokenKey);
-          tmpObj.action = "auth.getJwt";
+          tmpObj.action = 'auth.getJwt';
         }
 
-        if (action === "storage.uploadFile") {
+        if (action === 'storage.uploadFile') {
           params = new FormData();
           for (let key in tmpObj) {
             if (
               tmpObj.hasOwnProperty(key) &&
               tmpObj[key] !== undefined &&
-              key !== "onUploadProgress"
+              key !== 'onUploadProgress'
             ) {
               params.append(key, tmpObj[key]);
             }
           }
-          contentType = "multipart/form-data";
+          contentType = 'multipart/form-data';
         } else {
           // Object.keys(tmpObj).forEach((key) => {
           //   if ((typeof tmpObj[key]) === 'object') {
@@ -125,13 +125,13 @@ class Request {
           //   }
           // });
           // params = qs.stringify(tmpObj); // 这里必须使用qs库进行转换
-          contentType = "application/json;charset=UTF-8";
+          contentType = 'application/json;charset=UTF-8';
           params = tmpObj;
         }
 
         let opts = {
           headers: {
-            "content-type": contentType
+            'content-type': contentType
           },
           onUploadProgress
         };
@@ -146,24 +146,24 @@ class Request {
             .then(response => {
               if (Number(response.status) === 200) {
                 if (retryTimes > Max_Retry_Times) {
-                  activateEvent("LoginStateExpire");
-                  console.error("[tcb-js-sdk] 登录态请求循环尝试次数超限");
-                  throw new Error("LoginStateExpire");
+                  activateEvent('LoginStateExpire');
+                  console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
+                  throw new Error('LoginStateExpire');
                 }
                 if (response.data) {
                   if (
-                    response.data.code === "SIGN_PARAM_INVALID" ||
-                    response.data.code === "REFRESH_TOKEN_EXPIRED"
+                    response.data.code === 'SIGN_PARAM_INVALID' ||
+                    response.data.code === 'REFRESH_TOKEN_EXPIRED'
                   ) {
-                    activateEvent("LoginStateExpire");
+                    activateEvent('LoginStateExpire');
                     self.cache.removeStore(self.refreshTokenKey);
-                  } else if (response.data.code === "CHECK_LOGIN_FAILED") {
+                  } else if (response.data.code === 'CHECK_LOGIN_FAILED') {
                     // access_token过期，重新获取
                     self.cache.removeStore(self.accessTokenKey);
                     self.cache.removeStore(self.accessTokenExpireKey);
                     return self.send(action, initData, ++retryTimes);
                   } else {
-                    if (action === "auth.getJwt") {
+                    if (action === 'auth.getJwt') {
                       return response.data;
                     } else {
                       if (
@@ -196,7 +196,7 @@ class Request {
                 }
                 return response.data;
               }
-              throw new Error("network request error");
+              throw new Error('network request error');
             })
             .catch(err => {
               return err;
@@ -222,7 +222,7 @@ class Request {
 
         waitedTime += 10;
         if (waitedTime > 5000) {
-          reject(new Error("request timed out"));
+          reject(new Error('request timed out'));
         }
       }, 10);
     });

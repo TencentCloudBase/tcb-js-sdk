@@ -1,6 +1,6 @@
 // database regex
 import * as assert from 'power-assert';
-import {catchCallback, register, isSuccess, callbackWithTryCatch} from '../util';
+import { catchCallback, register, isSuccess, callbackWithTryCatch } from '../util';
 
 export function registerRegex(app, collName) {
   const db = app.database();

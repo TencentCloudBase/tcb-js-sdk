@@ -1,18 +1,18 @@
-import * as assert from "power-assert";
+import * as assert from 'power-assert';
 import * as tcb from '../../../';
-import * as Config from '../../config.local'
+import * as Config from '../../config.local';
 
-describe("test/unit/db.test.ts", () => {
-  const app = tcb.init(Config)
-  const db = app.database()
+describe('test/unit/db.test.ts', () => {
+  const app = tcb.init(Config);
+  const db = app.database();
   // const defaultDbName = "default";
 
   // it("use default db", () => {
   //   assert(db.config.dbname === defaultDbName);
   // });
 
-  it("get collection reference", () => {
-    const collName = "coll-1";
+  it('get collection reference', () => {
+    const collName = 'coll-1';
     const collection = db.collection(collName);
     assert(collection.name === collName);
   });

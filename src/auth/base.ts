@@ -1,12 +1,12 @@
-import { Request } from "../lib/request";
-import { Cache } from "../lib/cache";
+import { Request } from '../lib/request';
+import { Cache } from '../lib/cache';
 import {
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN,
   Config
-} from "../types";
-import { activateEvent } from "./listener";
+} from '../types';
+import { activateEvent } from './listener';
 
 export default class {
   httpRequest: Request;
@@ -25,7 +25,7 @@ export default class {
   }
 
   public getJwt(appid?: string, loginType?: string): any {
-    const action = "auth.getJwt";
+    const action = 'auth.getJwt';
 
     let self = this;
     return this.httpRequest.send(action, { appid, loginType }).then(res => {
@@ -40,17 +40,17 @@ export default class {
       if (res.refresh_token) {
         self.cache.setStore(self.refreshTokenKey, res.refresh_token);
       }
-      if (res.code === "CHECK_LOGIN_FAILED") {
+      if (res.code === 'CHECK_LOGIN_FAILED') {
         self.cache.removeStore(self.accessTokenKey);
         self.cache.removeStore(self.accessTokenExpireKey);
         // access_token过期，刷新access_token
         return self.getJwt(appid, loginType);
       }
-      if (res.code === "REFRESH_TOKEN_EXPIRED") {
+      if (res.code === 'REFRESH_TOKEN_EXPIRED') {
         self.cache.removeStore(self.refreshTokenKey);
         self.cache.removeStore(self.accessTokenKey);
         self.cache.removeStore(self.accessTokenExpireKey);
-        activateEvent("LoginStateExpire");
+        activateEvent('LoginStateExpire');
         return res;
       }
       return res;

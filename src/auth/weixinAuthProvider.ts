@@ -36,8 +36,8 @@ export default class extends Base {
     callback = callback || util.createPromiseCallback();
 
     let accessToken = this.cache.getStore(this.accessTokenKey);
-    let accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey)
-    let refreshToken = this.cache.getStore(this.refreshTokenKey)
+    let accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey);
+    let refreshToken = this.cache.getStore(this.refreshTokenKey);
     let code = util.getWeixinCode();
 
     if (accessToken) {
@@ -45,8 +45,8 @@ export default class extends Base {
         callback(0);
         return callback.promise;
       } else {
-        this.cache.removeStore(this.accessTokenKey)
-        this.cache.removeStore(this.accessTokenExpireKey)
+        this.cache.removeStore(this.accessTokenKey);
+        this.cache.removeStore(this.accessTokenExpireKey);
       }
     }
 

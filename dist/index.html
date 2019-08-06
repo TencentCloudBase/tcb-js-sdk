@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta content="telephone=no" name="format-detection" />
+    <title>TCB JSSDK 自动化测试页面</title>
+  </head>
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="format-detection" content="telephone=no"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta content="telephone=no" name="format-detection"/>
-  <title>TCB JSSDK 自动化测试页面</title>
-</head>
+  <body>
+    <div>
+      <h4>TCB JSSDK 自动化测试页面</h4>
+      <p>
+        本页面支持在微信环境中运行，支持自动化测试 初始化、存储、云函数、数据库
+        功能。
+      </p>
+      <p><a href="./storage.html">TCB JSSDK 存储 手动操作测试页面</a></p>
 
-<body>
-  <div>
-    <h4>TCB JSSDK 自动化测试页面</h4>
-    <p>本页面支持在微信环境中运行，支持自动化测试 初始化、存储、云函数、数据库 功能。</p>
-    <p><a href="./storage.html">TCB JSSDK 存储 手动操作测试页面</a></p>
+      <select id="testCaseSelect"></select>
 
-    <select id="testCaseSelect"></select>
+      <button id="runSelectedTestCase">执行选中用例</button>
 
-    <button id="runSelectedTestCase">执行选中用例</button>
+      <button id="mockAddDoc">增加</button>
 
-    <!--<select id="testCaseTypeSelect">
+      <!--<select id="testCaseTypeSelect">
       <option value="auth">初始化</option>
       <option value="storage">存储</option>
       <option value="function">云函数</option>
@@ -39,12 +46,13 @@
     <p>操作结果请见console</p>
     <div id="output" class="container">
 
+      <p>操作结果请见console</p>
+      <div id="output" class="container"></div>
     </div>
-  </div>
 
-  <script src="test.js"></script>
-  <script>
-    window['initIndex']();
-  </script>
-</body>
+    <script src="test.js"></script>
+    <script>
+      window["initIndex"]();
+    </script>
+  </body>
 </html>

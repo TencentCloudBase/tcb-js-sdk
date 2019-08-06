@@ -30,7 +30,7 @@ describe('test/index.test.ts', async () => {
 
   const initialData = {
     name: 'aaa',
-    array: [1, 2, 3, [4, 5, 6], { a: 1, b: { c: 'fjasklfljkas', d: false } }],
+    array: [1, 2, 3, [4, 5, 6], { a: 1, b: { c: 'fjasklfljkas', d: false }}],
     data: {
       a: 'a',
       b: 'b',
@@ -48,7 +48,7 @@ describe('test/index.test.ts', async () => {
         }
       }
     }
-  }
+  };
   it('Document - CRUD', async () => {
     // Create
     const res = await collection.add(initialData);
@@ -120,7 +120,7 @@ describe('test/index.test.ts', async () => {
     // Delete
     const deleteRes = await collection.doc(id).remove();
     assert.strictEqual(deleteRes.deleted, 1);
-  })
+  });
 
   it('Document - query', async () => {
     assert((await collection.add({ a: 1, b: 100 })).id);
@@ -308,4 +308,4 @@ describe('test/index.test.ts', async () => {
 
     // clean();
   });
-})
+});

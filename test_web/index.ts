@@ -24,8 +24,10 @@ let init = async function() {
     // env: 'webtestjimmy-5328c3'
     // env: 'feature-env-billing-004'
     // env: "dev-withnate-604e29"
-    env: "web-test-jimmy-0cf5fa" //体验
+    // env: "web-test-jimmy-0cf5fa" //体验
+    env: "luke-3de127" //现网luke-3de127
   })
+
   appid = "wxacfb81f2ced64e70"
   // appid = 'wxf4cf4a6bfa6320fb'
 
@@ -102,7 +104,7 @@ window["initStorage"] = function() {
     let returnTypeEle = <HTMLSelectElement>document.getElementById("returnType")
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value
     deleteFile(app, returnType)
-  }
+  } 
 }
 
 window["initIndex"] = function() {

@@ -70,10 +70,13 @@ export default class Auth extends Base {
         this.getJwt()
           .then(res => {
             console.log("get jwt res:", res)
-            if (res.code === "REFRESH_TOKEN_Expired") {
+            if (res.code === "REFRESH_TOKEN_EXPIRED" || res.code === "SIGN_PARAM_INVALID") {
               // 用户需重新登录
               // console.log("REFRESH_TOKEN_Expired")
-              reject({ err: { message: "REFRESH_TOKEN_Expired" } })
+              // reject({ err: { message: "REFRESH_TOKEN_EXPIRED" } })
+              activateEvent("LoginStateExpire")
+              cache.removeStore(this.refreshTokenKey);
+              reject(new Error(res.code))
             }
 
             if (!res.code) {

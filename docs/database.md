@@ -1029,12 +1029,19 @@ db.collection('user').where({
 
 ### 数据库实时推送
 
+
+监听指定集合中符合查询条件的文档，通过onchange回调获得文档的变化详情
+(where参数为查询条件 参考 [查询文档](#查询文档))
+
 ```js
+  const tcb = require('tcb-js-sdk')
+  const app =  tcb.init({
+      env: 'tcbenv-mPIgjhnq'
+  });
   const db = app.database();
   const _ = db.command
-  const collection = db.collection('collName')
+  const collection = db.collection('collName') // collName 需填当前env下集合名称
 
-  // 监听指定集合中符合查询条件的文档，通过onchange回调获得文档的变化详情
   let ref = collection.where({ test: _.gt(0) }).watch({
     onChange: snapshot => {
         console.log("收到snapshot**********", snapshot)
@@ -1044,7 +1051,23 @@ db.collection('user').where({
     }
   })
 
-  // 关闭监听
+
+```
+
+单个doc的监听，也可以采用doc('docId').watch()形式
+```js
+  let ref = collection.doc('one docId').watch({
+    onChange: snapshot => {
+        console.log("收到snapshot**********", snapshot)
+    },
+    onError: error => {
+      console.log("收到error**********", error)
+    }
+  })
+```
+
+手动关闭监听，当前监听将不再收到推送
+```js
   ref.close()
 ```
 

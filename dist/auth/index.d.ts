@@ -1,7 +1,7 @@
-import { Request } from "../lib/request";
-import WeixinAuthProvider from "./weixinAuthProvider";
-import Base from "./base";
-import { Config } from "../types";
+import { Request } from '../lib/request';
+import WeixinAuthProvider from './weixinAuthProvider';
+import Base from './base';
+import { Config } from '../types';
 export interface UserInfo {
     openid: string;
     nickname?: string;

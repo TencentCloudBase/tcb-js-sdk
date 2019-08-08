@@ -19,8 +19,8 @@ var Request = (function () {
         var initData = Object.assign({}, data);
         retryTimes = retryTimes || 0;
         if (retryTimes > Max_Retry_Times) {
-            listener_1.activateEvent("LoginStateExpire");
-            throw new Error("LoginStateExpire");
+            listener_1.activateEvent('LoginStateExpire');
+            throw new Error('LoginStateExpire');
         }
         retryTimes++;
         var accessToken = this.cache.getStore(this.accessTokenKey);
@@ -32,7 +32,7 @@ var Request = (function () {
         }
         else if (accessToken &&
             accessTokenExpire > Date.now &&
-            action == "auth.getJwt") {
+            action === 'auth.getJwt') {
             return Promise.resolve({ access_token: accessToken });
         }
         var refreshToken = this.cache.getStore(this.refreshTokenKey);
@@ -41,48 +41,48 @@ var Request = (function () {
             code = util.getWeixinCode();
         }
         var slowQueryWarning = setTimeout(function () {
-            console.warn("Database operation is longer than 3s. Please check query performance and your network environment.");
+            console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
         }, 3000);
         var promise = Promise.resolve(null);
-        if (!refreshToken && action !== "auth.getJwt" && action !== "auth.logout") {
+        if (!refreshToken && action !== 'auth.getJwt' && action !== 'auth.logout') {
             promise = this.waitToken();
         }
         try {
             return promise.then(function () {
-                var onUploadProgress = data["onUploadProgress"] || undefined;
+                var onUploadProgress = data['onUploadProgress'] || undefined;
                 var params;
-                var contentType = "application/x-www-form-urlencoded";
+                var contentType = 'application/x-www-form-urlencoded';
                 var tmpObj = Object.assign({}, data, {
                     action: action,
                     env: _this.config.env,
                     code: code,
-                    dataVersion: "2019-05-30"
+                    dataVersion: '2019-05-30'
                 });
                 if (accessToken) {
                     tmpObj.access_token = _this.cache.getStore(_this.accessTokenKey);
                 }
                 else if (refreshToken) {
                     tmpObj.refresh_token = _this.cache.getStore(_this.refreshTokenKey);
-                    tmpObj.action = "auth.getJwt";
+                    tmpObj.action = 'auth.getJwt';
                 }
-                if (action === "storage.uploadFile") {
+                if (action === 'storage.uploadFile') {
                     params = new FormData();
                     for (var key in tmpObj) {
                         if (tmpObj.hasOwnProperty(key) &&
                             tmpObj[key] !== undefined &&
-                            key !== "onUploadProgress") {
+                            key !== 'onUploadProgress') {
                             params.append(key, tmpObj[key]);
                         }
                     }
-                    contentType = "multipart/form-data";
+                    contentType = 'multipart/form-data';
                 }
                 else {
-                    contentType = "application/json;charset=UTF-8";
+                    contentType = 'application/json;charset=UTF-8';
                     params = tmpObj;
                 }
                 var opts = {
                     headers: {
-                        "content-type": contentType
+                        'content-type': contentType
                     },
                     onUploadProgress: onUploadProgress
                 };
@@ -94,23 +94,23 @@ var Request = (function () {
                         .then(function (response) {
                         if (Number(response.status) === 200) {
                             if (retryTimes > Max_Retry_Times) {
-                                listener_1.activateEvent("LoginStateExpire");
-                                console.error("[tcb-js-sdk] 登录态请求循环尝试次数超限");
-                                throw new Error("LoginStateExpire");
+                                listener_1.activateEvent('LoginStateExpire');
+                                console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
+                                throw new Error('LoginStateExpire');
                             }
                             if (response.data) {
-                                if (response.data.code === "SIGN_PARAM_INVALID" ||
-                                    response.data.code === "REFRESH_TOKEN_EXPIRED") {
-                                    listener_1.activateEvent("LoginStateExpire");
+                                if (response.data.code === 'SIGN_PARAM_INVALID' ||
+                                    response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+                                    listener_1.activateEvent('LoginStateExpire');
                                     self.cache.removeStore(self.refreshTokenKey);
                                 }
-                                else if (response.data.code === "CHECK_LOGIN_FAILED") {
+                                else if (response.data.code === 'CHECK_LOGIN_FAILED') {
                                     self.cache.removeStore(self.accessTokenKey);
                                     self.cache.removeStore(self.accessTokenExpireKey);
                                     return self.send(action, initData, ++retryTimes);
                                 }
                                 else {
-                                    if (action === "auth.getJwt") {
+                                    if (action === 'auth.getJwt') {
                                         return response.data;
                                     }
                                     else {
@@ -133,7 +133,7 @@ var Request = (function () {
                             }
                             return response.data;
                         }
-                        throw new Error("network request error");
+                        throw new Error('network request error');
                     })
                         .catch(function (err) {
                         return err;
@@ -158,7 +158,7 @@ var Request = (function () {
                 }
                 waitedTime += 10;
                 if (waitedTime > 5000) {
-                    reject(new Error("request timed out"));
+                    reject(new Error('request timed out'));
                 }
             }, 10);
         });

@@ -27,7 +27,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var weixinAuthProvider_1 = require("./weixinAuthProvider");
 var listener_1 = require("./listener");
 var base_1 = require("./base");
-var listener_2 = require("./listener");
 var cache_1 = require("../lib/cache");
 var types_1 = require("../types");
 var Auth = (function (_super) {
@@ -46,7 +45,7 @@ var Auth = (function (_super) {
         cache.removeStore(types_1.REFRESH_TOKEN + "_" + this.config.env);
         cache.removeStore(types_1.ACCESS_TOKEN + "_" + this.config.env);
         cache.removeStore(types_1.ACCESS_TOKEN_Expire + "_" + this.config.env);
-        var action = "auth.logout";
+        var action = 'auth.logout';
         return this.httpRequest.send(action, {}).then(function (res) {
             return res;
         });
@@ -56,19 +55,21 @@ var Auth = (function (_super) {
         var cache = new cache_1.Cache(this.config.persistence);
         return new Promise(function (resolve, reject) {
             if (!cache.getStore(_this.refreshTokenKey)) {
-                listener_2.activateEvent("LoginStateExpire");
-                reject({ err: { message: "LoginStateExpire" } });
+                listener_1.activateEvent('LoginStateExpire');
+                reject(new Error('LoginStateExpire'));
             }
             else {
                 _this.getJwt()
                     .then(function (res) {
-                    console.log("get jwt res:", res);
-                    if (res.code === "REFRESH_TOKEN_Expired") {
-                        reject({ err: { message: "REFRESH_TOKEN_Expired" } });
+                    console.log('get jwt res:', res);
+                    if (res.code === 'REFRESH_TOKEN_EXPIRED' || res.code === 'SIGN_PARAM_INVALID') {
+                        listener_1.activateEvent('LoginStateExpire');
+                        cache.removeStore(_this.refreshTokenKey);
+                        reject(new Error(res.code));
                     }
                     if (!res.code) {
                         var accessToken = cache.getStore(_this.accessTokenKey);
-                        console.log("get access_token*********:", accessToken);
+                        console.log('get access_token*********:', accessToken);
                         resolve({
                             accessToken: accessToken,
                             env: _this.config.env
@@ -76,16 +77,16 @@ var Auth = (function (_super) {
                     }
                 })
                     .catch(function (err) {
-                    reject({ err: err });
+                    reject(err);
                 });
             }
         });
     };
     Auth.prototype.onLoginStateExpire = function (callback) {
-        listener_1.addEventListener("LoginStateExpire", callback);
+        listener_1.addEventListener('LoginStateExpire', callback);
     };
     Auth.prototype.getUserInfo = function () {
-        var action = "auth.getUserInfo";
+        var action = 'auth.getUserInfo';
         return this.httpRequest.send(action, {}).then(function (res) {
             if (res.code) {
                 return res;

@@ -13,7 +13,7 @@ var default_1 = (function () {
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
     }
     default_1.prototype.getJwt = function (appid, loginType) {
-        var action = "auth.getJwt";
+        var action = 'auth.getJwt';
         var self = this;
         return this.httpRequest.send(action, { appid: appid, loginType: loginType }).then(function (res) {
             if (res.access_token) {
@@ -23,16 +23,16 @@ var default_1 = (function () {
             if (res.refresh_token) {
                 self.cache.setStore(self.refreshTokenKey, res.refresh_token);
             }
-            if (res.code === "CHECK_LOGIN_FAILED") {
+            if (res.code === 'CHECK_LOGIN_FAILED') {
                 self.cache.removeStore(self.accessTokenKey);
                 self.cache.removeStore(self.accessTokenExpireKey);
                 return self.getJwt(appid, loginType);
             }
-            if (res.code === "REFRESH_TOKEN_EXPIRED") {
+            if (res.code === 'REFRESH_TOKEN_EXPIRED') {
                 self.cache.removeStore(self.refreshTokenKey);
                 self.cache.removeStore(self.accessTokenKey);
                 self.cache.removeStore(self.accessTokenExpireKey);
-                listener_1.activateEvent("LoginStateExpire");
+                listener_1.activateEvent('LoginStateExpire');
                 return res;
             }
             return res;

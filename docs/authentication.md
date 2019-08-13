@@ -9,9 +9,10 @@
 ### 获取登录对象
 
 请求参数
-| 字段        | 类型   | 必填 | 说明                                                                        |
-| ----------- | ------ | ---- | --------------------------------------------------------------------------- |
-| persistence | string | 否   | 身份认证状态如何持久保留，有三个选项 local、session 和 none，默认为 session |
+
+字段 | 类型 | 必填 | 说明
+--- | --- | --- | -------
+persistence | string | 否 | 身份认证状态如何持久保留，有三个选项 local、session 和 none，默认为 session
 
 ```js
 let app = tcb.init({
@@ -43,10 +44,10 @@ auth.onLoginStateExpire(callback);
 
 请求参数
 
-| 字段  | 类型   | 必填 | 说明                                                                                                                                              |
-| ----- | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| appid | string | 是   | 微信公众平台（或开放平台）应用的 appid                                                                                                            |
-| scope | string | 是   | 网页授权类型，可选值为 snsapi_base(公众平台，只获取用户的 openid)、snsapi_userinfo(公众平台，获取用户的基本信息)和 snsapi_login(开放平台网页授权) |
+字段  | 类型   | 必填 | 说明
+---- | ----- | ---- | ----
+appid | string | 是   | 微信公众平台（或开放平台）应用的 appid
+scope | string | 是   | 网页授权类型，可选值为 snsapi_base(公众平台，只获取用户的 openid)、snsapi_userinfo(公众平台，获取用户的基本信息)和 snsapi_login(开放平台网页授权)
 
 ```javascript
 let app = tcb.init({

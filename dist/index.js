@@ -15,6 +15,7 @@ var Storage = require("./storage");
 var auth_1 = require("./auth");
 var Functions = require("./functions");
 var request_1 = require("./lib/request");
+var events_1 = require("./lib/events");
 var Db = require('@cloudbase/database').Db;
 function TCB(config) {
     this.config = config ? config : this.config;
@@ -49,6 +50,7 @@ TCB.prototype.auth = function (_a) {
     this.authObj = new auth_1.default(this.config);
     return this.authObj;
 };
+TCB.prototype.on = events_1.addEventListener.bind(TCB);
 function each(obj, fn) {
     for (var i in obj) {
         if (obj.hasOwnProperty(i)) {

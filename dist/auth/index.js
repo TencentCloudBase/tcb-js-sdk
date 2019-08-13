@@ -25,8 +25,8 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var weixinAuthProvider_1 = require("./weixinAuthProvider");
-var listener_1 = require("./listener");
 var base_1 = require("./base");
+var events_1 = require("../lib/events");
 var cache_1 = require("../lib/cache");
 var types_1 = require("../types");
 var Auth = (function (_super) {
@@ -34,6 +34,7 @@ var Auth = (function (_super) {
     function Auth(config) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
+        _this.customAuthProvider = new base_1.default(_this.config);
         return _this;
     }
     Auth.prototype.weixinAuthProvider = function (_a) {
@@ -55,7 +56,7 @@ var Auth = (function (_super) {
         var cache = new cache_1.Cache(this.config.persistence);
         return new Promise(function (resolve, reject) {
             if (!cache.getStore(_this.refreshTokenKey)) {
-                listener_1.activateEvent('LoginStateExpire');
+                events_1.activateEvent('LoginStateExpire');
                 reject(new Error('LoginStateExpire'));
             }
             else {
@@ -63,7 +64,7 @@ var Auth = (function (_super) {
                     .then(function (res) {
                     console.log('get jwt res:', res);
                     if (res.code === 'REFRESH_TOKEN_EXPIRED' || res.code === 'SIGN_PARAM_INVALID') {
-                        listener_1.activateEvent('LoginStateExpire');
+                        events_1.activateEvent('LoginStateExpire');
                         cache.removeStore(_this.refreshTokenKey);
                         reject(new Error(res.code));
                     }
@@ -83,7 +84,20 @@ var Auth = (function (_super) {
         });
     };
     Auth.prototype.onLoginStateExpire = function (callback) {
-        listener_1.addEventListener('LoginStateExpire', callback);
+        events_1.addEventListener('LoginStateExpire', callback);
+    };
+    Auth.prototype.signInWithTicket = function (ticket) {
+        var _this = this;
+        return this.httpRequest.send('auth.signInWithTicket', {
+            ticket: ticket
+        }).then(function (res) {
+            if (res.refresh_token) {
+                _this.customAuthProvider.setRefreshToken(res.refresh_token);
+            }
+        });
+    };
+    Auth.prototype.shouldRefreshAccessToken = function (hook) {
+        this.httpRequest._shouldRefreshAccessTokenHook = hook.bind(this);
     };
     Auth.prototype.getUserInfo = function () {
         var action = 'auth.getUserInfo';

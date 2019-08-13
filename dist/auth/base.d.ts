@@ -8,5 +8,6 @@ export default class {
     accessTokenExpireKey: string;
     refreshTokenKey: string;
     constructor(config: Config);
-    getJwt(appid?: string, loginType?: string): any;
+    setRefreshToken(refreshToken: any): void;
+    getJwt(appid?: string, loginType?: string, code?: string): any;
 }

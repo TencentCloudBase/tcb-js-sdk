@@ -1,11 +1,55 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios_1 = require("axios");
 var types_1 = require("../types");
 var cache_1 = require("./cache");
-var util = require("./util");
-var listener_1 = require("../auth/listener");
-var Max_Retry_Times = 5;
+var events_1 = require("./events");
 var Request = (function () {
     function Request(config) {
         this.config = config;
@@ -14,153 +58,138 @@ var Request = (function () {
         this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
     }
-    Request.prototype.send = function (action, data, retryTimes) {
-        var _this = this;
-        var initData = Object.assign({}, data);
-        retryTimes = retryTimes || 0;
-        if (retryTimes > Max_Retry_Times) {
-            listener_1.activateEvent('LoginStateExpire');
-            throw new Error('LoginStateExpire');
-        }
-        retryTimes++;
-        var accessToken = this.cache.getStore(this.accessTokenKey);
-        var accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
-        if (accessTokenExpire && accessTokenExpire < Date.now()) {
-            this.cache.removeStore(this.accessTokenKey);
-            this.cache.removeStore(this.accessTokenExpireKey);
-            accessToken = null;
-        }
-        else if (accessToken &&
-            accessTokenExpire > Date.now &&
-            action === 'auth.getJwt') {
-            return Promise.resolve({ access_token: accessToken });
-        }
-        var refreshToken = this.cache.getStore(this.refreshTokenKey);
-        var code;
-        if (!refreshToken) {
-            code = util.getWeixinCode();
-        }
-        var slowQueryWarning = setTimeout(function () {
-            console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
-        }, 3000);
-        var promise = Promise.resolve(null);
-        if (!refreshToken && action !== 'auth.getJwt' && action !== 'auth.logout') {
-            promise = this.waitToken();
-        }
-        try {
-            return promise.then(function () {
-                var onUploadProgress = data['onUploadProgress'] || undefined;
-                var params;
-                var contentType = 'application/x-www-form-urlencoded';
-                var tmpObj = Object.assign({}, data, {
-                    action: action,
-                    env: _this.config.env,
-                    code: code,
-                    dataVersion: '2019-05-30'
-                });
-                if (accessToken) {
-                    tmpObj.access_token = _this.cache.getStore(_this.accessTokenKey);
-                }
-                else if (refreshToken) {
-                    tmpObj.refresh_token = _this.cache.getStore(_this.refreshTokenKey);
-                    tmpObj.action = 'auth.getJwt';
-                }
-                if (action === 'storage.uploadFile') {
-                    params = new FormData();
-                    for (var key in tmpObj) {
-                        if (tmpObj.hasOwnProperty(key) &&
-                            tmpObj[key] !== undefined &&
-                            key !== 'onUploadProgress') {
-                            params.append(key, tmpObj[key]);
+    Request.prototype.refreshAccessToken = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var refreshToken, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.cache.removeStore(this.accessTokenKey);
+                        this.cache.removeStore(this.accessTokenExpireKey);
+                        refreshToken = this.cache.getStore(this.refreshTokenKey);
+                        if (!refreshToken) {
+                            throw Error('[tcb-js-sdk] 未登录CloudBase');
                         }
-                    }
-                    contentType = 'multipart/form-data';
+                        return [4, this.request('auth.getJwt', {
+                                refresh_token: refreshToken
+                            })];
+                    case 1:
+                        response = _a.sent();
+                        if (response.data.access_token) {
+                            events_1.activateEvent('refreshAccessToken');
+                            this.cache.setStore(this.accessTokenKey, response.data.access_token);
+                            this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+                            return [2, {
+                                    accessToken: response.data.access_token,
+                                    accessTokenExpire: response.data.access_token_expire
+                                }];
+                        }
+                        return [2];
+                }
+            });
+        });
+    };
+    Request.prototype.getAccessToken = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var accessToken, accessTokenExpire, shouldRefreshAccessToken;
+            return __generator(this, function (_a) {
+                accessToken = this.cache.getStore(this.accessTokenKey);
+                accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
+                shouldRefreshAccessToken = true;
+                if (this._shouldRefreshAccessTokenHook && !this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)) {
+                    shouldRefreshAccessToken = false;
+                }
+                if ((!accessToken || !accessTokenExpire || accessTokenExpire < Date.now()) && shouldRefreshAccessToken) {
+                    return [2, this.refreshAccessToken()];
                 }
                 else {
-                    contentType = 'application/json;charset=UTF-8';
-                    params = tmpObj;
+                    return [2, {
+                            accessToken: accessToken,
+                            accessTokenExpire: accessTokenExpire
+                        }];
                 }
-                var opts = {
-                    headers: {
-                        'content-type': contentType
-                    },
-                    onUploadProgress: onUploadProgress
-                };
-                var self = _this;
-                var urlPre = types_1.BASE_URL;
-                function postRequest() {
-                    return axios_1.default
-                        .post(urlPre, params, opts)
-                        .then(function (response) {
-                        if (Number(response.status) === 200) {
-                            if (retryTimes > Max_Retry_Times) {
-                                listener_1.activateEvent('LoginStateExpire');
-                                console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
-                                throw new Error('LoginStateExpire');
-                            }
-                            if (response.data) {
-                                if (response.data.code === 'SIGN_PARAM_INVALID' ||
-                                    response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-                                    listener_1.activateEvent('LoginStateExpire');
-                                    self.cache.removeStore(self.refreshTokenKey);
-                                }
-                                else if (response.data.code === 'CHECK_LOGIN_FAILED') {
-                                    self.cache.removeStore(self.accessTokenKey);
-                                    self.cache.removeStore(self.accessTokenExpireKey);
-                                    return self.send(action, initData, ++retryTimes);
-                                }
-                                else {
-                                    if (action === 'auth.getJwt') {
-                                        return response.data;
-                                    }
-                                    else {
-                                        if (response.data.access_token ||
-                                            response.data.refresh_token) {
-                                            if (response.data.access_token) {
-                                                self.cache.setStore(self.accessTokenKey, response.data.access_token);
-                                                self.cache.setStore(self.accessTokenExpireKey, response.data.access_token_expire + Date.now());
-                                            }
-                                            if (response.data.refresh_token) {
-                                                self.cache.setStore(self.refreshTokenKey, response.data.refresh_token);
-                                            }
-                                            return self.send(action, initData, ++retryTimes);
-                                        }
-                                        else {
-                                            return response.data;
-                                        }
-                                    }
-                                }
-                            }
-                            return response.data;
-                        }
-                        throw new Error('network request error');
-                    })
-                        .catch(function (err) {
-                        return err;
-                    });
-                }
-                return postRequest();
+                return [2];
             });
-        }
-        finally {
-            clearTimeout(slowQueryWarning);
-        }
+        });
     };
-    Request.prototype.waitToken = function () {
-        var _this = this;
-        var self = this;
-        var waitedTime = 0;
-        return new Promise(function (resolve, reject) {
-            var intervalId = setInterval(function () {
-                if (self.cache.getStore(_this.refreshTokenKey)) {
-                    clearInterval(intervalId);
-                    resolve();
+    Request.prototype.request = function (action, params, options, retryTimes) {
+        if (retryTimes === void 0) { retryTimes = 5; }
+        return __awaiter(this, void 0, void 0, function () {
+            var contentType, tmpObj, _a, payload, key, opts, res;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (retryTimes < 0) {
+                            events_1.activateEvent('LoginStateExpire');
+                            console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
+                            throw new Error('LoginStateExpire');
+                        }
+                        contentType = 'application/x-www-form-urlencoded';
+                        tmpObj = __assign({ action: action, env: this.config.env, dataVersion: '2019-05-30' }, params);
+                        if (!(action !== 'auth.getJwt' && action !== 'auth.logout' && action !== 'auth.signInWithTicket')) return [3, 2];
+                        _a = tmpObj;
+                        return [4, this.getAccessToken()];
+                    case 1:
+                        _a.access_token = (_b.sent()).accessToken;
+                        _b.label = 2;
+                    case 2:
+                        if (action === 'storage.uploadFile') {
+                            payload = new FormData();
+                            for (key in payload) {
+                                if (payload.hasOwnProperty(key) && payload[key] !== undefined) {
+                                    payload.append(key, tmpObj[key]);
+                                }
+                            }
+                            contentType = 'multipart/form-data';
+                        }
+                        else {
+                            contentType = 'application/json;charset=UTF-8';
+                            payload = tmpObj;
+                        }
+                        opts = {
+                            headers: {
+                                'content-type': contentType
+                            },
+                        };
+                        if (options && options['onUploadProgress']) {
+                            opts.onUploadProgress = options['onUploadProgress'];
+                        }
+                        return [4, axios_1.default.post(types_1.BASE_URL, payload, opts)];
+                    case 3:
+                        res = _b.sent();
+                        if (Number(res.status) !== 200 || !res.data) {
+                            throw new Error('network request error');
+                        }
+                        if (!(res.data.code === 'CHECK_LOGIN_FAILED')) return [3, 5];
+                        return [4, this.refreshAccessToken()];
+                    case 4:
+                        _b.sent();
+                        return [2, this.request(action, params, options, --retryTimes)];
+                    case 5: return [2, res];
                 }
-                waitedTime += 10;
-                if (waitedTime > 5000) {
-                    reject(new Error('request timed out'));
+            });
+        });
+    };
+    Request.prototype.send = function (action, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var slowQueryWarning, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        slowQueryWarning = setTimeout(function () {
+                            console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
+                        }, 3000);
+                        return [4, this.request(action, data, { onUploadProgress: data.onUploadProgress })];
+                    case 1:
+                        response = _a.sent();
+                        clearTimeout(slowQueryWarning);
+                        if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+                            events_1.activateEvent('LoginStateExpire');
+                            this.cache.removeStore(this.refreshTokenKey);
+                        }
+                        return [2, response.data];
                 }
-            }, 10);
+            });
         });
     };
     return Request;

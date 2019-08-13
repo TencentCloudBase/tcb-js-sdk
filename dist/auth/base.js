@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var cache_1 = require("../lib/cache");
 var types_1 = require("../types");
-var listener_1 = require("./listener");
+var events_1 = require("../lib/events");
 var default_1 = (function () {
     function default_1(config) {
         this.httpRequest = new request_1.Request(config);
@@ -12,10 +12,13 @@ var default_1 = (function () {
         this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
     }
-    default_1.prototype.getJwt = function (appid, loginType) {
+    default_1.prototype.setRefreshToken = function (refreshToken) {
+        this.cache.setStore(this.refreshTokenKey, refreshToken);
+    };
+    default_1.prototype.getJwt = function (appid, loginType, code) {
         var action = 'auth.getJwt';
         var self = this;
-        return this.httpRequest.send(action, { appid: appid, loginType: loginType }).then(function (res) {
+        return this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code }).then(function (res) {
             if (res.access_token) {
                 self.cache.setStore(self.accessTokenKey, res.access_token);
                 self.cache.setStore(self.accessTokenExpireKey, res.access_token_expire + Date.now());
@@ -32,7 +35,7 @@ var default_1 = (function () {
                 self.cache.removeStore(self.refreshTokenKey);
                 self.cache.removeStore(self.accessTokenKey);
                 self.cache.removeStore(self.accessTokenExpireKey);
-                listener_1.activateEvent('LoginStateExpire');
+                events_1.activateEvent('LoginStateExpire');
                 return res;
             }
             return res;

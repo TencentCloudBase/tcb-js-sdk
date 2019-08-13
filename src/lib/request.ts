@@ -8,10 +8,8 @@ import {
   REFRESH_TOKEN
 } from '../types';
 import { Cache } from './cache';
-import * as util from './util';
-import { activateEvent } from '../auth/listener';
-
-const Max_Retry_Times = 5;
+// import * as util from './util';
+import { activateEvent } from './events';
 
 /**
  * @internal
@@ -22,6 +20,7 @@ class Request {
   accessTokenKey: string;
   accessTokenExpireKey: string;
   refreshTokenKey: string;
+  _shouldRefreshAccessTokenHook: Function
 
   /**
    * 初始化
@@ -38,194 +37,126 @@ class Request {
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
   }
 
-  /**
-   * 发送请求
-   *
-   * @param action   - 接口
-   * @param data  - 参数
-   */
-  send(action?: string, data?: Object, retryTimes?: number): Promise<any> {
-    let initData = Object.assign({}, data);
-    retryTimes = retryTimes || 0;
-    if (retryTimes > Max_Retry_Times) {
-      activateEvent('LoginStateExpire');
-      throw new Error('LoginStateExpire');
-    }
-    retryTimes++;
+  // 调用接口刷新access token
+  async refreshAccessToken() {
+    this.cache.removeStore(this.accessTokenKey);
+    this.cache.removeStore(this.accessTokenExpireKey);
 
-    let accessToken = this.cache.getStore(this.accessTokenKey);
-    let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
-    if (accessTokenExpire && accessTokenExpire < Date.now()) {
-      this.cache.removeStore(this.accessTokenKey);
-      this.cache.removeStore(this.accessTokenExpireKey);
-      accessToken = null;
-    } else if (
-      accessToken &&
-      accessTokenExpire > Date.now &&
-      action === 'auth.getJwt'
-    ) {
-      return Promise.resolve({ access_token: accessToken });
-    }
     let refreshToken = this.cache.getStore(this.refreshTokenKey);
 
-    let code: string | false;
-
     if (!refreshToken) {
-      code = util.getWeixinCode();
+      throw Error('[tcb-js-sdk] 未登录CloudBase');
     }
 
-    const slowQueryWarning = setTimeout(() => {
-      console.warn(
-        'Database operation is longer than 3s. Please check query performance and your network environment.'
-      );
-    }, 3000);
-
-    let promise = Promise.resolve(null);
-    if (!refreshToken && action !== 'auth.getJwt' && action !== 'auth.logout') {
-      //生成token接口未返回，等待
-      promise = this.waitToken();
-    }
-
-    try {
-      return promise.then(() => {
-        let onUploadProgress = data['onUploadProgress'] || undefined;
-
-        let params: any;
-        let contentType = 'application/x-www-form-urlencoded';
-
-        const tmpObj: any = Object.assign({}, data, {
-          action,
-          env: this.config.env,
-          code,
-          dataVersion: '2019-05-30'
-        });
-        if (accessToken) {
-          tmpObj.access_token = this.cache.getStore(this.accessTokenKey);
-        } else if (refreshToken) {
-          tmpObj.refresh_token = this.cache.getStore(this.refreshTokenKey);
-          tmpObj.action = 'auth.getJwt';
-        }
-
-        if (action === 'storage.uploadFile') {
-          params = new FormData();
-          for (let key in tmpObj) {
-            if (
-              tmpObj.hasOwnProperty(key) &&
-              tmpObj[key] !== undefined &&
-              key !== 'onUploadProgress'
-            ) {
-              params.append(key, tmpObj[key]);
-            }
-          }
-          contentType = 'multipart/form-data';
-        } else {
-          // Object.keys(tmpObj).forEach((key) => {
-          //   if ((typeof tmpObj[key]) === 'object') {
-          //     tmpObj[key] = JSON.stringify(tmpObj[key]); // 这里必须使用内置JSON对象转换
-          //   }
-          // });
-          // params = qs.stringify(tmpObj); // 这里必须使用qs库进行转换
-          contentType = 'application/json;charset=UTF-8';
-          params = tmpObj;
-        }
-
-        let opts = {
-          headers: {
-            'content-type': contentType
-          },
-          onUploadProgress
-        };
-
-        let self = this;
-        let urlPre = BASE_URL;
-        // let paramsPre = params
-        // let optsPre = opts
-        function postRequest() {
-          return axios
-            .post(urlPre, params, opts)
-            .then(response => {
-              if (Number(response.status) === 200) {
-                if (retryTimes > Max_Retry_Times) {
-                  activateEvent('LoginStateExpire');
-                  console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
-                  throw new Error('LoginStateExpire');
-                }
-                if (response.data) {
-                  if (
-                    response.data.code === 'SIGN_PARAM_INVALID' ||
-                    response.data.code === 'REFRESH_TOKEN_EXPIRED'
-                  ) {
-                    activateEvent('LoginStateExpire');
-                    self.cache.removeStore(self.refreshTokenKey);
-                  } else if (response.data.code === 'CHECK_LOGIN_FAILED') {
-                    // access_token过期，重新获取
-                    self.cache.removeStore(self.accessTokenKey);
-                    self.cache.removeStore(self.accessTokenExpireKey);
-                    return self.send(action, initData, ++retryTimes);
-                  } else {
-                    if (action === 'auth.getJwt') {
-                      return response.data;
-                    } else {
-                      if (
-                        response.data.access_token ||
-                        response.data.refresh_token
-                      ) {
-                        if (response.data.access_token) {
-                          self.cache.setStore(
-                            self.accessTokenKey,
-                            response.data.access_token
-                          );
-                          // 本地时间可能没有同步
-                          self.cache.setStore(
-                            self.accessTokenExpireKey,
-                            response.data.access_token_expire + Date.now()
-                          );
-                        }
-                        if (response.data.refresh_token) {
-                          self.cache.setStore(
-                            self.refreshTokenKey,
-                            response.data.refresh_token
-                          );
-                        }
-                        return self.send(action, initData, ++retryTimes);
-                      } else {
-                        return response.data;
-                      }
-                    }
-                  }
-                }
-                return response.data;
-              }
-              throw new Error('network request error');
-            })
-            .catch(err => {
-              return err;
-            });
-        }
-        return postRequest();
-      });
-    } finally {
-      clearTimeout(slowQueryWarning);
+    const response = await this.request('auth.getJwt', {
+      refresh_token: refreshToken
+    });
+    if (response.data.access_token) {
+      activateEvent('refreshAccessToken');
+      this.cache.setStore(this.accessTokenKey, response.data.access_token);
+      // 本地时间可能没有同步
+      this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+      return {
+        accessToken: response.data.access_token,
+        accessTokenExpire: response.data.access_token_expire
+      };
     }
   }
 
-  waitToken() {
-    let self = this;
+  // 获取access token
+  async getAccessToken() {
+    // 如果没有access token或者过期，那么刷新
+    let accessToken = this.cache.getStore(this.accessTokenKey);
+    let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
 
-    let waitedTime = 0;
-    return new Promise((resolve, reject) => {
-      const intervalId = setInterval(() => {
-        if (self.cache.getStore(this.refreshTokenKey)) {
-          clearInterval(intervalId);
-          resolve();
-        }
+    // 调用钩子函数
+    let shouldRefreshAccessToken = true;
+    if (this._shouldRefreshAccessTokenHook && !this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)) {
+      shouldRefreshAccessToken = false;
+    }
 
-        waitedTime += 10;
-        if (waitedTime > 5000) {
-          reject(new Error('request timed out'));
+    if ((!accessToken || !accessTokenExpire || accessTokenExpire < Date.now()) && shouldRefreshAccessToken) {
+      // 返回新的access tolen
+      return this.refreshAccessToken();
+    } else {
+      // 返回本地的access token
+      return {
+        accessToken,
+        accessTokenExpire
+      };
+    }
+  }
+
+  async request(action, params, options?, retryTimes = 5) {
+    if (retryTimes < 0) {
+      activateEvent('LoginStateExpire');
+      console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
+      throw new Error('LoginStateExpire');
+    }
+    let contentType = 'application/x-www-form-urlencoded';
+
+    const tmpObj = {
+      action,
+      env: this.config.env,
+      dataVersion: '2019-05-30',
+      ...params
+    };
+
+    // 下面几种 action 不需要 access token
+    if (action !== 'auth.getJwt' && action !== 'auth.logout' && action !== 'auth.signInWithTicket') {
+      tmpObj.access_token = (await this.getAccessToken()).accessToken;
+    }
+
+    // 拼body和content-type
+    let payload;
+    if (action === 'storage.uploadFile') {
+      payload = new FormData();
+      for (let key in payload) {
+        if (payload.hasOwnProperty(key) && payload[key] !== undefined) {
+          payload.append(key, tmpObj[key]);
         }
-      }, 10);
-    });
+      }
+      contentType = 'multipart/form-data';
+    } else {
+      contentType = 'application/json;charset=UTF-8';
+      payload = tmpObj;
+    }
+    let opts: any = {
+      headers: {
+        'content-type': contentType
+      },
+    };
+    if (options && options['onUploadProgress']) {
+      opts.onUploadProgress = options['onUploadProgress'];
+    }
+
+    // 发出请求
+    const res = await axios.post(BASE_URL, payload, opts);
+
+    if (Number(res.status) !== 200 || !res.data) {
+      throw new Error('network request error');
+    }
+    if (res.data.code === 'CHECK_LOGIN_FAILED') {
+      // access_token过期，重新获取
+      await this.refreshAccessToken();
+      return this.request(action, params, options, --retryTimes);
+    }
+    return res;
+  }
+
+  async send(action?: string, data?: any): Promise<any> {
+    const slowQueryWarning = setTimeout(() => {
+      console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
+    }, 3000);
+    const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
+    clearTimeout(slowQueryWarning);
+
+    if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+      activateEvent('LoginStateExpire');
+      this.cache.removeStore(this.refreshTokenKey);
+    }
+
+    return response.data;
   }
 }
 

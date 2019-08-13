@@ -6,7 +6,7 @@ import {
   REFRESH_TOKEN,
   Config
 } from '../types';
-import { activateEvent } from './listener';
+import { activateEvent } from '../lib/events';
 
 export default class {
   httpRequest: Request;
@@ -24,11 +24,15 @@ export default class {
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
   }
 
-  public getJwt(appid?: string, loginType?: string): any {
+  setRefreshToken(refreshToken) {
+    this.cache.setStore(this.refreshTokenKey, refreshToken);
+  }
+
+  public getJwt(appid?: string, loginType?: string, code?: string): any {
     const action = 'auth.getJwt';
 
     let self = this;
-    return this.httpRequest.send(action, { appid, loginType }).then(res => {
+    return this.httpRequest.send(action, { appid, loginType, code }).then(res => {
       if (res.access_token) {
         self.cache.setStore(self.accessTokenKey, res.access_token);
         // 本地时间可能没有同步

@@ -4,6 +4,8 @@
 
 使用 js sdk 时，您可以指定身份认证状态如何持久保留，以避免需要用户频繁登录授权。相关选项包括：已登录的用户是在显式退出登录之前的 30 天内保留身份验证状态(local)、在窗口关闭时清除身份验证状态(session)，还是在页面重新加载时清除身份验证状态(none)。
 
+--------------
+
 ### 获取登录对象
 
 请求参数
@@ -35,6 +37,8 @@ let auth = app.auth({
 auth.onLoginStateExpire(callback);
 ```
 
+-------------------
+
 #### 微信公众平台及开放平台登录认证
 
 请求参数
@@ -56,4 +60,50 @@ app
     scope: "snsapi_base"
   })
   .signIn(function(err, res) {});
+```
+
+---------------------
+
+#### 自定义登录
+
+CloudBase 允许开发者使用特定的登录凭据 Ticket 对用户进行身份认证。开发者可以使用服务端 SDK 来创建 Ticket，并且将 JWT 传入到 Web 应用内，然后调用 `signInWithTicket()` 获得 CloudBase 的登录态。
+
+##### 1. 获取私钥文件
+
+
+##### 2. 使用私钥文件
+
+获取私钥文件之后，在服务端 SDK 初始化时，加入私钥文件的路径：
+
+```js
+// 开发者的服务端代码
+// 初始化示例
+const tcb = require('tcb-admin-node');
+
+tcb.init({
+  // ...
+  credentials: '/path/to/your/credentials'
+  // ...
+});
+```
+
+##### 3. 使用服务端 SDK 创建登录凭据 Ticket
+
+服务端 SDK 内置了生成 Ticket 的接口，开发者需要提供一个自定义的 `uid` 作为用户的唯一身份标识。Ticket 有效期为 5 分钟，过期则失效。
+
+```js
+let uid = '123456';
+
+const ticket = tcb.auth().createTicket(uid);
+// 然后把 ticket 发送给 Web 端
+```
+
+##### 4. Web 端上使用 Ticket 登录
+
+创建 Ticket 之后，开发者应将 Ticket 发送至 Web 端，然后使用 Web SDK 提供的 `signInWithTicket()` 登录 CloudBase：
+
+```js
+auth.signInWithTicket(ticket).then(() => {
+  // 登录成功
+})
 ```

@@ -37,8 +37,6 @@ export default class extends Base {
 
     let accessToken = this.cache.getStore(this.accessTokenKey);
     let accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey);
-    let refreshToken = this.cache.getStore(this.refreshTokenKey);
-    let code = util.getWeixinCode();
 
     if (accessToken) {
       if (accessTokenExpipre && accessTokenExpipre > Date.now()) {
@@ -49,29 +47,27 @@ export default class extends Base {
         this.cache.removeStore(this.accessTokenExpireKey);
       }
     }
-
-    if (refreshToken) {
-      let promise: Promise<any> = this.getJwt(this.appid);
-      promise.then(res => {
-        callback(null, res);
-      });
-      return callback.promise;
-    } else if (code) {
-      const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-      let promise: Promise<any> = this.getJwt(this.appid, loginType);
-
-      promise.then(res => {
-        callback(null, res);
-      });
-
-      return callback.promise;
-    }
-
     if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
       throw new Error('错误的scope类型');
     }
 
-    this.redirect();
+    const code = util.getWeixinCode();
+
+    // 没有code，拉起OAuth
+    if (!code) {
+      return this.redirect();
+    }
+
+    // 有code，用code换refresh token
+    callback = callback || util.createPromiseCallback();
+    const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
+    let promise: Promise<any> = this.getJwt(this.appid, loginType, code);
+
+    promise.then(res => {
+      callback(null, res);
+    });
+
+    return callback.promise;
   }
 
   redirect() {

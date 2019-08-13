@@ -1,8 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
-import { addEventListener, activateEvent } from './listener';
-import Base from './base';
-// import { activateEvent } from './listener';
+import AuthProvider from './base';
+import { addEventListener, activateEvent } from '../lib/events';
 
 import { Cache } from '../lib/cache';
 import {
@@ -30,14 +29,17 @@ export interface UserInfo {
   unionid?: string;
 }
 
-export default class Auth extends Base {
-  httpRequest: Request
-  config: Config
+export default class Auth extends AuthProvider {
+  httpRequest: Request;
+  config: Config;
+  customAuthProvider: AuthProvider
+  _shouldRefreshAccessToken: Function
 
   constructor(config: Config) {
     super(config);
     // this.httpRequest = new Request(config);
     this.config = config;
+    this.customAuthProvider = new AuthProvider(this.config);
   }
 
   weixinAuthProvider({ appid, scope, loginMode, state }) {
@@ -101,6 +103,20 @@ export default class Auth extends Base {
 
   onLoginStateExpire(callback: Function) {
     addEventListener('LoginStateExpire', callback);
+  }
+
+  signInWithTicket(ticket: string) {
+    return this.httpRequest.send('auth.signInWithTicket', {
+      ticket
+    }).then(res => {
+      if (res.refresh_token) {
+        this.customAuthProvider.setRefreshToken(res.refresh_token);
+      }
+    });
+  }
+
+  shouldRefreshAccessToken(hook) {
+    this.httpRequest._shouldRefreshAccessTokenHook = hook.bind(this);
   }
 
   getUserInfo(): any {

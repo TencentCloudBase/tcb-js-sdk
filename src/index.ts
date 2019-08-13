@@ -2,6 +2,7 @@ import * as Storage from './storage';
 import Auth from './auth';
 import * as Functions from './functions';
 import { Request } from './lib/request';
+import { addEventListener } from './lib/events';
 // import { Db } from '@cloudbase/database';
 const Db = require('@cloudbase/database').Db;
 
@@ -45,6 +46,8 @@ TCB.prototype.auth = function({ persistence }: { persistence?: string } = {}) {
   this.authObj = new Auth(this.config);
   return this.authObj;
 };
+
+TCB.prototype.on = addEventListener.bind(TCB);
 
 function each(obj: object, fn: Function) {
   for (let i in obj) {

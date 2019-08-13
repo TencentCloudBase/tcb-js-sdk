@@ -1,6 +1,6 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
-import Base from './base';
+import AuthProvider from './base';
 import { Config } from '../types';
 export interface UserInfo {
     openid: string;
@@ -13,9 +13,11 @@ export interface UserInfo {
     privilege?: [string];
     unionid?: string;
 }
-export default class Auth extends Base {
+export default class Auth extends AuthProvider {
     httpRequest: Request;
     config: Config;
+    customAuthProvider: AuthProvider;
+    _shouldRefreshAccessToken: Function;
     constructor(config: Config);
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
@@ -26,5 +28,7 @@ export default class Auth extends Base {
     signOut(): Promise<any>;
     getAccessToken(): Promise<{}>;
     onLoginStateExpire(callback: Function): void;
+    signInWithTicket(ticket: string): Promise<void>;
+    shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
 }

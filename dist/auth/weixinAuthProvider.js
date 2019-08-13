@@ -41,8 +41,6 @@ var default_1 = (function (_super) {
         callback = callback || util.createPromiseCallback();
         var accessToken = this.cache.getStore(this.accessTokenKey);
         var accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey);
-        var refreshToken = this.cache.getStore(this.refreshTokenKey);
-        var code = util.getWeixinCode();
         if (accessToken) {
             if (accessTokenExpipre && accessTokenExpipre > Date.now()) {
                 callback(0);
@@ -53,25 +51,20 @@ var default_1 = (function (_super) {
                 this.cache.removeStore(this.accessTokenExpireKey);
             }
         }
-        if (refreshToken) {
-            var promise = this.getJwt(this.appid);
-            promise.then(function (res) {
-                callback(null, res);
-            });
-            return callback.promise;
-        }
-        else if (code) {
-            var loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-            var promise = this.getJwt(this.appid, loginType);
-            promise.then(function (res) {
-                callback(null, res);
-            });
-            return callback.promise;
-        }
         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
             throw new Error('错误的scope类型');
         }
-        this.redirect();
+        var code = util.getWeixinCode();
+        if (!code) {
+            return this.redirect();
+        }
+        callback = callback || util.createPromiseCallback();
+        var loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
+        var promise = this.getJwt(this.appid, loginType, code);
+        promise.then(function (res) {
+            callback(null, res);
+        });
+        return callback.promise;
     };
     default_1.prototype.redirect = function () {
         var currUrl = util.removeParam('code', location.href);

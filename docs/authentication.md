@@ -81,10 +81,19 @@ CloudBase 允许开发者使用特定的登录凭据 Ticket 对用户进行身�
 // 初始化示例
 const tcb = require('tcb-admin-node');
 
+// 1. 直接使用下载的私钥文件
 tcb.init({
   // ...
-  credentials: '/path/to/your/credentials'
+  credentials: require('/path/to/your/credentials.json')
+});
+
+// 2. 也可以直接传入私钥的内容
+tcb.init({
   // ...
+  credentials: {
+    private_key_id: 'xxxxxxxxxxxxx',
+    private_key: 'xxxxxxxxxxx'
+  }
 });
 ```
 
@@ -95,7 +104,9 @@ tcb.init({
 ```js
 let uid = '123456';
 
-const ticket = tcb.auth().createTicket(uid);
+const ticket = tcb.auth().createTicket(uid, {
+  refresh: 10 * 60 * 1000 // 每十分钟刷新一次登录态， 默认为一小时
+});
 // 然后把 ticket 发送给 Web 端
 ```
 

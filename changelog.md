@@ -13,6 +13,13 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.2.0] 2019-08-14
+
+### Added
+
+- 新增 `Auth.signInWithTicket()`，支持自定义登录
+- 新增 `"refreshAccessToken"` 事件，当 Access Token 刷新成功时会触发这个事件
+- 新增 `Auth.shouldRefreshAccessToken()`，作为决定刷新 Access Token 的钩子函数
 
 ## [1.0.1] 2019-07-01
 

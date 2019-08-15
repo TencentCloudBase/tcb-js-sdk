@@ -141,6 +141,9 @@ class Request {
       await this.refreshAccessToken();
       return this.request(action, params, options, --retryTimes);
     }
+    if (res.data.code) {
+      throw new Error(`[${res.data.code}] ${res.data.message}`);
+    }
     return res;
   }
 

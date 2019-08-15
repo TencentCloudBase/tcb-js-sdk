@@ -165,7 +165,11 @@ var Request = (function () {
                     case 4:
                         _b.sent();
                         return [2, this.request(action, params, options, --retryTimes)];
-                    case 5: return [2, res];
+                    case 5:
+                        if (res.data.code) {
+                            throw new Error("[" + res.data.code + "] " + res.data.message);
+                        }
+                        return [2, res];
                 }
             });
         });

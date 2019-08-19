@@ -26,7 +26,10 @@ export default class Auth extends AuthProvider {
         state: any;
     }): WeixinAuthProvider;
     signOut(): Promise<any>;
-    getAccessToken(): Promise<{}>;
+    getAccessToken(): Promise<{
+        accessToken: string;
+        env: string;
+    }>;
     onLoginStateExpire(callback: Function): void;
     signInWithTicket(ticket: string): Promise<void>;
     shouldRefreshAccessToken(hook: any): void;

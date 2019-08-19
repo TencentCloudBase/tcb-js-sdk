@@ -11,6 +11,17 @@ import { Cache } from './cache';
 // import * as util from './util';
 import { activateEvent } from './events';
 
+interface GetAccessTokenResult {
+  accessToken: string;
+  accessTokenExpire: number;
+}
+
+const actionsWithoutAccessToken = [
+  'auth.getJwt',
+  'auth.logout',
+  'auth.signInWithTicket'
+];
+
 /**
  * @internal
  */
@@ -37,20 +48,25 @@ class Request {
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
   }
 
-  // 调用接口刷新access token
-  async refreshAccessToken() {
+  // 调用接口刷新access token，并且返回
+  async refreshAccessToken(): Promise<GetAccessTokenResult> {
     this.cache.removeStore(this.accessTokenKey);
     this.cache.removeStore(this.accessTokenExpireKey);
 
     let refreshToken = this.cache.getStore(this.refreshTokenKey);
 
     if (!refreshToken) {
-      throw Error('[tcb-js-sdk] 未登录CloudBase');
+      throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
 
     const response = await this.request('auth.getJwt', {
       refresh_token: refreshToken
     });
+    if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+      activateEvent('LoginStateExpire');
+      this.cache.removeStore(this.refreshTokenKey);
+      throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
+    }
     if (response.data.access_token) {
       activateEvent('refreshAccessToken');
       this.cache.setStore(this.accessTokenKey, response.data.access_token);
@@ -64,7 +80,7 @@ class Request {
   }
 
   // 获取access token
-  async getAccessToken() {
+  async getAccessToken(): Promise<GetAccessTokenResult> {
     // 如果没有access token或者过期，那么刷新
     let accessToken = this.cache.getStore(this.accessTokenKey);
     let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
@@ -87,23 +103,18 @@ class Request {
     }
   }
 
-  async request(action, params, options?, retryTimes = 5) {
-    if (retryTimes < 0) {
-      activateEvent('LoginStateExpire');
-      console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
-      throw new Error('LoginStateExpire');
-    }
+  async request(action, params, options?) {
     let contentType = 'application/x-www-form-urlencoded';
 
     const tmpObj = {
       action,
       env: this.config.env,
-      dataVersion: '2019-05-30',
+      dataVersion: '2019-08-16',
       ...params
     };
 
     // 下面几种 action 不需要 access token
-    if (action !== 'auth.getJwt' && action !== 'auth.logout' && action !== 'auth.signInWithTicket') {
+    if (actionsWithoutAccessToken.indexOf(action) === -1) {
       tmpObj.access_token = (await this.getAccessToken()).accessToken;
     }
 
@@ -136,14 +147,7 @@ class Request {
     if (Number(res.status) !== 200 || !res.data) {
       throw new Error('network request error');
     }
-    if (res.data.code === 'CHECK_LOGIN_FAILED') {
-      // access_token过期，重新获取
-      await this.refreshAccessToken();
-      return this.request(action, params, options, --retryTimes);
-    }
-    if (res.data.code) {
-      throw new Error(`[${res.data.code}] ${res.data.message}`);
-    }
+
     return res;
   }
 
@@ -154,9 +158,14 @@ class Request {
     const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
     clearTimeout(slowQueryWarning);
 
-    if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-      activateEvent('LoginStateExpire');
-      this.cache.removeStore(this.refreshTokenKey);
+    if (response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1) {
+      // access_token过期，重新获取
+      await this.refreshAccessToken();
+      return this.request(action, data, { onUploadProgress: data.onUploadProgress });
+    }
+
+    if (response.data.code) {
+      throw new Error(`[${response.data.code}] ${response.data.message}`);
     }
 
     return response.data;

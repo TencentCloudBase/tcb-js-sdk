@@ -36,10 +36,10 @@ export default class extends Base {
     callback = callback || util.createPromiseCallback();
 
     let accessToken = this.cache.getStore(this.accessTokenKey);
-    let accessTokenExpipre = this.cache.getStore(this.accessTokenExpireKey);
+    let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
 
     if (accessToken) {
-      if (accessTokenExpipre && accessTokenExpipre > Date.now()) {
+      if (accessTokenExpire && accessTokenExpire > Date.now()) {
         callback(0);
         return callback.promise;
       } else {
@@ -59,9 +59,8 @@ export default class extends Base {
     }
 
     // 有code，用code换refresh token
-    callback = callback || util.createPromiseCallback();
     const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-    let promise: Promise<any> = this.getJwt(this.appid, loginType, code);
+    let promise: Promise<any> = this.getRefreshTokenByWXCode(this.appid, loginType, code);
 
     promise.then(res => {
       callback(null, res);

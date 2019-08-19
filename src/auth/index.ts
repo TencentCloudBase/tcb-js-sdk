@@ -1,7 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
-import { addEventListener, activateEvent } from '../lib/events';
+import { addEventListener } from '../lib/events';
 
 import { Cache } from '../lib/cache';
 import {
@@ -58,47 +58,11 @@ export default class Auth extends AuthProvider {
     });
   }
 
-  getAccessToken() {
-    // 调getJWT获取access_token
-    let cache = new Cache(this.config.persistence);
-
-    return new Promise((resolve, reject) => {
-      if (!cache.getStore(this.refreshTokenKey)) {
-        // console.log("LoginStateExpire")
-        activateEvent('LoginStateExpire');
-        reject(new Error('LoginStateExpire'));
-      } else {
-        // console.log("this********", this)
-        this.getJwt()
-          .then(res => {
-            console.log('get jwt res:', res);
-            if (res.code === 'REFRESH_TOKEN_EXPIRED' || res.code === 'SIGN_PARAM_INVALID') {
-              // 用户需重新登录
-              // console.log("REFRESH_TOKEN_Expired")
-              // reject({ err: { message: "REFRESH_TOKEN_EXPIRED" } })
-              activateEvent('LoginStateExpire');
-              cache.removeStore(this.refreshTokenKey);
-              reject(new Error(res.code));
-            }
-
-            if (!res.code) {
-              // 从cache里取accesstoken
-              let accessToken = cache.getStore(this.accessTokenKey);
-              console.log('get access_token*********:', accessToken);
-              //
-              resolve({
-                accessToken,
-                env: this.config.env
-              });
-              // callback(accessToken, this.config.env)
-            }
-          })
-          .catch(err => {
-            // console.log("err:", err)
-            reject(err);
-          });
-      }
-    });
+  async getAccessToken() {
+    return {
+      accessToken: (await this.httpRequest.getAccessToken()).accessToken,
+      env: this.config.env
+    };
   }
 
   onLoginStateExpire(callback: Function) {

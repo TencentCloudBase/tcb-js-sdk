@@ -10,9 +10,9 @@
 
 请求参数
 
-字段 | 类型 | 必填 | 说明
---- | --- | --- | -------
-persistence | string | 否 | 身份认证状态如何持久保留，有三个选项 local、session 和 none，默认为 session
+| 字段        | 类型   | 必填 | 说明                                                                        |
+| ----------- | ------ | ---- | --------------------------------------------------------------------------- |
+| persistence | string | 否   | 身份认证状态如何持久保留，有三个选项 local、session 和 none，默认为 session |
 
 ```js
 let app = tcb.init({
@@ -44,10 +44,10 @@ auth.onLoginStateExpire(callback);
 
 请求参数
 
-字段  | 类型   | 必填 | 说明
----- | ----- | ---- | ----
-appid | string | 是   | 微信公众平台（或开放平台）应用的 appid
-scope | string | 是   | 网页授权类型，可选值为 snsapi_base(公众平台，只获取用户的 openid)、snsapi_userinfo(公众平台，获取用户的基本信息)和 snsapi_login(开放平台网页授权)
+| 字段  | 类型   | 必填 | 说明                                                                                                                                              |
+| ----- | ------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| appid | string | 是   | 微信公众平台（或开放平台）应用的 appid                                                                                                            |
+| scope | string | 是   | 网页授权类型，可选值为 snsapi_base(公众平台，只获取用户的 openid)、snsapi_userinfo(公众平台，获取用户的基本信息)和 snsapi_login(开放平台网页授权) |
 
 ```javascript
 let app = tcb.init({
@@ -118,4 +118,56 @@ const ticket = tcb.auth().createTicket(uid, {
 auth.signInWithTicket(ticket).then(() => {
   // 登录成功
 })
+```
+
+-----
+
+#### 手动创建自定义登录凭据 Ticket
+
+如果服务端没有使用 Cloudbase 提供的 SDK，或者 SDK 无法满足需求，依然可以使用[相应语言的 JWT 库](https://jwt.io/)和自定义登录的私钥文件自行创建登录凭据。
+
+首先，使用 JWT 库创建一个包含以下信息的 JWT：
+
+| 字段    | 说明             | 取值                                       |
+| ------- | ---------------- | ------------------------------------------ |
+| alg     | 算法             | "RS256"                                    |
+| env     | Cloudbase 环境名 | 对应的环境名                               |
+| iat     | Ticket颁发时间   | 当前时间（Unix时间戳对应的毫秒数）         |
+| exp     | Ticket过期时间   | Ticket过期的时间（Unix时间戳对应的毫秒数） |
+| uid     | 自定义uid        | 自定义的用户全局唯一id                     |
+| refresh | 登录态刷新时间   | 毫秒数，上限为 1 小时（3600000毫秒）       |
+| expire  | 登录态过期时间   | Unix时间戳对应的毫秒数                     |
+
+以 JavaScript 为例：
+
+```js
+const jwt = require('jsonwebtoken')
+
+// 读取私钥文件
+const credentials = require('path/to/tcb_custom_login.json')
+
+// 指定环境和uid
+const env = 'your-env-id'
+const uid = '123456'
+
+// 创建 JWT
+const now = new Date().getTime()
+const token = jwt.sign(
+  {
+    alg: 'RS256',
+    env: env,
+    iat: now,
+    exp: now + 10 * 60 * 1000, // ticket十分钟有效
+    uid: uid,
+    refresh: 3600 * 1000, // 每一小时刷新一次登录态
+    expire: now + 7 * 24 * 60 * 60 * 1000 // 登录态维持一周有效
+  },
+  credentials.private_key,
+  { algorithm: 'RS256' }
+)
+
+// 然后拼接出 Ticket
+const ticket = credentials.private_key_id + '/@@/' + token
+
+console.log(ticket)
 ```

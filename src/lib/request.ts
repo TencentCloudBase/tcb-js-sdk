@@ -63,7 +63,7 @@ class Request {
       refresh_token: refreshToken
     });
     if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-      activateEvent('LoginStateExpire');
+      activateEvent('loginStateExpire');
       this.cache.removeStore(this.refreshTokenKey);
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
@@ -161,7 +161,11 @@ class Request {
     if (response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1) {
       // access_token过期，重新获取
       await this.refreshAccessToken();
-      return this.request(action, data, { onUploadProgress: data.onUploadProgress });
+      const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
+      if (response.data.code) {
+        throw new Error(`[${response.data.code}] ${response.data.message}`);
+      }
+      return response.data;
     }
 
     if (response.data.code) {

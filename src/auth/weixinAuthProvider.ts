@@ -1,4 +1,5 @@
 import { Config } from '../types';
+import { LoginResult } from './interface';
 import * as util from '../lib/util';
 import Base from './base';
 
@@ -32,17 +33,21 @@ export default class extends Base {
     this.loginMode = loginMode || 'redirect';
   }
 
-  signIn(callback?: any) {
-    callback = callback || util.createPromiseCallback();
-
+  async signIn(): Promise<LoginResult> {
     let accessToken = this.cache.getStore(this.accessTokenKey);
     let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
 
     if (accessToken) {
       if (accessTokenExpire && accessTokenExpire > Date.now()) {
-        callback(0);
-        return callback.promise;
+        // access存在且没有过期，那么直接返回
+        return {
+          credential: {
+            accessToken,
+            refreshToken: this.cache.getStore(this.refreshTokenKey)
+          }
+        };
       } else {
+        // access token存在但是过期了，那么删除掉重新拉
         this.cache.removeStore(this.accessTokenKey);
         this.cache.removeStore(this.accessTokenExpireKey);
       }
@@ -60,16 +65,19 @@ export default class extends Base {
 
     // 有code，用code换refresh token
     const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-    let promise: Promise<any> = this.getRefreshTokenByWXCode(this.appid, loginType, code);
+    const { refreshToken } = await this.getRefreshTokenByWXCode(this.appid, loginType, code);
 
-    promise.then(res => {
-      callback(null, res);
-    });
+    // 本地存下
+    this.cache.setStore(this.refreshTokenKey, refreshToken);
 
-    return callback.promise;
+    return {
+      credential: {
+        refreshToken
+      }
+    };
   }
 
-  redirect() {
+  redirect(): any {
     let currUrl = util.removeParam('code', location.href);
     currUrl = util.removeParam('state', currUrl);
     currUrl = encodeURIComponent(currUrl);

@@ -9,5 +9,7 @@ export default class {
     refreshTokenKey: string;
     constructor(config: Config);
     setRefreshToken(refreshToken: any): void;
-    getRefreshTokenByWXCode(appid: string, loginType: string, code: string): any;
+    getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
+        refreshToken: string;
+    }>;
 }

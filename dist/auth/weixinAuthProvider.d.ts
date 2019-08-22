@@ -1,4 +1,5 @@
 import { Config } from '../types';
+import { LoginResult } from './interface';
 import Base from './base';
 export default class extends Base {
     config: Config;
@@ -7,6 +8,6 @@ export default class extends Base {
     private loginMode;
     private appid;
     constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string);
-    signIn(callback?: any): any;
-    redirect(): void;
+    signIn(): Promise<LoginResult>;
+    redirect(): any;
 }

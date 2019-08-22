@@ -2,7 +2,7 @@ import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
 import { addEventListener } from '../lib/events';
-
+import { LoginResult } from './interface';
 import { Cache } from '../lib/cache';
 import {
   ACCESS_TOKEN,
@@ -46,16 +46,15 @@ export default class Auth extends AuthProvider {
     return new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
   }
 
-  signOut() {
+  async signOut() {
     let cache = new Cache(this.config.persistence);
     cache.removeStore(`${REFRESH_TOKEN}_${this.config.env}`);
     cache.removeStore(`${ACCESS_TOKEN}_${this.config.env}`);
     cache.removeStore(`${ACCESS_TOKEN_Expire}_${this.config.env}`);
 
     const action = 'auth.logout';
-    return this.httpRequest.send(action, {}).then(res => {
-      return res;
-    });
+    await this.httpRequest.send(action, {});
+    return;
   }
 
   async getAccessToken() {
@@ -66,17 +65,26 @@ export default class Auth extends AuthProvider {
   }
 
   onLoginStateExpire(callback: Function) {
-    addEventListener('LoginStateExpire', callback);
+    addEventListener('loginStateExpire', callback);
   }
 
-  signInWithTicket(ticket: string) {
-    return this.httpRequest.send('auth.signInWithTicket', {
+  async signInWithTicket(ticket: string): Promise<LoginResult> {
+    if (typeof ticket !== 'string') {
+      throw new Error('ticket must be a string');
+    }
+    const res = await this.httpRequest.send('auth.signInWithTicket', {
       ticket
-    }).then(res => {
-      if (res.refresh_token) {
-        this.customAuthProvider.setRefreshToken(res.refresh_token);
-      }
     });
+    if (res.refresh_token) {
+      this.customAuthProvider.setRefreshToken(res.refresh_token);
+      return {
+        credential: {
+          refreshToken: res.refresh_token
+        }
+      };
+    } else {
+      throw new Error('[tcb-js-sdk] 自定义登录失败');
+    }
   }
 
   shouldRefreshAccessToken(hook) {

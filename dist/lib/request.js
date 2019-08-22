@@ -50,6 +50,11 @@ var axios_1 = require("axios");
 var types_1 = require("../types");
 var cache_1 = require("./cache");
 var events_1 = require("./events");
+var actionsWithoutAccessToken = [
+    'auth.getJwt',
+    'auth.logout',
+    'auth.signInWithTicket'
+];
 var Request = (function () {
     function Request(config) {
         this.config = config;
@@ -68,13 +73,18 @@ var Request = (function () {
                         this.cache.removeStore(this.accessTokenExpireKey);
                         refreshToken = this.cache.getStore(this.refreshTokenKey);
                         if (!refreshToken) {
-                            throw Error('[tcb-js-sdk] 未登录CloudBase');
+                            throw new Error('[tcb-js-sdk] 未登录CloudBase');
                         }
                         return [4, this.request('auth.getJwt', {
                                 refresh_token: refreshToken
                             })];
                     case 1:
                         response = _a.sent();
+                        if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
+                            events_1.activateEvent('loginStateExpire');
+                            this.cache.removeStore(this.refreshTokenKey);
+                            throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
+                        }
                         if (response.data.access_token) {
                             events_1.activateEvent('refreshAccessToken');
                             this.cache.setStore(this.accessTokenKey, response.data.access_token);
@@ -112,21 +122,15 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.request = function (action, params, options, retryTimes) {
-        if (retryTimes === void 0) { retryTimes = 5; }
+    Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
             var contentType, tmpObj, _a, payload, key, opts, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        if (retryTimes < 0) {
-                            events_1.activateEvent('LoginStateExpire');
-                            console.error('[tcb-js-sdk] 登录态请求循环尝试次数超限');
-                            throw new Error('LoginStateExpire');
-                        }
                         contentType = 'application/x-www-form-urlencoded';
-                        tmpObj = __assign({ action: action, env: this.config.env, dataVersion: '2019-05-30' }, params);
-                        if (!(action !== 'auth.getJwt' && action !== 'auth.logout' && action !== 'auth.signInWithTicket')) return [3, 2];
+                        tmpObj = __assign({ action: action, env: this.config.env, dataVersion: '2019-08-16' }, params);
+                        if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
                         _a = tmpObj;
                         return [4, this.getAccessToken()];
                     case 1:
@@ -160,15 +164,6 @@ var Request = (function () {
                         if (Number(res.status) !== 200 || !res.data) {
                             throw new Error('network request error');
                         }
-                        if (!(res.data.code === 'CHECK_LOGIN_FAILED')) return [3, 5];
-                        return [4, this.refreshAccessToken()];
-                    case 4:
-                        _b.sent();
-                        return [2, this.request(action, params, options, --retryTimes)];
-                    case 5:
-                        if (res.data.code) {
-                            throw new Error("[" + res.data.code + "] " + res.data.message);
-                        }
                         return [2, res];
                 }
             });
@@ -176,7 +171,7 @@ var Request = (function () {
     };
     Request.prototype.send = function (action, data) {
         return __awaiter(this, void 0, void 0, function () {
-            var slowQueryWarning, response;
+            var slowQueryWarning, response, response_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -187,9 +182,20 @@ var Request = (function () {
                     case 1:
                         response = _a.sent();
                         clearTimeout(slowQueryWarning);
-                        if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-                            events_1.activateEvent('LoginStateExpire');
-                            this.cache.removeStore(this.refreshTokenKey);
+                        if (!(response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 4];
+                        return [4, this.refreshAccessToken()];
+                    case 2:
+                        _a.sent();
+                        return [4, this.request(action, data, { onUploadProgress: data.onUploadProgress })];
+                    case 3:
+                        response_1 = _a.sent();
+                        if (response_1.data.code) {
+                            throw new Error("[" + response_1.data.code + "] " + response_1.data.message);
+                        }
+                        return [2, response_1.data];
+                    case 4:
+                        if (response.data.code) {
+                            throw new Error("[" + response.data.code + "] " + response.data.message);
                         }
                         return [2, response.data];
                 }

@@ -27,18 +27,19 @@ export default class {
     this.cache.setStore(this.refreshTokenKey, refreshToken);
   }
 
-  public getRefreshTokenByWXCode(appid: string, loginType: string, code: string): any {
+  public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string }> {
     const action = 'auth.getJwt';
-
-    let self = this;
     return this.httpRequest.send(action, { appid, loginType, code }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);
       }
       if (res.refresh_token) {
-        self.cache.setStore(self.refreshTokenKey, res.refresh_token);
+        return {
+          refreshToken: res.refresh_token
+        };
+      } else {
+        throw new Error(`[tcb-js-sdk] getJwt未返回refreshToken`);
       }
-      return res;
     });
   }
 }

@@ -1,6 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
+import { LoginResult } from './interface';
 import { Config } from '../types';
 export interface UserInfo {
     openid: string;
@@ -25,13 +26,13 @@ export default class Auth extends AuthProvider {
         loginMode: any;
         state: any;
     }): WeixinAuthProvider;
-    signOut(): Promise<any>;
+    signOut(): Promise<void>;
     getAccessToken(): Promise<{
         accessToken: string;
         env: string;
     }>;
     onLoginStateExpire(callback: Function): void;
-    signInWithTicket(ticket: string): Promise<void>;
+    signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
 }

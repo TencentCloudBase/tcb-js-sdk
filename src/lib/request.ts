@@ -142,7 +142,9 @@ class Request {
     }
 
     // 发出请求
-    const res = await axios.post(BASE_URL, payload, opts);
+    // 新的 url 需要携带 env 参数进行 CORS 校验
+    const newUrl = `${BASE_URL}?env=${this.config.env}`;
+    const res = await axios.post(newUrl, payload, opts);
 
     if (Number(res.status) !== 200 || !res.data) {
       throw new Error('network request error');

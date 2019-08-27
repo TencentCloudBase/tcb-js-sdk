@@ -101,30 +101,40 @@ var Request = (function () {
     };
     Request.prototype.getAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, shouldRefreshAccessToken;
-            return __generator(this, function (_a) {
-                accessToken = this.cache.getStore(this.accessTokenKey);
-                accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
-                shouldRefreshAccessToken = true;
-                if (this._shouldRefreshAccessTokenHook && !this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)) {
-                    shouldRefreshAccessToken = false;
+            var accessToken, accessTokenExpire, shouldRefreshAccessToken, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        accessToken = this.cache.getStore(this.accessTokenKey);
+                        accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
+                        shouldRefreshAccessToken = true;
+                        _a = this._shouldRefreshAccessTokenHook;
+                        if (!_a) return [3, 2];
+                        return [4, this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)];
+                    case 1:
+                        _a = !(_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        if (_a) {
+                            shouldRefreshAccessToken = false;
+                        }
+                        if ((!accessToken || !accessTokenExpire || accessTokenExpire < Date.now()) && shouldRefreshAccessToken) {
+                            return [2, this.refreshAccessToken()];
+                        }
+                        else {
+                            return [2, {
+                                    accessToken: accessToken,
+                                    accessTokenExpire: accessTokenExpire
+                                }];
+                        }
+                        return [2];
                 }
-                if ((!accessToken || !accessTokenExpire || accessTokenExpire < Date.now()) && shouldRefreshAccessToken) {
-                    return [2, this.refreshAccessToken()];
-                }
-                else {
-                    return [2, {
-                            accessToken: accessToken,
-                            accessTokenExpire: accessTokenExpire
-                        }];
-                }
-                return [2];
             });
         });
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, res;
+            var contentType, tmpObj, _a, payload, key, opts, newUrl, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -158,7 +168,8 @@ var Request = (function () {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
-                        return [4, axios_1.default.post(types_1.BASE_URL, payload, opts)];
+                        newUrl = types_1.BASE_URL + "?env=" + this.config.env;
+                        return [4, axios_1.default.post(newUrl, payload, opts)];
                     case 3:
                         res = _b.sent();
                         if (Number(res.status) !== 200 || !res.data) {

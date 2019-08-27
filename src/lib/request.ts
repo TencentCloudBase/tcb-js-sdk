@@ -87,7 +87,7 @@ class Request {
 
     // 调用钩子函数
     let shouldRefreshAccessToken = true;
-    if (this._shouldRefreshAccessTokenHook && !this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)) {
+    if (this._shouldRefreshAccessTokenHook && !(await this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire))) {
       shouldRefreshAccessToken = false;
     }
 

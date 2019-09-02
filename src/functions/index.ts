@@ -24,7 +24,6 @@ export const callFunction = function ({ name, data }, callback?: any): Promise<a
   let httpRequest = new Request(this.config);
 
   httpRequest.send(action, params).then(res => {
-    console.log(res);
     if (res.code) {
       callback(null, res);
     } else {

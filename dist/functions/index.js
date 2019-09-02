@@ -21,7 +21,6 @@ exports.callFunction = function (_a, callback) {
     };
     var httpRequest = new request_1.Request(this.config);
     httpRequest.send(action, params).then(function (res) {
-        console.log(res);
         if (res.code) {
             callback(null, res);
         }

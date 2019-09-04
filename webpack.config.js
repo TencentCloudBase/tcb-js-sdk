@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const package = require('./package.json');
 const Visualizer = require('webpack-visualizer-plugin');
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const modName = 'tcb';
 
@@ -35,6 +36,7 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new Visualizer({
       filename: './statistics.html'
-    })
+    }),
+    // new BundleAnalyzerPlugin()
   ]
 };

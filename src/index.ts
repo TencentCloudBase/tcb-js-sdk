@@ -3,8 +3,8 @@ import Auth from './auth';
 import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener } from './lib/events';
-// import { Db } from '@cloudbase/database';
-const Db = require('@cloudbase/database').Db;
+import { Db } from '@cloudbase/database';
+// const Db = require('@cloudbase/database').Db;
 
 function TCB(config?: object) {
   // console.log(config)

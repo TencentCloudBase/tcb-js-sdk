@@ -16,7 +16,7 @@ var auth_1 = require("./auth");
 var Functions = require("./functions");
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
-var Db = require('@cloudbase/database').Db;
+var database_1 = require("@cloudbase/database");
 function TCB(config) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
@@ -29,16 +29,16 @@ TCB.prototype.init = function (config) {
     return new TCB(this.config);
 };
 TCB.prototype.database = function (dbConfig) {
-    Db.reqClass = request_1.Request;
+    database_1.Db.reqClass = request_1.Request;
     if (!this.authObj) {
         console.warn('需要app.auth()授权');
         return;
     }
-    Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
-    if (!Db.ws) {
-        Db.ws = null;
+    database_1.Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
+    if (!database_1.Db.ws) {
+        database_1.Db.ws = null;
     }
-    return new Db(__assign({}, this.config, dbConfig));
+    return new database_1.Db(__assign({}, this.config, dbConfig));
 };
 TCB.prototype.auth = function (_a) {
     var persistence = (_a === void 0 ? {} : _a).persistence;

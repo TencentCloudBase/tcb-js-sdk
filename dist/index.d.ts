@@ -1,2 +1,35 @@
-declare let tcb: any;
+import { Db } from '@cloudbase/database';
+declare class TCB {
+    config: any;
+    authObj: any;
+    constructor(config?: object);
+    init(config: {
+        env: string;
+        timeout: number;
+    }): TCB;
+    database(dbConfig?: object): Db;
+    auth({ persistence }?: {
+        persistence?: string;
+    }): any;
+    on(eventName: string, callback: Function): void;
+    callFunction(params: {
+        name: string;
+        data: any;
+    }, callback?: Function): Promise<any>;
+    deleteFile(params: {
+        fileList: string[];
+    }, callback?: Function): any;
+    getTempFileURL(params: {
+        fileList: string[];
+    }, callback?: Function): any;
+    downloadFile(params: {
+        fileID: string;
+    }, callback?: Function): any;
+    uploadFile(params: {
+        cloudPath: string;
+        filePath: string;
+        onUploadProgress?: Function;
+    }, callback?: Function): any;
+}
+declare let tcb: TCB;
 export default tcb;

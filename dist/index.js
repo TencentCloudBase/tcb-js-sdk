@@ -17,55 +17,60 @@ var Functions = require("./functions");
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
 var database_1 = require("@cloudbase/database");
-function TCB(config) {
-    this.config = config ? config : this.config;
-    this.authObj = undefined;
-}
-TCB.prototype.init = function (config) {
-    this.config = {
-        env: config.env,
-        timeout: config.timeout || 15000
+var TCB = (function () {
+    function TCB(config) {
+        this.config = config ? config : this.config;
+        this.authObj = undefined;
+    }
+    TCB.prototype.init = function (config) {
+        this.config = {
+            env: config.env,
+            timeout: config.timeout || 15000
+        };
+        return new TCB(this.config);
     };
-    return new TCB(this.config);
-};
-TCB.prototype.database = function (dbConfig) {
-    database_1.Db.reqClass = request_1.Request;
-    if (!this.authObj) {
-        console.warn('需要app.auth()授权');
-        return;
-    }
-    database_1.Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
-    if (!database_1.Db.ws) {
-        database_1.Db.ws = null;
-    }
-    return new database_1.Db(__assign({}, this.config, dbConfig));
-};
-TCB.prototype.auth = function (_a) {
-    var persistence = (_a === void 0 ? {} : _a).persistence;
-    if (this.authObj) {
-        console.warn('tcb实例只存在一个auth对象');
-        return this.authObj;
-    }
-    Object.assign(this.config, { persistence: persistence || 'session' });
-    this.authObj = new auth_1.default(this.config);
-    return this.authObj;
-};
-TCB.prototype.on = events_1.addEventListener.bind(TCB);
-function each(obj, fn) {
-    for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-            fn(obj[i], i);
+    TCB.prototype.database = function (dbConfig) {
+        database_1.Db.reqClass = request_1.Request;
+        if (!this.authObj) {
+            console.warn('需要app.auth()授权');
+            return;
         }
-    }
-}
-function extend(target, source) {
-    each(source, function (_val, key) {
-        target[key] = source[key];
-    });
-    return target;
-}
-extend(TCB.prototype, Functions);
-extend(TCB.prototype, Storage);
+        database_1.Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
+        if (!database_1.Db.ws) {
+            database_1.Db.ws = null;
+        }
+        return new database_1.Db(__assign({}, this.config, dbConfig));
+    };
+    TCB.prototype.auth = function (_a) {
+        var persistence = (_a === void 0 ? {} : _a).persistence;
+        if (this.authObj) {
+            console.warn('tcb实例只存在一个auth对象');
+            return this.authObj;
+        }
+        Object.assign(this.config, { persistence: persistence || 'session' });
+        this.authObj = new auth_1.default(this.config);
+        return this.authObj;
+    };
+    TCB.prototype.on = function (eventName, callback) {
+        return events_1.addEventListener.apply(this, [eventName, callback]);
+    };
+    TCB.prototype.callFunction = function (params, callback) {
+        return Functions.callFunction.apply(this, [params, callback]);
+    };
+    TCB.prototype.deleteFile = function (params, callback) {
+        return Storage.deleteFile.apply(this, [params, callback]);
+    };
+    TCB.prototype.getTempFileURL = function (params, callback) {
+        return Storage.getTempFileURL.apply(this, [params, callback]);
+    };
+    TCB.prototype.downloadFile = function (params, callback) {
+        return Storage.downloadFile.apply(this, [params, callback]);
+    };
+    TCB.prototype.uploadFile = function (params, callback) {
+        return Storage.uploadFile.apply(this, [params, callback]);
+    };
+    return TCB;
+}());
 var tcb = new TCB();
 try {
     window.tcb = tcb;

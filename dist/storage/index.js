@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var axios_1 = require("axios");
 var request_1 = require("../lib/request");
 var util_1 = require("../lib/util");
-exports.uploadFile = function (_a, callback) {
-    var cloudPath = _a.cloudPath, filePath = _a.filePath, onUploadProgress = _a.onUploadProgress;
+exports.uploadFile = function (params, callback) {
     callback = callback || util_1.createPromiseCallback();
     var metaData = 'storage.getUploadMetadata';
     var httpRequest = new request_1.Request(this.config);
+    var cloudPath = params.cloudPath, filePath = params.filePath, onUploadProgress = params.onUploadProgress;
     httpRequest
         .send(metaData, {
         path: cloudPath

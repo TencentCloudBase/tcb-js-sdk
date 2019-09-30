@@ -1,7 +1,7 @@
-export declare const uploadFile: ({ cloudPath, filePath, onUploadProgress }: {
+export declare const uploadFile: (params: {
     cloudPath: any;
     filePath: any;
-    onUploadProgress: any;
+    onUploadProgress?: any;
 }, callback?: any) => any;
 export declare const deleteFile: ({ fileList }: {
     fileList: any;

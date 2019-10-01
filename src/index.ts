@@ -7,7 +7,7 @@ import { Db } from '@cloudbase/database';
 
 class TCB {
   config: any
-  authObj: any
+  authObj: Auth
   constructor(config?: object) {
     this.config = config ? config : this.config;
     this.authObj = undefined;

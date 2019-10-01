@@ -1,7 +1,8 @@
+import Auth from './auth';
 import { Db } from '@cloudbase/database';
 declare class TCB {
     config: any;
-    authObj: any;
+    authObj: Auth;
     constructor(config?: object);
     init(config: {
         env: string;
@@ -10,7 +11,7 @@ declare class TCB {
     database(dbConfig?: object): Db;
     auth({ persistence }?: {
         persistence?: string;
-    }): any;
+    }): Auth;
     on(eventName: string, callback: Function): void;
     callFunction(params: {
         name: string;

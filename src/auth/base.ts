@@ -24,6 +24,9 @@ export default class {
   }
 
   setRefreshToken(refreshToken) {
+    // refresh token设置前，先清掉 access token
+    this.cache.removeStore(this.accessTokenKey);
+    this.cache.removeStore(this.accessTokenExpireKey);
     this.cache.setStore(this.refreshTokenKey, refreshToken);
   }
 

@@ -153,7 +153,7 @@ class Request {
     return res;
   }
 
-  async send(action?: string, data?: any): Promise<any> {
+  async send(action: string, data: any = {}): Promise<any> {
     const slowQueryWarning = setTimeout(() => {
       console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
     }, 3000);

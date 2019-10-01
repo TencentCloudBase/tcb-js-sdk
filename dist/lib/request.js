@@ -181,6 +181,7 @@ var Request = (function () {
         });
     };
     Request.prototype.send = function (action, data) {
+        if (data === void 0) { data = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var slowQueryWarning, response, response_1;
             return __generator(this, function (_a) {

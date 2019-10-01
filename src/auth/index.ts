@@ -68,6 +68,21 @@ export default class Auth extends AuthProvider {
     addEventListener('loginStateExpire', callback);
   }
 
+  getLoginState(): LoginResult | undefined {
+    const { cache, refreshTokenKey, accessTokenKey } = this.httpRequest;
+    const refreshToken = cache.getStore(refreshTokenKey);
+    if (refreshToken) {
+      return {
+        credential: {
+          refreshToken,
+          accessToken: cache.getStore(accessTokenKey)
+        }
+      };
+    } else {
+      return;
+    }
+  }
+
   async signInWithTicket(ticket: string): Promise<LoginResult> {
     if (typeof ticket !== 'string') {
       throw new Error('ticket must be a string');

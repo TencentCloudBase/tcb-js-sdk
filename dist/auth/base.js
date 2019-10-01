@@ -47,6 +47,8 @@ var default_1 = (function () {
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
     }
     default_1.prototype.setRefreshToken = function (refreshToken) {
+        this.cache.removeStore(this.accessTokenKey);
+        this.cache.removeStore(this.accessTokenExpireKey);
         this.cache.setStore(this.refreshTokenKey, refreshToken);
     };
     default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {

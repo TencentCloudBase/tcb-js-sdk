@@ -113,6 +113,21 @@ var Auth = (function (_super) {
     Auth.prototype.onLoginStateExpire = function (callback) {
         events_1.addEventListener('loginStateExpire', callback);
     };
+    Auth.prototype.getLoginState = function () {
+        var _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
+        var refreshToken = cache.getStore(refreshTokenKey);
+        if (refreshToken) {
+            return {
+                credential: {
+                    refreshToken: refreshToken,
+                    accessToken: cache.getStore(accessTokenKey)
+                }
+            };
+        }
+        else {
+            return;
+        }
+    };
     Auth.prototype.signInWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
             var res;

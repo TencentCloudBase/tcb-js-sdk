@@ -9,8 +9,12 @@ import { MetaDataRes } from '../types';
  * @param {string} cloudPath 上传后的文件路径
  * @param {fs.ReadStream} filePath  上传文件的临时路径
  */
-export const uploadFile = function(
-  { cloudPath, filePath, onUploadProgress },
+export const uploadFile = function (
+  params: {
+    cloudPath;
+    filePath;
+    onUploadProgress?;
+  },
   callback?: any
 ) {
   callback = callback || createPromiseCallback();
@@ -19,6 +23,7 @@ export const uploadFile = function(
 
   const httpRequest = new Request(this.config);
 
+  const { cloudPath, filePath, onUploadProgress } = params;
   httpRequest
     .send(metaData, {
       path: cloudPath
@@ -70,7 +75,7 @@ export const uploadFile = function(
  * 删除文件
  * @param {Array.<string>} fileList 文件id数组
  */
-export const deleteFile = function({ fileList }, callback?: any) {
+export const deleteFile = function ({ fileList }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   if (!fileList || !Array.isArray(fileList)) {
@@ -119,7 +124,7 @@ export const deleteFile = function({ fileList }, callback?: any) {
  * 获取文件下载链接
  * @param {Array.<Object>} fileList
  */
-export const getTempFileURL = function({ fileList }, callback?: any) {
+export const getTempFileURL = function ({ fileList }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   if (!fileList || !Array.isArray(fileList)) {
@@ -184,7 +189,7 @@ export const getTempFileURL = function({ fileList }, callback?: any) {
   return callback.promise;
 };
 
-export const downloadFile = function({ fileID }, callback?: any) {
+export const downloadFile = function ({ fileID }, callback?: any) {
   callback = callback || createPromiseCallback();
 
   let promise: Promise<any>;
@@ -213,7 +218,7 @@ export const downloadFile = function({ fileID }, callback?: any) {
       .get(tmpUrl, {
         responseType: 'blob'
       })
-      .then(function(response) {
+      .then(function (response) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;

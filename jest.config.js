@@ -13,6 +13,5 @@ module.exports = {
     'json',
     'node'
   ],
-  'testEnvironment': 'node',
-  'setupFilesAfterEnv': ['<rootDir>/test/setup.js']
+  'testEnvironment': 'node'
 };

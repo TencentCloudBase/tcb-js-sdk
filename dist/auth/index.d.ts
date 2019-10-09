@@ -32,7 +32,7 @@ export default class Auth extends AuthProvider {
         env: string;
     }>;
     onLoginStateExpire(callback: Function): void;
-    getLoginState(): LoginResult | undefined;
+    getLoginState(): Promise<LoginResult | undefined>;
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;

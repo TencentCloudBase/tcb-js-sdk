@@ -32,6 +32,21 @@ let auth = tcb.auth({
 })
 ```
 
+## 获取登录状态
+
+开发者可以通过 `getLoginState()` 来获取当前的登录状态，调用 `getLoginState()` 后，SDK 会识别本地是否有登录状态，如果有，则会尝试刷新登录状态，若刷新登录状态成功，则会返回新的登录状态，否则返回 `undefined`。
+
+### 示例代码
+```js
+tcb.auth().getLoginState().then(loginState => {
+  if (loginState) {
+    // 登录态有效
+  } else {
+    // 没有登录态，或者登录态已经失效
+  }
+})
+```
+
 ## 微信授权
 ### 请求参数
 

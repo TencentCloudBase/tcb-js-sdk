@@ -3,11 +3,7 @@ import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
 import { addEventListener } from '../lib/events';
 import { LoginResult } from './interface';
-import { Cache } from '../lib/cache';
 import {
-  ACCESS_TOKEN,
-  ACCESS_TOKEN_Expire,
-  REFRESH_TOKEN,
   Config
 } from '../types';
 
@@ -47,13 +43,13 @@ export default class Auth extends AuthProvider {
   }
 
   async signOut() {
-    let cache = new Cache(this.config.persistence);
-    cache.removeStore(`${REFRESH_TOKEN}_${this.config.env}`);
-    cache.removeStore(`${ACCESS_TOKEN}_${this.config.env}`);
-    cache.removeStore(`${ACCESS_TOKEN_Expire}_${this.config.env}`);
-
+    const { cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this.httpRequest;
     const action = 'auth.logout';
-    await this.httpRequest.send(action, {});
+    await this.httpRequest.send(action, { refresh_token: cache.getStore(refreshTokenKey) });
+
+    cache.removeStore(refreshTokenKey);
+    cache.removeStore(accessTokenKey);
+    cache.removeStore(accessTokenExpireKey);
     return;
   }
 
@@ -68,10 +64,15 @@ export default class Auth extends AuthProvider {
     addEventListener('loginStateExpire', callback);
   }
 
-  getLoginState(): LoginResult | undefined {
+  async getLoginState(): Promise<LoginResult | undefined> {
     const { cache, refreshTokenKey, accessTokenKey } = this.httpRequest;
     const refreshToken = cache.getStore(refreshTokenKey);
     if (refreshToken) {
+      try {
+        await this.httpRequest.refreshAccessToken();
+      } catch (e) {
+        return;
+      }
       return {
         credential: {
           refreshToken,

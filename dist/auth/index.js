@@ -62,8 +62,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var weixinAuthProvider_1 = require("./weixinAuthProvider");
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
-var cache_1 = require("../lib/cache");
-var types_1 = require("../types");
 var Auth = (function (_super) {
     __extends(Auth, _super);
     function Auth(config) {
@@ -78,18 +76,18 @@ var Auth = (function (_super) {
     };
     Auth.prototype.signOut = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var cache, action;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        cache = new cache_1.Cache(this.config.persistence);
-                        cache.removeStore(types_1.REFRESH_TOKEN + "_" + this.config.env);
-                        cache.removeStore(types_1.ACCESS_TOKEN + "_" + this.config.env);
-                        cache.removeStore(types_1.ACCESS_TOKEN_Expire + "_" + this.config.env);
+                        _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
                         action = 'auth.logout';
-                        return [4, this.httpRequest.send(action, {})];
+                        return [4, this.httpRequest.send(action, { refresh_token: cache.getStore(refreshTokenKey) })];
                     case 1:
-                        _a.sent();
+                        _b.sent();
+                        cache.removeStore(refreshTokenKey);
+                        cache.removeStore(accessTokenKey);
+                        cache.removeStore(accessTokenExpireKey);
                         return [2];
                 }
             });
@@ -114,19 +112,34 @@ var Auth = (function (_super) {
         events_1.addEventListener('loginStateExpire', callback);
     };
     Auth.prototype.getLoginState = function () {
-        var _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
-        var refreshToken = cache.getStore(refreshTokenKey);
-        if (refreshToken) {
-            return {
-                credential: {
-                    refreshToken: refreshToken,
-                    accessToken: cache.getStore(accessTokenKey)
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, cache, refreshTokenKey, accessTokenKey, refreshToken, e_1;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
+                        refreshToken = cache.getStore(refreshTokenKey);
+                        if (!refreshToken) return [3, 5];
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4, this.httpRequest.refreshAccessToken()];
+                    case 2:
+                        _b.sent();
+                        return [3, 4];
+                    case 3:
+                        e_1 = _b.sent();
+                        return [2];
+                    case 4: return [2, {
+                            credential: {
+                                refreshToken: refreshToken,
+                                accessToken: cache.getStore(accessTokenKey)
+                            }
+                        }];
+                    case 5: return [2];
                 }
-            };
-        }
-        else {
-            return;
-        }
+            });
+        });
     };
     Auth.prototype.signInWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {

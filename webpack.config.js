@@ -15,7 +15,7 @@ module.exports = {
   devtool: false,
   output: {
     path: path.resolve(__dirname, 'tcbjs'),
-    filename: `${package.version}/${modName}.js`,
+    filename: process.env.NODE_ENV === 'e2e' ? 'e2e/tcb.js' : `${package.version}/${modName}.js`,
     library: modName,
     libraryTarget: 'umd',
     umdNamedDefine: true
@@ -28,7 +28,10 @@ module.exports = {
       {
         test: /\.ts?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader?presets[]=es2015!ts-loader'
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env']
+        }
       }
     ]
   },

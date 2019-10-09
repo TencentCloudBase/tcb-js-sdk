@@ -27,7 +27,10 @@ module.exports = {
       {
         test: /\.ts?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader?presets[]=es2015!ts-loader'
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env']
+        }
       }
     ]
   },

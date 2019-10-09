@@ -1,6 +1,6 @@
 import * as assert from 'power-assert';
 import { callbackWithTryCatch, catchCallback, isSuccess, register } from '../util';
-import { Util } from '@cloudbase/database/dist/util';
+import { Util } from '@cloudbase/database/dist/esm/util';
 
 export function registerDocument(app, collName) {
   const docIDGenerated = Util.generateDocId();

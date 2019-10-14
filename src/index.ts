@@ -77,5 +77,4 @@ try {
   (window as any).tcb = tcb;
 } catch (e) { }
 
-export default tcb;
-module.exports = tcb;
+export = tcb;

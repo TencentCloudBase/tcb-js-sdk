@@ -33,4 +33,4 @@ declare class TCB {
     }, callback?: Function): any;
 }
 declare let tcb: TCB;
-export default tcb;
+export = tcb;

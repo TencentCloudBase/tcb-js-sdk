@@ -10,7 +10,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 var Storage = require("./storage");
 var auth_1 = require("./auth");
 var Functions = require("./functions");
@@ -76,5 +75,4 @@ try {
     window.tcb = tcb;
 }
 catch (e) { }
-exports.default = tcb;
 module.exports = tcb;

@@ -9,7 +9,7 @@ const modName = 'tcb';
 module.exports = {
   mode: 'production',
   entry: [
-    './src/index.ts'
+    './dist/index.js'
   ],
   // devtool: 'inline-source-map',
   devtool: false,

@@ -1,13 +1,16 @@
 import { Db } from '@cloudbase/database';
 import Auth from './auth';
+import { RequestMode } from './types';
+declare type InitConfig = {
+    env: string;
+    timeout?: number;
+    mode?: RequestMode;
+};
 declare class TCB {
     config: any;
     authObj: Auth;
-    constructor(config?: object);
-    init(config: {
-        env: string;
-        timeout: number;
-    }): TCB;
+    constructor(config?: InitConfig);
+    init(config: InitConfig): TCB;
     database(dbConfig?: object): Db;
     auth({ persistence }?: {
         persistence?: string;

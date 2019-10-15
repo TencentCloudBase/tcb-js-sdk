@@ -4,19 +4,29 @@ import Auth from './auth';
 import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener } from './lib/events';
+import { RequestMode } from './types';
 
+type InitConfig = {
+  env: string;
+  timeout?: number;
+  mode?: RequestMode;
+}
+const DEFAULT_INIT_CONFIG = {
+  timeout: 15000,
+  mode: RequestMode.WEB
+};
 class TCB {
   config: any
   authObj: Auth
-  constructor(config?: object) {
+  constructor(config?: InitConfig) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
   }
 
-  init(config: { env: string; timeout: number }) {
+  init(config: InitConfig) {
     this.config = {
-      env: config.env,
-      timeout: config.timeout || 15000
+      ...DEFAULT_INIT_CONFIG,
+      ...config
     };
 
     return new TCB(this.config);

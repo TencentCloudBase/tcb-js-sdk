@@ -3,9 +3,7 @@ import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
 import { addEventListener } from '../lib/events';
 import { LoginResult } from './interface';
-import {
-  Config
-} from '../types';
+import { Config } from '../types';
 
 // enum Persistence {
 //   local = 'local',

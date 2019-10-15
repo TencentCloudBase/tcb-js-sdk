@@ -2,12 +2,19 @@ class Cache {
   storageClass: any;
 
   constructor(persistence: string) {
-    if (persistence === 'local') {
-      this.storageClass = localStorage;
-    } else if (persistence === 'none') {
-      this.storageClass = new TcbObject();
-    } else {
-      this.storageClass = sessionStorage;
+    switch (persistence) {
+      case 'local':
+        this.storageClass = localStorage;
+        break;
+      case 'none':
+        this.storageClass = new TcbObject();
+        break;
+      case 'weixin':
+        this.storageClass = new TcbMiniappStorage();
+        break;
+      default:
+        this.storageClass = sessionStorage;
+        break;
     }
   }
 
@@ -109,4 +116,25 @@ class TcbObject {
   }
 }
 
+class TcbMiniappStorage {
+  // 保存数据到
+  setItem(key: string, value: any) {
+    wx.setStorageSync(key, value);
+  }
+
+  // 获取数据
+  getItem(key: string) {
+    return wx.getStorageSync(key);
+  }
+
+  // 删除保存的数据
+  removeItem(key: string) {
+    wx.removeStorageSync(key);
+  }
+
+  // 删除所有保存的数据
+  clear() {
+    wx.clearStorageSync();
+  }
+}
 export { Cache };

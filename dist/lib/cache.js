@@ -2,14 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var Cache = (function () {
     function Cache(persistence) {
-        if (persistence === 'local') {
-            this.storageClass = localStorage;
-        }
-        else if (persistence === 'none') {
-            this.storageClass = new TcbObject();
-        }
-        else {
-            this.storageClass = sessionStorage;
+        switch (persistence) {
+            case 'local':
+                this.storageClass = localStorage;
+                break;
+            case 'none':
+                this.storageClass = new TcbObject();
+                break;
+            case 'weixin':
+                this.storageClass = new TcbMiniappStorage();
+                break;
+            default:
+                this.storageClass = sessionStorage;
+                break;
         }
     }
     Cache.prototype.setStore = function (key, value, version) {
@@ -84,4 +89,21 @@ var TcbObject = (function () {
         delete window['tcbObject'];
     };
     return TcbObject;
+}());
+var TcbMiniappStorage = (function () {
+    function TcbMiniappStorage() {
+    }
+    TcbMiniappStorage.prototype.setItem = function (key, value) {
+        wx.setStorageSync(key, value);
+    };
+    TcbMiniappStorage.prototype.getItem = function (key) {
+        return wx.getStorageSync(key);
+    };
+    TcbMiniappStorage.prototype.removeItem = function (key) {
+        wx.removeStorageSync(key);
+    };
+    TcbMiniappStorage.prototype.clear = function () {
+        wx.clearStorageSync();
+    };
+    return TcbMiniappStorage;
 }());

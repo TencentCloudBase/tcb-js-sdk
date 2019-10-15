@@ -74,3 +74,16 @@ export const createPromiseCallback = () => {
 export const getWeixinCode = function() {
   return getQuery('code') || getHash('code');
 };
+
+export const getMiniAppCode = function(): Promise<string> {
+  return new Promise(resolve => {
+    wx.login({
+      success(res) {
+        resolve(res.code);
+      },
+      fail(err) {
+        resolve(err);
+      }
+    });
+  });
+};

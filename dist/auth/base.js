@@ -51,12 +51,13 @@ var default_1 = (function () {
         this.cache.removeStore(this.accessTokenExpireKey);
         this.cache.setStore(this.refreshTokenKey, refreshToken);
     };
-    default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
+    default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code, hybridMiniapp) {
+        if (hybridMiniapp === void 0) { hybridMiniapp = '0'; }
         return __awaiter(this, void 0, void 0, function () {
             var action;
             return __generator(this, function (_a) {
                 action = 'auth.getJwt';
-                return [2, this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code }).then(function (res) {
+                return [2, this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);
                         }

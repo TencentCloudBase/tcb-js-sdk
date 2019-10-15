@@ -1,7 +1,6 @@
-import axios from 'axios';
-
 import {
   Config,
+  RequestMode,
   BASE_URL,
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
@@ -10,6 +9,7 @@ import {
 import { Cache } from './cache';
 // import * as util from './util';
 import { activateEvent } from './events';
+import Axios from 'axios';
 
 interface GetAccessTokenResult {
   accessToken: string;
@@ -23,9 +23,117 @@ const actionsWithoutAccessToken = [
 ];
 
 /**
+ * @class RequestMethods
+ */
+class RequestMethods {
+  private readonly _mode: RequestMode
+  constructor(mode: RequestMode = RequestMode.WEB) {
+    this._mode = mode;
+  }
+  public async post(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<KV<any>> {
+    let res;
+    switch (this._mode) {
+      case RequestMode.WEB:
+        res = await this._postWeb(url, data, options);
+        break;
+      case RequestMode.WX_MINIAPP:
+        res = await this._postWxMiniApp(`http:${url}`, data, options);
+        break;
+    }
+    return res;
+  }
+  public async upload(url: string, filePath: string, key: string, data: FormData, options: KV<any> = {}): Promise<KV<any>> {
+    let res;
+    switch (this._mode) {
+      case RequestMode.WEB:
+        data.append('file', filePath);
+        data.append('key', key);
+        res = await this._uploadWeb(url, data, options);
+        break;
+      case RequestMode.WX_MINIAPP:
+        res = await this._uploadWxMiniApp(`http:${url}`, filePath, key, data, options);
+        break;
+    }
+    return res;
+  }
+  public download(url: string) {
+    switch (this._mode) {
+      case RequestMode.WEB:
+        this._downloadWeb(url);
+        break;
+      case RequestMode.WX_MINIAPP:
+        this._downloadWxMiniApp(url);
+        break;
+    }
+  }
+  private _uploadWeb(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
+    return Axios.post(url, data, options);
+  }
+  private _uploadWxMiniApp(url: string, filePath: string, key, formData: KV<any> = {}, options: KV<any> = {}) {
+    return new Promise(resolve => {
+      wx.uploadFile({
+        url,
+        filePath,
+        name: key,
+        formData,
+        ...options,
+        success(res) {
+          resolve(res);
+        },
+        fail(err) {
+          resolve(err);
+        }
+      });
+    });
+  }
+  private _downloadWeb(url: string) {
+    Axios
+      .get(url, {
+        responseType: 'blob'
+      })
+      .then(function (response) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'file.pdf');
+        document.body.appendChild(link);
+        link.click();
+      });
+  }
+  private _downloadWxMiniApp(url: string) {
+    wx.downloadFile({ url });
+  }
+  private _postWeb(url: string, data: KV<any> = {}, options: KV<any> = {}) {
+    return Axios.post(url, data, options);
+  }
+  private _postWxMiniApp(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url,
+        data,
+        method: 'POST',
+        ...options,
+        success(res) {
+          resolve(res);
+        },
+        fail(err) {
+          reject(err);
+        }
+      });
+    });
+  }
+}
+/**
+ * 默认配置
+ * @constant DEFAULT_REQUEST_CONFIG
+ */
+const DEFAULT_REQUEST_CONFIG = {
+  mode: RequestMode.WEB
+};
+/**
  * @internal
  */
-class Request {
+class Request extends RequestMethods {
   config: Config;
   cache: Cache;
   accessTokenKey: string;
@@ -39,7 +147,8 @@ class Request {
    * @internal
    * @param config
    */
-  constructor(config?: Config) {
+  constructor(config: Config = DEFAULT_REQUEST_CONFIG) {
+    super(config.mode);
     this.config = config;
     this.cache = new Cache(config.persistence);
 
@@ -144,9 +253,10 @@ class Request {
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
     const newUrl = `${BASE_URL}?env=${this.config.env}`;
-    const res = await axios.post(newUrl, payload, opts);
+    // const res = await axios.post(newUrl, payload, opts);
+    const res: any = await this.post(newUrl, payload, opts);
 
-    if (Number(res.status) !== 200 || !res.data) {
+    if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
       throw new Error('network request error');
     }
 

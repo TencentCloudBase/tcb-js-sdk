@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from 'axios';
 import { Request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 import { MetaDataRes } from '../types';
@@ -42,24 +41,21 @@ export const uploadFile = function (
       formData.append('x-cos-meta-fileid', cosFileId);
       formData.append('success_action_status', '201');
       formData.append('x-cos-security-token', token);
-      formData.append('file', filePath);
-      axios
-        .post(url, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          },
-          onUploadProgress
-        })
-        .then((res: AxiosResponse) => {
-          if (res.status === 201) {
-            callback(null, {
-              fileID: fileId,
-              requestId
-            });
-          } else {
-            callback(new Error(`STORAGE_REQUEST_FAIL: ${res.data}`));
-          }
-        })
+      httpRequest.upload(url, filePath, cloudPath, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress
+      }).then((res: KV<any>) => {
+        if (res.status === 201 || res.statusCode === 200) {
+          callback(null, {
+            fileID: fileId,
+            requestId
+          });
+        } else {
+          callback(new Error(`STORAGE_REQUEST_FAIL: ${res.data}`));
+        }
+      })
         .catch(err => {
           callback(err);
         });
@@ -213,19 +209,8 @@ export const downloadFile = function ({ fileID }, callback?: any) {
 
     let tmpUrl = res.download_url;
     tmpUrl = encodeURI(tmpUrl);
-
-    axios
-      .get(tmpUrl, {
-        responseType: 'blob'
-      })
-      .then(function (response) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'file.pdf');
-        document.body.appendChild(link);
-        link.click();
-      });
+    let httpRequest = new Request(this.config);
+    httpRequest.download(tmpUrl);
   });
   return callback.promise;
 };

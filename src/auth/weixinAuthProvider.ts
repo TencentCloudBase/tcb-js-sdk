@@ -1,13 +1,18 @@
-import { Config } from '../types';
+import { Config, RequestMode } from '../types';
 import { LoginResult } from './interface';
 import * as util from '../lib/util';
 import Base from './base';
 
 /* eslint-disable no-unused-vars */
 enum AllowedScopes {
+  // 公众平台-base
   snsapi_base = 'snsapi_base',
+  // 公众平台-userinfo
   snsapi_userinfo = 'snsapi_userinfo',
-  snsapi_login = 'snsapi_login',
+  // 公众平台-miniapp
+  snsapi_miniapp = 'snsapi_miniapp',
+  // 开放平台-login
+  snsapi_login = 'snsapi_login'
 }
 
 enum LoginModes {
@@ -24,6 +29,9 @@ export default class extends Base {
   private appid: string;
 
   constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string) {
+    if (scope === AllowedScopes.snsapi_miniapp) {
+      config.mode = RequestMode.WX_MINIAPP;
+    }
     super(config);
 
     this.config = config;
@@ -56,16 +64,22 @@ export default class extends Base {
       throw new Error('错误的scope类型');
     }
 
-    const code = util.getWeixinCode();
-
+    const code = this.config.mode === RequestMode.WEB ? await util.getWeixinCode() : await util.getMiniAppCode();
     // 没有code，拉起OAuth
-    if (!code) {
+    if (!code && this.config.mode === RequestMode.WEB) {
       return this.redirect();
     }
-
     // 有code，用code换refresh token
-    const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-    const refreshTokenRes = await this.getRefreshTokenByWXCode(this.appid, loginType, code);
+    const loginType = (scope => {
+      switch (scope) {
+        case AllowedScopes.snsapi_login:
+          return 'WECHAT-OPEN';
+        default:
+          return 'WECHAT-PUBLIC';
+      }
+    })(this.scope);
+
+    const refreshTokenRes = await this.getRefreshTokenByWXCode(this.appid, loginType, code, this.scope === AllowedScopes.snsapi_miniapp ? '1' : '0');
     const { refreshToken } = refreshTokenRes;
 
     // 本地存下

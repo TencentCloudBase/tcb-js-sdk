@@ -56,3 +56,15 @@ exports.createPromiseCallback = function () {
 exports.getWeixinCode = function () {
     return exports.getQuery('code') || exports.getHash('code');
 };
+exports.getMiniAppCode = function () {
+    return new Promise(function (resolve) {
+        wx.login({
+            success: function (res) {
+                resolve(res.code);
+            },
+            fail: function (err) {
+                resolve(err);
+            }
+        });
+    });
+};

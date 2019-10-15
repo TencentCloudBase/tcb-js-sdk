@@ -1,4 +1,4 @@
-const webpack = require('webpack');
+// const webpack = require('webpack');
 const path = require('path');
 const package = require('./package.json');
 const Visualizer = require('webpack-visualizer-plugin');
@@ -36,7 +36,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new Visualizer({
       filename: './statistics.html'
     }),

@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = require("axios");
 var request_1 = require("../lib/request");
 var util_1 = require("../lib/util");
 exports.uploadFile = function (params, callback) {
@@ -20,16 +19,13 @@ exports.uploadFile = function (params, callback) {
         formData.append('x-cos-meta-fileid', cosFileId);
         formData.append('success_action_status', '201');
         formData.append('x-cos-security-token', token);
-        formData.append('file', filePath);
-        axios_1.default
-            .post(url, formData, {
+        httpRequest.upload(url, filePath, cloudPath, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
             onUploadProgress: onUploadProgress
-        })
-            .then(function (res) {
-            if (res.status === 201) {
+        }).then(function (res) {
+            if (res.status === 201 || res.statusCode === 200) {
                 callback(null, {
                     fileID: fileId,
                     requestId: requestId
@@ -149,6 +145,7 @@ exports.getTempFileURL = function (_a, callback) {
     return callback.promise;
 };
 exports.downloadFile = function (_a, callback) {
+    var _this = this;
     var fileID = _a.fileID;
     callback = callback || util_1.createPromiseCallback();
     var promise;
@@ -168,18 +165,8 @@ exports.downloadFile = function (_a, callback) {
         }
         var tmpUrl = res.download_url;
         tmpUrl = encodeURI(tmpUrl);
-        axios_1.default
-            .get(tmpUrl, {
-            responseType: 'blob'
-        })
-            .then(function (response) {
-            var url = window.URL.createObjectURL(new Blob([response.data]));
-            var link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'file.pdf');
-            document.body.appendChild(link);
-            link.click();
-        });
+        var httpRequest = new request_1.Request(_this.config);
+        httpRequest.download(tmpUrl);
     });
     return callback.promise;
 };

@@ -12,6 +12,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -48,40 +59,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = require("../lib/util");
 var base_1 = require("./base");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
     AllowedScopes["snsapi_userinfo"] = "snsapi_userinfo";
-    AllowedScopes["snsapi_miniapp"] = "snsapi_miniapp";
-    AllowedScopes["snsapi_login"] = "snsapi_login";
 })(AllowedScopes || (AllowedScopes = {}));
-var LoginModes;
-(function (LoginModes) {
-    LoginModes["redirect"] = "redirect";
-    LoginModes["prompt"] = "prompt";
-})(LoginModes || (LoginModes = {}));
+var DEFAULT_CONFIG = {
+    mode: "WX_MINIAPP"
+};
 var default_1 = (function (_super) {
     __extends(default_1, _super);
-    function default_1(config, appid, scope, loginMode, state) {
+    function default_1(config, appid, scope) {
         var _this = this;
-        if (scope === AllowedScopes.snsapi_miniapp) {
-            config.mode = "WX_MINIAPP";
-        }
-        _this = _super.call(this, config) || this;
-        _this.config = config;
+        var options = __assign({ DEFAULT_CONFIG: DEFAULT_CONFIG }, config);
+        _this = _super.call(this, options) || this;
+        _this.config = options;
         _this.appid = appid;
         _this.scope = scope;
-        _this.state = state || 'weixin';
-        _this.loginMode = loginMode || 'redirect';
         return _this;
     }
     default_1.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, code, _a, loginType, refreshTokenRes, refreshToken;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         accessToken = this.cache.getStore(this.accessTokenKey);
                         accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
@@ -102,31 +104,13 @@ var default_1 = (function (_super) {
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
                             throw new Error('错误的scope类型');
                         }
-                        if (!(this.config.mode === "WEB")) return [3, 2];
-                        return [4, util.getWeixinCode()];
+                        return [4, this._getCode()];
                     case 1:
-                        _a = _b.sent();
-                        return [3, 4];
-                    case 2: return [4, util.getMiniAppCode()];
-                    case 3:
-                        _a = _b.sent();
-                        _b.label = 4;
-                    case 4:
-                        code = _a;
-                        if (!code && this.config.mode === "WEB") {
-                            return [2, this.redirect()];
-                        }
-                        loginType = (function (scope) {
-                            switch (scope) {
-                                case AllowedScopes.snsapi_login:
-                                    return 'WECHAT-OPEN';
-                                default:
-                                    return 'WECHAT-PUBLIC';
-                            }
-                        })(this.scope);
-                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code, this.scope === AllowedScopes.snsapi_miniapp ? '1' : '0')];
-                    case 5:
-                        refreshTokenRes = _b.sent();
+                        code = _a.sent();
+                        loginType = 'WECHAT-MINIAPP';
+                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
+                    case 2:
+                        refreshTokenRes = _a.sent();
                         refreshToken = refreshTokenRes.refreshToken;
                         this.cache.setStore(this.refreshTokenKey, refreshToken);
                         if (refreshTokenRes.accessToken) {
@@ -144,17 +128,17 @@ var default_1 = (function (_super) {
             });
         });
     };
-    default_1.prototype.redirect = function () {
-        var currUrl = util.removeParam('code', location.href);
-        currUrl = util.removeParam('state', currUrl);
-        currUrl = encodeURIComponent(currUrl);
-        var host = '//open.weixin.qq.com/connect/oauth2/authorize';
-        if (this.scope === 'snsapi_login') {
-            host = '//open.weixin.qq.com/connect/qrconnect';
-        }
-        if (LoginModes[this.loginMode] === 'redirect') {
-            location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
-        }
+    default_1.prototype._getCode = function () {
+        return new Promise(function (resolve) {
+            wx.login({
+                success: function (res) {
+                    resolve(res.code);
+                },
+                fail: function (err) {
+                    resolve(err);
+                }
+            });
+        });
     };
     return default_1;
 }(base_1.default));

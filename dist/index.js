@@ -16,16 +16,17 @@ var auth_1 = require("./auth");
 var Functions = require("./functions");
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
+var DEFAULT_INIT_CONFIG = {
+    timeout: 15000,
+    mode: "WEB"
+};
 var TCB = (function () {
     function TCB(config) {
         this.config = config ? config : this.config;
         this.authObj = undefined;
     }
     TCB.prototype.init = function (config) {
-        this.config = {
-            env: config.env,
-            timeout: config.timeout || 15000
-        };
+        this.config = __assign({}, DEFAULT_INIT_CONFIG, config);
         return new TCB(this.config);
     };
     TCB.prototype.database = function (dbConfig) {

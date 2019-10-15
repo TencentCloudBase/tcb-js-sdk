@@ -10,12 +10,12 @@ import {
 import { test_database } from './database';
 import { runAllTestCases, runSelectedTestCase } from './util';
 
-import '../src/index';
+import '../dist/index';
 
 let tcb = window['tcb'];
 let app;
 let appid;
-let init = async function() {
+let init = async function () {
   console.log('web test**************');
   // 初始化
   app = tcb.init({
@@ -23,9 +23,9 @@ let init = async function() {
     // env: 'jimmytest-088bef'
     // env: 'webtestjimmy-5328c3'
     // env: 'feature-env-billing-004'
-    // env: "dev-withnate-604e29"
+    env: 'dev-withnate-604e29'
     // env: "web-test-jimmy-0cf5fa" //体验
-    env: 'luke-3de127' //现网luke-3de127
+    // env: 'luke-3de127' //现网luke-3de127
   });
 
   appid = 'wxacfb81f2ced64e70';
@@ -86,29 +86,29 @@ let init = async function() {
   // });
 };
 
-window['initStorage'] = function() {
-  document.getElementById('uploadFile').onclick = function() {
+window['initStorage'] = function () {
+  document.getElementById('uploadFile').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>document.getElementById('returnType');
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
     uploadFile(app, returnType);
   };
-  document.getElementById('getTempFileURL').onclick = function() {
+  document.getElementById('getTempFileURL').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>document.getElementById('returnType');
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
     getTempFileURL(app, returnType);
   };
-  document.getElementById('downloadFile').onclick = function() {
+  document.getElementById('downloadFile').onclick = function () {
     downloadFile(app);
   };
-  document.getElementById('deleteFile').onclick = function() {
+  document.getElementById('deleteFile').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>document.getElementById('returnType');
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
     deleteFile(app, returnType);
   };
 };
 
-window['initIndex'] = function() {
-  document.getElementById('runSelectedTestCase').onclick = function() {
+window['initIndex'] = function () {
+  document.getElementById('runSelectedTestCase').onclick = function () {
     let selectEle = <HTMLSelectElement>document.getElementById('testCaseSelect');
     let selectIndex = selectEle.options[selectEle.selectedIndex].value;
     runSelectedTestCase(Number(selectIndex));
@@ -118,7 +118,7 @@ window['initIndex'] = function() {
     let selectIndex = selectEle.options[selectEle.selectedIndex].value;
     runSelectedTestCase(Number(selectIndex));
   };*/
-  document.getElementById('runAllTestCases').onclick = function() {
+  document.getElementById('runAllTestCases').onclick = function () {
     runAllTestCases();
   };
 

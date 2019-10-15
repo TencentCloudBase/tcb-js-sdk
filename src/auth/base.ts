@@ -30,7 +30,7 @@ export default class {
     this.cache.setStore(this.refreshTokenKey, refreshToken);
   }
 
-  public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string }> {
+  public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<any> {
     const action = 'auth.getJwt';
     return this.httpRequest.send(action, { appid, loginType, code }).then(res => {
       if (res.code) {
@@ -38,7 +38,9 @@ export default class {
       }
       if (res.refresh_token) {
         return {
-          refreshToken: res.refresh_token
+          refreshToken: res.refresh_token,
+          accessToken: res.access_token,
+          accessTokenExpire: res.access_token_expire
         };
       } else {
         throw new Error(`[tcb-js-sdk] getJwt未返回refreshToken`);

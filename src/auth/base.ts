@@ -30,7 +30,7 @@ export default class {
     this.cache.setStore(this.refreshTokenKey, refreshToken);
   }
 
-  public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<any> {
+  public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
     return this.httpRequest.send(action, { appid, loginType, code }).then(res => {
       if (res.code) {

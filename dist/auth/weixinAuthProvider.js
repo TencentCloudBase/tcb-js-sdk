@@ -74,7 +74,7 @@ var default_1 = (function (_super) {
     }
     default_1.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, code, loginType, refreshToken;
+            var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -104,8 +104,15 @@ var default_1 = (function (_super) {
                         loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
                         return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
                     case 1:
-                        refreshToken = (_a.sent()).refreshToken;
+                        refreshTokenRes = _a.sent();
+                        refreshToken = refreshTokenRes.refreshToken;
                         this.cache.setStore(this.refreshTokenKey, refreshToken);
+                        if (refreshTokenRes.accessToken) {
+                            this.cache.setStore(this.accessTokenKey, refreshTokenRes.accessToken);
+                        }
+                        if (refreshTokenRes.accessTokenExpire) {
+                            this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
+                        }
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

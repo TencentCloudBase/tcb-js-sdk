@@ -62,7 +62,9 @@ var default_1 = (function () {
                         }
                         if (res.refresh_token) {
                             return {
-                                refreshToken: res.refresh_token
+                                refreshToken: res.refresh_token,
+                                accessToken: res.access_token,
+                                accessTokenExpire: res.access_token_expire
                             };
                         }
                         else {

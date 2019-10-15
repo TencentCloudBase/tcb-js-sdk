@@ -11,5 +11,7 @@ export default class {
     setRefreshToken(refreshToken: any): void;
     getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
         refreshToken: string;
+        accessToken: string;
+        accessTokenExpire: number;
     }>;
 }

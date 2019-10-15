@@ -65,10 +65,17 @@ export default class extends Base {
 
     // 有code，用code换refresh token
     const loginType = this.scope === 'snsapi_login' ? 'WECHAT-OPEN' : 'WECHAT-PUBLIC';
-    const { refreshToken } = await this.getRefreshTokenByWXCode(this.appid, loginType, code);
+    const refreshTokenRes = await this.getRefreshTokenByWXCode(this.appid, loginType, code);
+    const { refreshToken } = refreshTokenRes;
 
     // 本地存下
     this.cache.setStore(this.refreshTokenKey, refreshToken);
+    if (refreshTokenRes.accessToken) {
+      this.cache.setStore(this.accessTokenKey, refreshTokenRes.accessToken);
+    }
+    if (refreshTokenRes.accessTokenExpire) {
+      this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
+    }
 
     return {
       credential: {

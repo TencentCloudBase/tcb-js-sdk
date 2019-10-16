@@ -1,3 +1,5 @@
+# 授权登录
+
 目前 Cloudbase 支持的登录方式有：
 
 * 微信授权，包括微信公众平台（公众号网页）和开放平台（普通网站应用）的网页授权
@@ -11,6 +13,15 @@
 * `session`：在窗口关闭时清除身份验证状态
 * `none`：在页面重新加载时清除身份验证状态
 
+## 目录
+
+- [获取登录对象](#获取登录对象)
+- [获取登录状态](#获取登录状态)
+- [微信授权](#微信授权)
+- [自定义登录](#自定义登录)
+- [获取用户信息](#获取用户信息)
+- [登录授权相关事件及钩子函数](#登录授权相关事件及钩子函数)
+
 ## 获取登录对象
 
 ### 请求参数
@@ -20,6 +31,7 @@
 | persistence | string | 否 | 身份认证状态如何持久保留，有三个选项 `local`、`session` 和 `none`，默认为 `session`。 |
 
 ### 示例代码
+
 ```js
 const tcb = require('tcb-js-sdk');
 
@@ -37,6 +49,7 @@ let auth = tcb.auth({
 开发者可以通过 `getLoginState()` 来获取当前的登录状态，调用 `getLoginState()` 后，SDK 会识别本地是否有登录状态，如果有，则会尝试刷新登录状态，若刷新登录状态成功，则会返回新的登录状态，否则返回 `undefined`。
 
 ### 示例代码
+
 ```js
 tcb.auth().getLoginState().then(loginState => {
   if (loginState) {
@@ -48,6 +61,7 @@ tcb.auth().getLoginState().then(loginState => {
 ```
 
 ## 微信授权
+
 ### 请求参数
 
 | 字段 | 类型 | 必填 | 说明
@@ -139,6 +153,7 @@ auth.signInWithTicket(ticket).then(() => {
 任何方式登录成功后，可以调用 `getUserInfo` 获得用户的 Cloudbase 身份信息。
 
 ### 请求参数
+
 无
 
 ### 响应参数

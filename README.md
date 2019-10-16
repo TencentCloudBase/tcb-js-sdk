@@ -1,49 +1,97 @@
-# Tencent Cloud Base(TCB) JavaScript SDK
-
-## 目录
-* [介绍](#介绍)
-* [安装](#安装)
-* [文档](#文档)
-
+# Tencent Cloud Base(TCB) JavaScript SDK ![npm (tag)](https://img.shields.io/npm/v/tcb-js-sdk)
 
 ## 介绍
-TCB提供开发应用所需服务和基础设施。tcb js SDK 让你可以在网页端使用JavaScript代码服务访问TCB的的服务。
+
+TCB 提供开发应用所需服务和基础设施。TCB JS SDK 让你可以在网页端使用 JavaScript 代码服务访问 TCB 的的服务。你可以使用该 SDK 构建自己的公众号页面或者独立的网站等 Web 服务。
 
 ## 安装
-tcb js SDK 可以通过`tcb-js-sdk`来访问：
+
+TCB JS SDK 可以通过 `tcb-js-sdk` 来访问：
+
 ```bash
 npm install --save tcb-js-sdk@latest
 ```
 
 要在你的模块式使用模块可以
+
 ```js
-var tcb = require("tcb-js-sdk");
+const tcb = require('tcb-js-sdk');
 ```
+
 或
+
 ```js
-import * as tcb from "tcb-js-sdk";
+import * as tcb from 'tcb-js-sdk';
 ```
 
 或者使用官方的代码包
+
 ```
-    <script src="">
+<script src="//imgcache.qq.com/qcloud/tcbjs/1.3.1/tcb.js">
+```
+
+## 快速上手
+
+### 初始化
+
+```javascript
+// 引用官方 JS CDN 文件直接使用
+const app = tcb.init({
+  env: '你的环境 Id'
+});
+```
+
+```js
+// 模块化开发
+const tcb = require('tcb-js-sdk');
+const app = tcb.init({
+  env: '你的环境 Id'
+});
+```
+
+### 授权
+
+```js
+// 获取 auth 对象
+const auth = app.auth({
+  persistence: 'local'
+});
+
+// 微信登录
+await auth
+  .weixinAuthProvider({
+    appid: '微信 appId',
+    scope: 'snsapi_base'
+  })
+  .signIn(function() {});
+```
+
+### 使用
+
+```js
+// 调用云函数
+const res = await app.callFunction({
+  name: 'test',
+  data: {
+    str: base64
+  }
+});
 ```
 
 ## 文档
-* [初始化](docs/initialization.md)
-* [存储](docs/storage.md)
-* [数据库](docs/database.md)
-* [云函数](docs/functions.md)
+
+- [授权登录](docs/authentication.md)
+- [存储](docs/storage.md)
+- [数据库](docs/database.md)
+- [云函数](docs/functions.md)
 
 ## 更新日志
 
-查看[更新日志](./changelog.md)
-
+查看 [更新日志](./changelog.md)
 
 ### 注意
 
-> 1.0.1 版本后，为了提高文件上传性能，文件上传方式修改为直接上传到对象存储，为了防止在使用过程中出现 CORS 报错，需要到 Web 控制台/用户管理/登录设置选项中设置安全域名。如果已有域名出现 CORS 报错，请删除安全域名，重新添加。
-
+> 1.0.1 版本后，为了提高文件上传性能，文件上传方式修改为直接上传到对象存储，为了防止在使用过程中出现 CORS 报错，需要到 Web 控制台 / 用户管理 / 登录设置选项中设置安全域名。如果已有域名出现 CORS 报错，请删除安全域名，重新添加。
 
 ### 开发
 
@@ -52,6 +100,7 @@ import * as tcb from "tcb-js-sdk";
 ```
 npm install
 ```
+
 或者
 
 ```
@@ -64,9 +113,9 @@ yarn
 npm test unit
 ```
 
-#### E2E测试
+#### E2E 测试
 
-依赖puppeteer，在部分 linux 系统下跑不起来
+依赖 puppeteer，在部分 linux 系统下跑不起来
 
 ```
 npm run e2e

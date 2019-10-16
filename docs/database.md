@@ -1,80 +1,75 @@
-## 数据库
+# 数据库
 
-<!-- TOC -->
+- [获取数据库的引用](#获取数据库的引用)
+- [获取集合的引用](#获取集合的引用)
+  - [集合 Collection](#集合-collection)
+  - [记录 Record / Document](#记录-record--document)
+  - [查询筛选指令 Query Command](#查询筛选指令-query-command)
+  - [字段更新指令 Update Command](#字段更新指令-update-command)
+- [支持的数据类型](#支持的数据类型)
+- [新增文档](#新增文档)
+- [查询文档](#查询文档)
+  - [添加查询条件](#添加查询条件)
+  - [获取查询数量](#获取查询数量)
+  - [设置记录数量](#设置记录数量)
+  - [设置起始位置](#设置起始位置)
+  - [对结果排序](#对结果排序)
+  - [指定返回字段](#指定返回字段)
+  - [查询指令](#查询指令)
+    - [eq](#eq)
+    - [neq](#neq)
+    - [gt](#gt)
+    - [gte](#gte)
+    - [lt](#lt)
+    - [lte](#lte)
+    - [in](#in)
+    - [nin](#nin)
+    - [and](#and)
+    - [or](#or)
+  - [正则表达式查询](#正则表达式查询)
+    - [db.RegExp](#dbregexp)
+- [删除文档](#删除文档)
+- [更新文档](#更新文档)
+  - [更新指定文档](#更新指定文档)
+  - [更新文档，如果不存在则创建](#更新文档如果不存在则创建)
+  - [批量更新文档](#批量更新文档)
+  - [更新指令](#更新指令)
+    - [set](#set)
+    - [inc](#inc)
+    - [mul](#mul)
+    - [remove](#remove)
+    - [push](#push)
+    - [pop](#pop)
+    - [unshift](#unshift)
+    - [shift](#shift)
+- [GEO地理位置](#geo地理位置)
+  - [GEO数据类型](#geo数据类型)
+    - [Point](#point)
+    - [LineString](#linestring)
+    - [Polygon](#polygon)
+    - [MultiPoint](#multipoint)
+    - [MultiLineString](#multilinestring)
+    - [MultiPolygon](#multipolygon)
+  - [GEO操作符](#geo操作符)
+    - [geoNear](#geonear)
+    - [geoWithin](#geowithin)
+    - [geoIntersects](#geointersects)
+- [数据库实时推送](#数据库实时推送)
 
-- [数据库](#%e6%95%b0%e6%8d%ae%e5%ba%93)
-  - [获取数据库的引用](#%e8%8e%b7%e5%8f%96%e6%95%b0%e6%8d%ae%e5%ba%93%e7%9a%84%e5%bc%95%e7%94%a8)
-  - [获取集合的引用](#%e8%8e%b7%e5%8f%96%e9%9b%86%e5%90%88%e7%9a%84%e5%bc%95%e7%94%a8)
-    - [集合 Collection](#%e9%9b%86%e5%90%88-collection)
-    - [记录 Record / Document](#%e8%ae%b0%e5%bd%95-record--document)
-    - [查询筛选指令 Query Command](#%e6%9f%a5%e8%af%a2%e7%ad%9b%e9%80%89%e6%8c%87%e4%bb%a4-query-command)
-    - [字段更新指令 Update Command](#%e5%ad%97%e6%ae%b5%e6%9b%b4%e6%96%b0%e6%8c%87%e4%bb%a4-update-command)
-  - [支持的数据类型](#%e6%94%af%e6%8c%81%e7%9a%84%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b)
-  - [新增文档](#%e6%96%b0%e5%a2%9e%e6%96%87%e6%a1%a3)
-  - [查询文档](#%e6%9f%a5%e8%af%a2%e6%96%87%e6%a1%a3)
-    - [添加查询条件](#%e6%b7%bb%e5%8a%a0%e6%9f%a5%e8%af%a2%e6%9d%a1%e4%bb%b6)
-    - [获取查询数量](#%e8%8e%b7%e5%8f%96%e6%9f%a5%e8%af%a2%e6%95%b0%e9%87%8f)
-    - [设置记录数量](#%e8%ae%be%e7%bd%ae%e8%ae%b0%e5%bd%95%e6%95%b0%e9%87%8f)
-    - [设置起始位置](#%e8%ae%be%e7%bd%ae%e8%b5%b7%e5%a7%8b%e4%bd%8d%e7%bd%ae)
-    - [对结果排序](#%e5%af%b9%e7%bb%93%e6%9e%9c%e6%8e%92%e5%ba%8f)
-    - [指定返回字段](#%e6%8c%87%e5%ae%9a%e8%bf%94%e5%9b%9e%e5%ad%97%e6%ae%b5)
-    - [查询指令](#%e6%9f%a5%e8%af%a2%e6%8c%87%e4%bb%a4)
-      - [eq](#eq)
-      - [neq](#neq)
-      - [gt](#gt)
-      - [gte](#gte)
-      - [lt](#lt)
-      - [lte](#lte)
-      - [in](#in)
-      - [nin](#nin)
-      - [and](#and)
-      - [or](#or)
-    - [正则表达式查询](#%e6%ad%a3%e5%88%99%e8%a1%a8%e8%be%be%e5%bc%8f%e6%9f%a5%e8%af%a2)
-      - [db.RegExp](#dbregexp)
-  - [删除文档](#%e5%88%a0%e9%99%a4%e6%96%87%e6%a1%a3)
-  - [更新文档](#%e6%9b%b4%e6%96%b0%e6%96%87%e6%a1%a3)
-    - [更新指定文档](#%e6%9b%b4%e6%96%b0%e6%8c%87%e5%ae%9a%e6%96%87%e6%a1%a3)
-    - [更新文档，如果不存在则创建](#%e6%9b%b4%e6%96%b0%e6%96%87%e6%a1%a3%e5%a6%82%e6%9e%9c%e4%b8%8d%e5%ad%98%e5%9c%a8%e5%88%99%e5%88%9b%e5%bb%ba)
-    - [批量更新文档](#%e6%89%b9%e9%87%8f%e6%9b%b4%e6%96%b0%e6%96%87%e6%a1%a3)
-    - [更新指令](#%e6%9b%b4%e6%96%b0%e6%8c%87%e4%bb%a4)
-      - [set](#set)
-      - [inc](#inc)
-      - [mul](#mul)
-      - [remove](#remove)
-      - [push](#push)
-      - [pop](#pop)
-      - [unshift](#unshift)
-      - [shift](#shift)
-  - [GEO地理位置](#geo%e5%9c%b0%e7%90%86%e4%bd%8d%e7%bd%ae)
-    - [GEO数据类型](#geo%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b)
-      - [Point](#point)
-      - [LineString](#linestring)
-      - [Polygon](#polygon)
-      - [MultiPoint](#multipoint)
-      - [MultiLineString](#multilinestring)
-      - [MultiPolygon](#multipolygon)
-    - [GEO操作符](#geo%e6%93%8d%e4%bd%9c%e7%ac%a6)
-      - [geoNear](#geonear)
-      - [geoWithin](#geowithin)
-      - [geoIntersects](#geointersects)
-  - [数据库实时推送](#%e6%95%b0%e6%8d%ae%e5%ba%93%e5%ae%9e%e6%97%b6%e6%8e%a8%e9%80%81)
-    
-<!-- /TOC -->
-
-### 获取数据库的引用
+## 获取数据库的引用
 
 ```js
 const db = app.database();
 ```
 
-### 获取集合的引用
+## 获取集合的引用
 
 ```js
 // 获取 `user` 集合的引用
 const collection = db.collection('user');
 ```
 
-#### 集合 Collection
+### 集合 Collection
 
 通过 `db.collection(name)` 可以获取指定集合的引用，在集合上可以进行以下操作
 
@@ -94,7 +89,7 @@ const collection = db.collection('user');
 查询及更新指令用于在 `where` 中指定字段需满足的条件，指令可通过 `db.command` 对象取得。
 
 
-#### 记录 Record / Document
+### 记录 Record / Document
 
 通过 `db.collection(collectionName).doc(docId)` 可以获取指定集合上指定 id 的记录的引用，在记录上可以进行以下操作
 
@@ -106,7 +101,7 @@ const collection = db.collection('user');
 | 读   | get    | 获取记录(触发请求)     |
 
 
-#### 查询筛选指令 Query Command
+### 查询筛选指令 Query Command
 
 以下指令挂载在 `db.command` 下
 
@@ -124,7 +119,7 @@ const collection = db.collection('user');
 |          | or   | 表示需同时满足指定条件中的至少一个 |
 
 
-#### 字段更新指令 Update Command
+### 字段更新指令 Update Command
 
 以下指令挂载在 `db.command` 下
 
@@ -140,7 +135,7 @@ const collection = db.collection('user');
 |      | unshift | 数组类型字段追加头元素，支持数组 |
 
 
-### 支持的数据类型
+## 支持的数据类型
 
 数据库提供以下几种数据类型：
 * String：字符串
@@ -185,7 +180,7 @@ const collection = db.collection('user');
   Null 相当于一个占位符，表示一个字段存在但是值为空。
 
 
-### 新增文档
+## 新增文档
 
 方法1： collection.add(data)
 
@@ -230,14 +225,14 @@ collection.doc().set({
 });
 ```
 
-### 查询文档
+## 查询文档
 
 支持 `where()`、`limit()`、`skip()`、`orderBy()`、`get()`、`update()`、`field()`、`count()` 等操作。
 
 只有当调用`get()` `update()`时才会真正发送请求。
 注：默认取前100条数据，最大取前100条数据。
 
-#### 添加查询条件
+### 添加查询条件
 collection.where()
 参数
 
@@ -264,7 +259,7 @@ db.collection('goods').where({
 })
 ```
 
-#### 获取查询数量
+### 获取查询数量
 collection.count()
 
 参数
@@ -301,7 +296,7 @@ db.collection('goods').where({
 
 
 
-#### 设置记录数量
+### 设置记录数量
 collection.limit()
 
 参数说明
@@ -324,7 +319,7 @@ collection.limit(1).get(function(err, res) {
 });
 ```
 
-#### 设置起始位置
+### 设置起始位置
 collection.skip()
 
 参数说明
@@ -347,7 +342,7 @@ collection.skip(4).get(function(err, res) {
 })
 ```
 
-#### 对结果排序
+### 对结果排序
 collection.orderBy()
 
 参数说明
@@ -371,7 +366,7 @@ collection.orderBy("name", "asc").get(function(err, res) {
 });
 ```
 
-#### 指定返回字段
+### 指定返回字段
 
 collection.field()
 
@@ -388,8 +383,8 @@ collection.field({ 'age': true })
 ```
 备注：只能指定要返回的字段或者不要返回的字段。即{'a': true, 'b': false}是一种错误的参数格式
 
-#### 查询指令
-##### eq
+### 查询指令
+#### eq
 
 表示字段等于某个值。`eq` 指令接受一个字面量 (literal)，可以是 `number`, `boolean`, `string`, `object`, `array`。
 
@@ -432,7 +427,7 @@ db.collection('articles').where({
 })
 ```
 
-##### neq
+#### neq
 
 字段不等于。`neq` 指令接受一个字面量 (literal)，可以是 `number`, `boolean`, `string`, `object`, `array`。
 
@@ -448,7 +443,7 @@ db.collection('goods').where({
 })
 ```
 
-##### gt
+#### gt
 
 字段大于指定值。
 
@@ -462,19 +457,19 @@ db.collection('goods').where({
 })
 ```
 
-##### gte
+#### gte
 
 字段大于或等于指定值。
 
-##### lt
+#### lt
 
 字段小于指定值。
 
-##### lte
+#### lte
 
 字段小于或等于指定值。
 
-##### in
+#### in
 
 字段值在给定的数组中。
 
@@ -490,7 +485,7 @@ db.collection('goods').where({
 })
 ```
 
-##### nin
+#### nin
 
 字段值不在给定的数组中。
 
@@ -506,7 +501,7 @@ db.collection('goods').where({
 })
 ```
 
-##### and
+#### and
 
 表示需同时满足指定的两个或以上的条件。
 
@@ -534,7 +529,7 @@ db.collection('goods').where({
 })
 ```
 
-##### or
+#### or
 
 表示需满足所有指定条件中的至少一个。如筛选出价格小于 4000 或在 6000-8000 之间的计算机：
 
@@ -578,9 +573,9 @@ db.collection('goods').where(_.or(
 ))
 ```
 
-#### 正则表达式查询
+### 正则表达式查询
 
-##### db.RegExp
+#### db.RegExp
 
 根据正则表达式进行筛选
 
@@ -600,7 +595,7 @@ db.collection('articles').where({
 })
 ```
 
-### 删除文档
+## 删除文档
 方式1 通过指定文档ID
 
 collection.doc(_id).remove()
@@ -641,9 +636,9 @@ collection.where({
 })
 ```
 
-### 更新文档
+## 更新文档
 
-#### 更新指定文档
+### 更新指定文档
 
 collection.doc().update()
 
@@ -653,7 +648,7 @@ collection.doc('doc-id').update({
 });
 ```
 
-#### 更新文档，如果不存在则创建
+### 更新文档，如果不存在则创建
 collection.doc().set()
 
 ```js
@@ -672,7 +667,7 @@ collection.doc('doc-id').set({
 });
 ```
 
-#### 批量更新文档
+### 批量更新文档
 collection.update()
 
 ```js
@@ -690,9 +685,9 @@ collection.where({name: _.eq('hey')}).update({
 });
 ```
 
-#### 更新指令
+### 更新指令
 
-##### set
+#### set
 
 更新指令。用于设定字段等于指定值。这种方法相比传入纯 JS 对象的好处是能够指定字段等于一个对象：
 
@@ -722,7 +717,7 @@ db.collection('photo').doc('doc-id').update({
 })
 ```
 
-##### inc
+#### inc
 
 更新指令。用于指示字段自增某个值，这是个原子操作，使用这个操作指令而不是先读数据、再加、再写回的好处是：
 
@@ -757,12 +752,12 @@ db.collection('user').where({
 })
 ```
 
-##### mul
+#### mul
 
 更新指令。用于指示字段自乘某个值。
 
 
-##### remove
+#### remove
 
 更新指令。用于表示删除某个字段。如某人删除了自己一条商品评价中的评分：
 
@@ -784,7 +779,7 @@ db.collection('comments').doc('comment-id').update({
 })
 ```
 
-##### push
+#### push
 向数组尾部追加元素，支持传入单个元素或数组
 
 ```js
@@ -806,7 +801,7 @@ db.collection('comments').doc('comment-id').update({
 })
 ```
 
-##### pop
+#### pop
 删除数组尾部元素
 
 ```js
@@ -825,19 +820,19 @@ db.collection('comments').doc('comment-id').update({
   
 })
 ```
-##### unshift
+#### unshift
 向数组头部添加元素，支持传入单个元素或数组。使用同push
-##### shift
+#### shift
 删除数组头部元素。使用同pop
 
 
-### GEO地理位置
+## GEO地理位置
 
 注意：**如果需要对类型为地理位置的字段进行搜索，一定要建立地理位置索引**。
 
-#### GEO数据类型
+### GEO数据类型
 
-##### Point
+#### Point
 
 用于表示地理位置点，用经纬度唯一标记一个点，这是一个特殊的数据存储类型。
 
@@ -848,7 +843,7 @@ db.collection('comments').doc('comment-id').update({
 new db.Geo.Point(longitude, latitude)
 ```
 
-##### LineString
+#### LineString
 
 用于表示地理路径，是由两个或者更多的 `Point` 组成的线段。
 
@@ -864,7 +859,7 @@ new db.Geo.LineString([
 ])
 ```
 
-##### Polygon
+#### Polygon
 
 用于表示地理上的一个多边形（有洞或无洞均可），它是由一个或多个**闭环** `LineString` 组成的几何图形。
 
@@ -882,7 +877,7 @@ new db.Geo.Polygon([
 ])
 ```
 
-##### MultiPoint
+#### MultiPoint
 
 用于表示多个点 `Point` 的集合。
 
@@ -898,7 +893,7 @@ new db.Geo.MultiPoint([
 ])
 ```
 
-##### MultiLineString
+#### MultiLineString
 
 用于表示多个地理路径 `LineString` 的集合。
 
@@ -915,7 +910,7 @@ new db.Geo.MultiLineString([
 ```
 
 
-##### MultiPolygon
+#### MultiPolygon
 
 用于表示多个地理多边形 `Polygon` 的集合。
 
@@ -931,9 +926,9 @@ new db.Geo.MultiPolygon([
 ])
 ```
 
-#### GEO操作符
+### GEO操作符
 
-##### geoNear
+#### geoNear
 
 按从近到远的顺序，找出字段值在给定点的附近的记录。
 
@@ -961,7 +956,7 @@ db.collection('user').where({
 })
 ```
 
-##### geoWithin
+#### geoWithin
 
 找出字段值在指定 Polygon / MultiPolygon 内的记录，无排序
 
@@ -996,7 +991,7 @@ db.collection('user').where({
 })
 ```
 
-##### geoIntersects
+#### geoIntersects
 
 找出字段值和给定的地理位置图形相交的记录
 
@@ -1027,8 +1022,7 @@ db.collection('user').where({
 })
 ```
 
-### 数据库实时推送
-
+## 数据库实时推送
 
 监听指定集合中符合查询条件的文档，通过onchange回调获得文档的变化详情
 (where参数为查询条件 参考 [查询文档](#查询文档))
@@ -1050,8 +1044,6 @@ db.collection('user').where({
       console.log("收到error**********", error)
     }
   })
-
-
 ```
 
 单个doc的监听，也可以采用doc('docId').watch()形式

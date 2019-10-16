@@ -4,6 +4,7 @@ import { register,  isSuccess, callbackWithTryCatch, catchCallback } from '../ut
 
 export function registerCollection(app, collName) {
   const db = app.database();
+  console.log(db);
   const collection = db.collection(collName);
 
   register('database collection: name test', callbackWithTryCatch(() => {

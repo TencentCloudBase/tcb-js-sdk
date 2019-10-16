@@ -16,7 +16,7 @@ export function registerDocument(app, collName) {
   register('database document: API - set data in empty document', async () => {
     await new Promise(async resolve => {
       try {
-        const document = collection.doc();
+        const document = collection.doc(docIDGenerated);
         await document.set({
           name: 'jude'
         }).catch(callbackWithTryCatch(err => {

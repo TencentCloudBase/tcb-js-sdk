@@ -608,6 +608,7 @@ export function registerCommand(app, collName) {
         res = await collection.doc(docId).get().catch(callbackWithTryCatch(err => {
           assert(false, { err });
         }));
+        console.log(res);
         assert(isSuccess(0, res), { res });
         assert.deepStrictEqual(res.data[0].test, [100, 10000, 1000], { res });
 

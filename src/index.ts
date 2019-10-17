@@ -1,9 +1,9 @@
+import { Db } from '@cloudbase/database';
 import * as Storage from './storage';
 import Auth from './auth';
 import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener } from './lib/events';
-import { Db } from '@cloudbase/database';
 
 class TCB {
   config: any

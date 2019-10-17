@@ -10,12 +10,12 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var database_1 = require("@cloudbase/database");
 var Storage = require("./storage");
 var auth_1 = require("./auth");
 var Functions = require("./functions");
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
-var database_1 = require("@cloudbase/database");
 var TCB = (function () {
     function TCB(config) {
         this.config = config ? config : this.config;
@@ -38,7 +38,7 @@ var TCB = (function () {
         if (!database_1.Db.ws) {
             database_1.Db.ws = null;
         }
-        return new database_1.Db(__assign({}, this.config, dbConfig));
+        return new database_1.Db(__assign(__assign({}, this.config), dbConfig));
     };
     TCB.prototype.auth = function (_a) {
         var persistence = (_a === void 0 ? {} : _a).persistence;

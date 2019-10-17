@@ -1,5 +1,5 @@
-import Auth from './auth';
 import { Db } from '@cloudbase/database';
+import Auth from './auth';
 declare class TCB {
     config: any;
     authObj: Auth;

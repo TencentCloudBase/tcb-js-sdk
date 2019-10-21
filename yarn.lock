@@ -769,10 +769,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@cloudbase/database@^0.7.2":
-  version "0.7.2"
-  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.7.2.tgz#db02de01027d15e1bd5ead2c50d09f352ddf43de"
-  integrity sha512-62jOclBXxV6yaz+QtmiPBA7oIf+zlqe6DNu3SIddX17QyEvb4BVeoujVXff/WO0vMFu2VonYqCQo7OOTVmffUg==
+"@cloudbase/database@^0.8.0":
+  version "0.8.0"
+  resolved "http://r.tnpm.oa.com/@cloudbase/database/download/@cloudbase/database-0.8.0.tgz#434d8153d6ab5c163bd9eed1b74a6d21b31e2bb9"
+  integrity sha1-Q02BU9arXBY72e7Rt0ptIbMeK7k=
   dependencies:
     bson "^4.0.2"
     camelcase "^5.3.1"

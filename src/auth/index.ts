@@ -93,6 +93,7 @@ export default class Auth extends AuthProvider {
     });
     if (res.refresh_token) {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
+      await this.httpRequest.refreshAccessToken();
       return {
         credential: {
           refreshToken: res.refresh_token

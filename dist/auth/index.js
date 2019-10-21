@@ -156,18 +156,17 @@ var Auth = (function (_super) {
                             })];
                     case 1:
                         res = _a.sent();
-                        if (res.refresh_token) {
-                            this.customAuthProvider.setRefreshToken(res.refresh_token);
-                            return [2, {
-                                    credential: {
-                                        refreshToken: res.refresh_token
-                                    }
-                                }];
-                        }
-                        else {
-                            throw new Error('[tcb-js-sdk] 自定义登录失败');
-                        }
-                        return [2];
+                        if (!res.refresh_token) return [3, 3];
+                        this.customAuthProvider.setRefreshToken(res.refresh_token);
+                        return [4, this.httpRequest.refreshAccessToken()];
+                    case 2:
+                        _a.sent();
+                        return [2, {
+                                credential: {
+                                    refreshToken: res.refresh_token
+                                }
+                            }];
+                    case 3: throw new Error('[tcb-js-sdk] 自定义登录失败');
                 }
             });
         });

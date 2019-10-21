@@ -26,11 +26,17 @@ async function setup() {
     });
   }, ticket);
 
-  console.log(refreshToken);
   expect(refreshToken).toBeDefined();
 }
 
-beforeAll(async () => {
-  global.foo = 123;
+beforeEach(async () => {
   await setup();
+});
+
+afterEach(async () => {
+  const { page } = global;
+  await page.evaluate(() => {
+    localStorage.clear();
+  });
+  page.close();
 });

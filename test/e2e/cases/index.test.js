@@ -14,6 +14,13 @@ describe('数据库', () => {
 });
 
 describe('鉴权', () => {
+  it('自定义登录后应该有access token', async () => {
+    const result = await page.evaluate(() => {
+      return localStorage.getItem('access_token_starkwang-e850e3');
+    });
+
+    expect(result).toBeDefined();
+  });
   it('getLoginState', async () => {
     const page = global.page;
     let result = await page.evaluate(() => {

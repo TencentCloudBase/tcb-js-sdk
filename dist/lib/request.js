@@ -91,7 +91,7 @@ var RequestMethods = (function () {
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._postWxMiniApp("http:" + url, data, options)];
+                    case 3: return [4, this._postWxMiniApp("https:" + url, data, options)];
                     case 4:
                         res = _b.sent();
                         return [3, 5];
@@ -120,7 +120,7 @@ var RequestMethods = (function () {
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._uploadWxMiniApp("http:" + url, filePath, key, data, options)];
+                    case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, options)];
                     case 4:
                         res = _b.sent();
                         return [3, 5];

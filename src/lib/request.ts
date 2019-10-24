@@ -37,7 +37,7 @@ class RequestMethods {
         res = await this._postWeb(url, data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        res = await this._postWxMiniApp(`http:${url}`, data, options);
+        res = await this._postWxMiniApp(`https:${url}`, data, options);
         break;
     }
     return res;
@@ -51,7 +51,7 @@ class RequestMethods {
         res = await this._uploadWeb(url, data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        res = await this._uploadWxMiniApp(`http:${url}`, filePath, key, data, options);
+        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, options);
         break;
     }
     return res;

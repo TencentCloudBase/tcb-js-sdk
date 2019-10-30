@@ -31,7 +31,7 @@ declare class TCB {
     }, callback?: Function): any;
     uploadFile(params: {
         cloudPath: string;
-        filePath: string;
+        filePath: File;
         onUploadProgress?: Function;
     }, callback?: Function): any;
 }

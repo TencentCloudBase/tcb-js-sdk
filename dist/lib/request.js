@@ -211,6 +211,24 @@ var Request = (function (_super) {
     }
     Request.prototype.refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this._refreshAccessTokenPromise) {
+                            this._refreshAccessTokenPromise = this._refreshAccessToken();
+                        }
+                        return [4, this._refreshAccessTokenPromise];
+                    case 1:
+                        result = _a.sent();
+                        this._shouldRefreshAccessTokenHook = null;
+                        return [2, result];
+                }
+            });
+        });
+    };
+    Request.prototype._refreshAccessToken = function () {
+        return __awaiter(this, void 0, void 0, function () {
             var refreshToken, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {

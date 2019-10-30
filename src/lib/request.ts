@@ -140,6 +140,7 @@ class Request extends RequestMethods {
   accessTokenExpireKey: string;
   refreshTokenKey: string;
   _shouldRefreshAccessTokenHook: Function
+  _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null
 
   /**
    * 初始化
@@ -157,8 +158,19 @@ class Request extends RequestMethods {
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
   }
 
-  // 调用接口刷新access token，并且返回
   async refreshAccessToken(): Promise<GetAccessTokenResult> {
+    // 可能会同时调用多次刷新access token，这里把它们合并成一个
+    if (!this._refreshAccessTokenPromise) {
+      // 没有正在刷新，那么正常执行刷新逻辑
+      this._refreshAccessTokenPromise = this._refreshAccessToken();
+    }
+    const result = await this._refreshAccessTokenPromise;
+    this._shouldRefreshAccessTokenHook = null;
+    return result;
+  }
+
+  // 调用接口刷新access token，并且返回
+  async _refreshAccessToken(): Promise<GetAccessTokenResult> {
     this.cache.removeStore(this.accessTokenKey);
     this.cache.removeStore(this.accessTokenExpireKey);
 

@@ -77,7 +77,7 @@ class TCB {
     return Storage.downloadFile.apply(this, [params, callback]);
   }
 
-  uploadFile(params: { cloudPath: string; filePath: string; onUploadProgress?: Function }, callback?: Function) {
+  uploadFile(params: { cloudPath: string; filePath: File; onUploadProgress?: Function }, callback?: Function) {
     return Storage.uploadFile.apply(this, [params, callback]);
   }
 }

@@ -2,6 +2,7 @@
 const path = require('path');
 const package = require('./package.json');
 const Visualizer = require('webpack-visualizer-plugin');
+const webpack = require('webpack');
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const modName = 'tcb';
@@ -36,6 +37,10 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      'process.env.END_POINT': JSON.stringify(process.env.END_POINT)
+    }),
     new Visualizer({
       filename: './statistics.html'
     }),

@@ -128,6 +128,8 @@ tcb.init({
 
 服务端 SDK 内置了生成 Ticket 的接口，开发者需要提供一个自定义的 `customUserId` 作为用户的唯一身份标识。Ticket 有效期为 5 分钟，过期则失效。
 
+每个用户的 customUserId 不能相同，每次用户重新登录时，原有的登录态将会失效。
+
 ```js
 let customUserId = '123456';
 

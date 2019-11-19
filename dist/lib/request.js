@@ -158,6 +158,7 @@ var RequestMethods = (function () {
         });
     };
     RequestMethods.prototype._downloadWeb = function (url) {
+        var fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
         axios_1.default
             .get(url, {
             responseType: 'blob'
@@ -166,7 +167,7 @@ var RequestMethods = (function () {
             var url = window.URL.createObjectURL(new Blob([response.data]));
             var link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', 'file.pdf');
+            link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
         });

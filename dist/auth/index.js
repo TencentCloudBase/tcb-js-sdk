@@ -76,13 +76,17 @@ var Auth = (function (_super) {
     };
     Auth.prototype.signOut = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action;
+            var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action, refresh_token;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
                         action = 'auth.logout';
-                        return [4, this.httpRequest.send(action, { refresh_token: cache.getStore(refreshTokenKey) })];
+                        refresh_token = cache.getStore(refreshTokenKey);
+                        if (!refresh_token) {
+                            return [2];
+                        }
+                        return [4, this.httpRequest.send(action, { refresh_token: refresh_token })];
                     case 1:
                         _b.sent();
                         cache.removeStore(refreshTokenKey);
@@ -150,22 +154,25 @@ var Auth = (function (_super) {
                         if (typeof ticket !== 'string') {
                             throw new Error('ticket must be a string');
                         }
+                        return [4, this.signOut()];
+                    case 1:
+                        _a.sent();
                         return [4, this.httpRequest.send('auth.signInWithTicket', {
                                 ticket: ticket
                             })];
-                    case 1:
+                    case 2:
                         res = _a.sent();
-                        if (!res.refresh_token) return [3, 3];
+                        if (!res.refresh_token) return [3, 4];
                         this.customAuthProvider.setRefreshToken(res.refresh_token);
                         return [4, this.httpRequest.refreshAccessToken()];
-                    case 2:
+                    case 3:
                         _a.sent();
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
                                 }
                             }];
-                    case 3: throw new Error('[tcb-js-sdk] 自定义登录失败');
+                    case 4: throw new Error('[tcb-js-sdk] 自定义登录失败');
                 }
             });
         });

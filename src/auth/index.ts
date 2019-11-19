@@ -43,7 +43,12 @@ export default class Auth extends AuthProvider {
   async signOut() {
     const { cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this.httpRequest;
     const action = 'auth.logout';
-    await this.httpRequest.send(action, { refresh_token: cache.getStore(refreshTokenKey) });
+
+    const refresh_token = cache.getStore(refreshTokenKey);
+    if (!refresh_token) {
+      return;
+    }
+    await this.httpRequest.send(action, { refresh_token });
 
     cache.removeStore(refreshTokenKey);
     cache.removeStore(accessTokenKey);
@@ -86,6 +91,10 @@ export default class Auth extends AuthProvider {
     if (typeof ticket !== 'string') {
       throw new Error('ticket must be a string');
     }
+
+    // 先登出
+    await this.signOut();
+
     const res = await this.httpRequest.send('auth.signInWithTicket', {
       ticket
     });

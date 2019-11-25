@@ -222,6 +222,7 @@ var Request = (function (_super) {
                         return [4, this._refreshAccessTokenPromise];
                     case 1:
                         result = _a.sent();
+                        this._refreshAccessTokenPromise = null;
                         this._shouldRefreshAccessTokenHook = null;
                         return [2, result];
                 }
@@ -230,7 +231,7 @@ var Request = (function (_super) {
     };
     Request.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var refreshToken, response;
+            var refreshToken, response, code;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -245,9 +246,12 @@ var Request = (function (_super) {
                             })];
                     case 1:
                         response = _a.sent();
-                        if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-                            events_1.activateEvent('loginStateExpire');
-                            this.cache.removeStore(this.refreshTokenKey);
+                        if (response.data.code) {
+                            code = response.data.code;
+                            if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
+                                events_1.activateEvent('loginStateExpire');
+                                this.cache.removeStore(this.refreshTokenKey);
+                            }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {

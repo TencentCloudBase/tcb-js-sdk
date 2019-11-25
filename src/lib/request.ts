@@ -166,6 +166,7 @@ class Request extends RequestMethods {
       this._refreshAccessTokenPromise = this._refreshAccessToken();
     }
     const result = await this._refreshAccessTokenPromise;
+    this._refreshAccessTokenPromise = null;
     this._shouldRefreshAccessTokenHook = null;
     return result;
   }
@@ -184,9 +185,12 @@ class Request extends RequestMethods {
     const response = await this.request('auth.getJwt', {
       refresh_token: refreshToken
     });
-    if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-      activateEvent('loginStateExpire');
-      this.cache.removeStore(this.refreshTokenKey);
+    if (response.data.code) {
+      const { code } = response.data;
+      if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
+        activateEvent('loginStateExpire');
+        this.cache.removeStore(this.refreshTokenKey);
+      }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {

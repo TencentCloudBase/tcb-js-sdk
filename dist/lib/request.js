@@ -79,6 +79,9 @@ var actionsWithoutAccessToken = [
     'auth.logout',
     'auth.signInWithTicket'
 ];
+var commonHeader = {
+    'X-SDK-Version': types_1.SDK_VERISON
+};
 var RequestMethods = (function () {
     function RequestMethods(mode) {
         if (mode === void 0) { mode = "WEB"; }
@@ -98,11 +101,15 @@ var RequestMethods = (function () {
                             case "WX_MINIAPP": return [3, 3];
                         }
                         return [3, 5];
-                    case 1: return [4, this._postWeb(url, data, options)];
+                    case 1:
+                        options.headers = __assign({}, options.headers, commonHeader);
+                        return [4, this._postWeb(url, data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._postWxMiniApp("https:" + url, data, options)];
+                    case 3:
+                        options.header = __assign({}, options.header, commonHeader);
+                        return [4, this._postWxMiniApp("https:" + url, data, options)];
                     case 4:
                         res = _b.sent();
                         return [3, 5];
@@ -125,13 +132,16 @@ var RequestMethods = (function () {
                         }
                         return [3, 5];
                     case 1:
+                        options.headers = __assign({}, options.headers, commonHeader);
                         data.append('file', filePath);
                         data.append('key', key);
                         return [4, this._uploadWeb(url, data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, options)];
+                    case 3:
+                        options.header = __assign({}, options.header, commonHeader);
+                        return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, options)];
                     case 4:
                         res = _b.sent();
                         return [3, 5];
@@ -172,7 +182,8 @@ var RequestMethods = (function () {
         var fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
         axios_1.default
             .get(url, {
-            responseType: 'blob'
+            responseType: 'blob',
+            headers: commonHeader
         })
             .then(function (response) {
             var url = window.URL.createObjectURL(new Blob([response.data]));
@@ -184,7 +195,10 @@ var RequestMethods = (function () {
         });
     };
     RequestMethods.prototype._downloadWxMiniApp = function (url) {
-        wx.downloadFile({ url: url });
+        wx.downloadFile({
+            url: url,
+            header: commonHeader
+        });
     };
     RequestMethods.prototype._postWeb = function (url, data, options) {
         if (data === void 0) { data = {}; }

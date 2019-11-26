@@ -1,3 +1,6 @@
+import * as packageInfo from '../package.json';
+
+export const SDK_VERISON = packageInfo.version;
 /*eslint-disable */
 export const enum RequestMode {
   WEB = 'WEB',

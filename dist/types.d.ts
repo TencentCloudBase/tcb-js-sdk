@@ -1,3 +1,4 @@
+export declare const SDK_VERISON: any;
 export declare const enum RequestMode {
     WEB = "WEB",
     WX_MINIAPP = "WX_MINIAPP"

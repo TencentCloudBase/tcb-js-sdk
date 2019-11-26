@@ -9,8 +9,10 @@ const modName = 'tcb';
 
 module.exports = {
   mode: 'production',
+  // regenerator-runtime/runtime是Generator的polyfill
+  // 解决async/await被babel转成generator后的兼容问题
   entry: [
-    './dist/index.js'
+    'regenerator-runtime/runtime','./dist/index.js'
   ],
   // devtool: 'inline-source-map',
   devtool: false,
@@ -31,7 +33,7 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel-loader',
         options: {
-          presets: ['@babel/preset-env']
+          presets: ["@babel/preset-env"]
         }
       }
     ]

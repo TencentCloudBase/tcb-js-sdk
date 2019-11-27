@@ -1,3 +1,4 @@
+declare module '*.json';
 declare type Weixin = {
   setStorageSync(key: string, val: any): any;
   getStorageSync(key: string): any;

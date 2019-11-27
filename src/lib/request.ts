@@ -5,10 +5,10 @@ import {
   BASE_URL,
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
-  REFRESH_TOKEN
+  REFRESH_TOKEN,
+  SDK_VERISON
 } from '../types';
 import { Cache } from './cache';
-// import * as util from './util';
 import { activateEvent } from './events';
 import Axios from 'axios';
 
@@ -23,6 +23,9 @@ const actionsWithoutAccessToken = [
   'auth.signInWithTicket'
 ];
 
+const commonHeader = {
+  'X-SDK-Version': SDK_VERISON
+}
 /**
  * @class RequestMethods
  */
@@ -35,9 +38,17 @@ class RequestMethods {
     let res;
     switch (this._mode) {
       case RequestMode.WEB:
+        options.headers = {
+          ...options.headers,
+          ...commonHeader
+        };
         res = await this._postWeb(url, data, options);
         break;
       case RequestMode.WX_MINIAPP:
+        options.header = {
+          ...options.header,
+          ...commonHeader
+        };
         res = await this._postWxMiniApp(`https:${url}`, data, options);
         break;
     }
@@ -47,11 +58,19 @@ class RequestMethods {
     let res;
     switch (this._mode) {
       case RequestMode.WEB:
+        options.headers = {
+          ...options.headers,
+          ...commonHeader
+        };
         data.append('file', filePath);
         data.append('key', key);
         res = await this._uploadWeb(url, data, options);
         break;
       case RequestMode.WX_MINIAPP:
+        options.header = {
+          ...options.header,
+          ...commonHeader
+        };
         res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, options);
         break;
     }
@@ -91,8 +110,9 @@ class RequestMethods {
     const fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
     Axios
       .get(url, {
-        responseType: 'blob'
-      })
+        responseType: 'blob',
+        headers: commonHeader
+      },)
       .then(function (response) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
@@ -103,7 +123,10 @@ class RequestMethods {
       });
   }
   private _downloadWxMiniApp(url: string) {
-    wx.downloadFile({ url });
+    wx.downloadFile({ 
+      url,
+      header: commonHeader
+    });
   }
   private _postWeb(url: string, data: KV<any> = {}, options: KV<any> = {}) {
     return Axios.post(url, data, options);

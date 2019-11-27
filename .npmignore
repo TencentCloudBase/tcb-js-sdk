@@ -9,3 +9,4 @@ tcbjs
 jest.config.js
 webpack.test.js
 tsconfig.json
+tsconfig.tsbuildinfo

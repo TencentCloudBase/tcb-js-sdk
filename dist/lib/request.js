@@ -58,11 +58,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var url = __importStar(require("url"));
 var types_1 = require("../types");
 var cache_1 = require("./cache");
 var events_1 = require("./events");
-var axios_1 = require("axios");
+var axios_1 = __importDefault(require("axios"));
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
@@ -303,7 +314,7 @@ var Request = (function (_super) {
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, newUrl, res;
+            var contentType, tmpObj, _a, payload, key, opts, parse, query, formatQuery, newUrl, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -337,7 +348,16 @@ var Request = (function (_super) {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
-                        newUrl = types_1.BASE_URL + "?env=" + this.config.env;
+                        parse = params.parse, query = params.query;
+                        formatQuery = {
+                            env: this.config.env
+                        };
+                        parse && (formatQuery.parse = true);
+                        query && (formatQuery = __assign({}, query, formatQuery));
+                        newUrl = url.format({
+                            pathname: types_1.BASE_URL,
+                            query: formatQuery
+                        });
                         return [4, this.post(newUrl, payload, opts)];
                     case 3:
                         res = _b.sent();

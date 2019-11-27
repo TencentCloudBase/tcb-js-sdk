@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "yarn && npm run tsc && webpack",
+    "build": "npm run tsc && webpack",
     "tsc": "tsc -p tsconfig.json",
     "tsc:w": "tsc -p tsconfig.json -w",
     "test": "jest --verbose false -i",
@@ -13,7 +13,7 @@
     "start": "webpack-dev-server --hot --open",
     "eslint": "eslint \"./**/*.js\" \"./**/*.ts\"",
     "eslint-fix": "eslint --fix \"./**/*.js\" \"./**/*.ts\"",
-    "test_web": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true --mode development --config webpack.test.js"
+    "test_web": "npm run tsc && webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true --mode development --config webpack.test.js"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "@cloudbase/database": "^0.8.0",
     "axios": "^0.19.0",
     "eventemitter3": "^4.0.0",
-    "node-cache": "^4.2.0"
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",

@@ -1,29 +1,42 @@
 import { Db } from '@cloudbase/database';
-import * as Storage from './storage';
 import Auth from './auth';
+import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener } from './lib/events';
 import { RequestMode } from './types';
 
-type InitConfig = {
+// eslint-disable-next-line
+declare global {
+  interface Window {
+    tcb: TCB;
+  }
+}
+
+interface ICloudbaseConfig {
   env: string;
   timeout?: number;
   mode?: RequestMode;
+  persistence?: string;
 }
+
 const DEFAULT_INIT_CONFIG = {
   timeout: 15000,
   mode: RequestMode.WEB
 };
+
+type Persistence = 'local' | 'session' | 'none';
+
 class TCB {
-  config: any
-  authObj: Auth
-  constructor(config?: InitConfig) {
+  config: ICloudbaseConfig;
+  authObj: Auth;
+
+  constructor(config?: ICloudbaseConfig) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
   }
 
-  init(config: InitConfig) {
+  init(config: ICloudbaseConfig) {
     this.config = {
       ...DEFAULT_INIT_CONFIG,
       ...config
@@ -47,12 +60,16 @@ class TCB {
     return new Db({ ...this.config, ...dbConfig });
   }
 
-  auth({ persistence }: { persistence?: string } = {}) {
+  auth({ persistence }: { persistence?: Persistence } = {}) {
     if (this.authObj) {
       console.warn('tcb实例只存在一个auth对象');
       return this.authObj;
     }
-    Object.assign(this.config, { persistence: persistence || 'session' });
+    this.config = {
+      ...this.config,
+      persistence: persistence || 'session'
+    };
+
     this.authObj = new Auth(this.config);
     return this.authObj;
   }
@@ -61,7 +78,10 @@ class TCB {
     return addEventListener.apply(this, [eventName, callback]);
   }
 
-  callFunction(params: { name: string; data: any }, callback?: Function) {
+  callFunction(
+    params: { name: string; data: any; query: any; parse: boolean },
+    callback?: Function
+  ) {
     return Functions.callFunction.apply(this, [params, callback]);
   }
 
@@ -77,14 +97,20 @@ class TCB {
     return Storage.downloadFile.apply(this, [params, callback]);
   }
 
-  uploadFile(params: { cloudPath: string; filePath: File; onUploadProgress?: Function }, callback?: Function) {
+  uploadFile(
+    params: { cloudPath: string; filePath: File; onUploadProgress?: Function },
+    callback?: Function
+  ) {
     return Storage.uploadFile.apply(this, [params, callback]);
   }
 }
 
-let tcb = new TCB();
+const tcb = new TCB();
+// window 可能不存在
 try {
-  (window as any).tcb = tcb;
-} catch (e) { }
+  window.tcb = tcb;
+} catch (e) {
+  // 忽略错误
+}
 
 export = tcb;

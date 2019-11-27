@@ -58,9 +58,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var weixinAuthProvider_1 = require("./weixinAuthProvider");
-var base_1 = require("./base");
+var weixinAuthProvider_1 = __importDefault(require("./weixinAuthProvider"));
+var base_1 = __importDefault(require("./base"));
 var events_1 = require("../lib/events");
 var Auth = (function (_super) {
     __extends(Auth, _super);

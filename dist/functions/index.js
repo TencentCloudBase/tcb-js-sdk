@@ -3,10 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var util_1 = require("../lib/util");
 exports.callFunction = function (_a, callback) {
-    var name = _a.name, data = _a.data;
-    callback = callback || util_1.createPromiseCallback();
+    var name = _a.name, data = _a.data, query = _a.query, parse = _a.parse;
+    var promisedCallback = callback || util_1.createPromiseCallback();
+    var jsonData;
     try {
-        data = data ? JSON.stringify(data) : '';
+        jsonData = data ? JSON.stringify(data) : '';
     }
     catch (e) {
         return Promise.reject(e);
@@ -16,30 +17,43 @@ exports.callFunction = function (_a, callback) {
     }
     var action = 'functions.invokeFunction';
     var params = {
+        query: query,
+        parse: parse,
         function_name: name,
-        request_data: data
+        request_data: jsonData
     };
     var httpRequest = new request_1.Request(this.config);
-    httpRequest.send(action, params).then(function (res) {
+    httpRequest
+        .send(action, params)
+        .then(function (res) {
         if (res.code) {
-            callback(null, res);
+            promisedCallback(null, res);
         }
         else {
             var result = res.data.response_data;
-            try {
-                result = JSON.parse(res.data.response_data);
-                callback(null, {
+            if (parse) {
+                promisedCallback(null, {
                     result: result,
                     requestId: res.requestId
                 });
             }
-            catch (e) {
-                callback(new Error('response data must be json'));
+            else {
+                try {
+                    result = JSON.parse(res.data.response_data);
+                    promisedCallback(null, {
+                        result: result,
+                        requestId: res.requestId
+                    });
+                }
+                catch (e) {
+                    promisedCallback(new Error('response data must be json'));
+                }
             }
         }
-        return callback.promise;
-    }).catch(function (err) {
-        callback(err);
+        return promisedCallback.promise;
+    })
+        .catch(function (err) {
+        promisedCallback(err);
     });
-    return callback.promise;
+    return promisedCallback.promise;
 };

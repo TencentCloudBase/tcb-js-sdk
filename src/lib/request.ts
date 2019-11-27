@@ -1,3 +1,4 @@
+import * as url from 'url';
 import {
   Config,
   RequestMode,
@@ -269,7 +270,23 @@ class Request extends RequestMethods {
 
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
-    const newUrl = `${BASE_URL}?env=${this.config.env}`;
+    // 请求链接支持添加动态 query 参数，方便用户调试定位请求
+    const { parse, query } = params;
+    let formatQuery: Record<string, any> = {
+      env: this.config.env
+    };
+    // 尝试解析响应数据为 JSON
+    parse && (formatQuery.parse = true);
+    query && (formatQuery = {
+      ...query,
+      ...formatQuery
+    });
+    // 生成请求 url
+    const newUrl = url.format({
+      pathname: BASE_URL,
+      query: formatQuery
+    });
+
     // const res = await axios.post(newUrl, payload, opts);
     const res: any = await this.post(newUrl, payload, opts);
 

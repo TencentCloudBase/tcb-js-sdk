@@ -7,10 +7,18 @@ declare type Weixin = {
   request(options: object): any;
   uploadFile(options: object): any;
   downloadFile(options: object): any;
+};
+
+// eslint-disable-next-line
+declare global {
+  interface Window {
+    tcb: any;
+  }
 }
-/*eslint-disable */
+
+// eslint-disable-next-line
 declare const wx: Weixin;
-/*eslint-enable */
+
 declare type KV<T> = {
   [key: string]: T;
 };

@@ -68,3 +68,11 @@ exports.getMiniAppCode = function () {
         });
     });
 };
+function isString(val) {
+    return typeof val === 'string';
+}
+exports.isString = isString;
+function isInstanceOf(instance, construct) {
+    return instance instanceof construct;
+}
+exports.isInstanceOf = isInstanceOf;

@@ -87,3 +87,11 @@ export const getMiniAppCode = function(): Promise<string> {
     });
   });
 };
+
+export function isString(val: any): boolean {
+  return typeof val === 'string';
+}
+
+export function isInstanceOf(instance,construct){
+  return instance instanceof construct;
+}

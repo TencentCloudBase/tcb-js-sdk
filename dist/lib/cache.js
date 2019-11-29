@@ -4,7 +4,7 @@ var Cache = (function () {
     function Cache(persistence) {
         switch (persistence) {
             case 'local':
-                this.storageClass = localStorage;
+                this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : localStorage;
                 break;
             case 'none':
                 this.storageClass = new TcbObject();
@@ -13,7 +13,7 @@ var Cache = (function () {
                 this.storageClass = new TcbMiniappStorage();
                 break;
             default:
-                this.storageClass = sessionStorage;
+                this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : sessionStorage;
                 break;
         }
     }

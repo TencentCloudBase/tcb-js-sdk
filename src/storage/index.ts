@@ -1,6 +1,6 @@
 import { Request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
-import { MetaDataRes } from '../types';
+import { MetaDataRes, KV } from '../types';
 
 
 /*

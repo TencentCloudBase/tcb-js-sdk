@@ -1,13 +1,18 @@
-import { Config, RequestMode } from '../types';
+import { Config, RequestMode, KV } from '../types';
 import { Cache } from './cache';
 interface GetAccessTokenResult {
     accessToken: string;
     accessTokenExpire: number;
 }
+export declare type CommonRequestOptions = {
+    headers?: KV<string>;
+    responseType?: string;
+    onUploadProgress?: Function;
+};
 declare class RequestMethods {
     private readonly _mode;
     constructor(mode?: RequestMode);
-    post(url: string, data?: KV<any>, options?: KV<any>): Promise<KV<any>>;
+    post(url: string, data?: KV<any>, options?: CommonRequestOptions): Promise<KV<any>>;
     upload(url: string, filePath: string, key: string, data: FormData, options?: KV<any>): Promise<KV<any>>;
     download(url: string): void;
     private _uploadWeb;

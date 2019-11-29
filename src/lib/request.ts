@@ -6,7 +6,9 @@ import {
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN,
-  SDK_VERISON
+  SDK_VERISON,
+  KV,
+  protocol
 } from '../types';
 import { Cache } from './cache';
 import { activateEvent } from './events';
@@ -17,6 +19,16 @@ interface GetAccessTokenResult {
   accessTokenExpire: number;
 }
 
+export type CommonRequestOptions = {
+  headers?:KV<string>;
+  responseType?:string;
+  onUploadProgress?:Function;
+}
+
+type WXRequestOptions = Pick<CommonRequestOptions,'onUploadProgress'>&{
+  header?:KV<string>;
+}
+
 const actionsWithoutAccessToken = [
   'auth.getJwt',
   'auth.logout',
@@ -25,7 +37,8 @@ const actionsWithoutAccessToken = [
 
 const commonHeader = {
   'X-SDK-Version': SDK_VERISON
-}
+};
+
 /**
  * @class RequestMethods
  */
@@ -34,7 +47,7 @@ class RequestMethods {
   constructor(mode: RequestMode = RequestMode.WEB) {
     this._mode = mode;
   }
-  public async post(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<KV<any>> {
+  public async post(url: string, data: KV<any> = {}, options: CommonRequestOptions = {}): Promise<KV<any>> {
     let res;
     switch (this._mode) {
       case RequestMode.WEB:
@@ -42,14 +55,15 @@ class RequestMethods {
           ...options.headers,
           ...commonHeader
         };
-        res = await this._postWeb(url, data, options);
+        res = await this._postWeb(`${protocol}${url}`, data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        options.header = {
-          ...options.header,
-          ...commonHeader
-        };
-        res = await this._postWxMiniApp(`https:${url}`, data, options);
+        res = await this._postWxMiniApp(`https:${url}`, data, <WXRequestOptions>{
+          header: {
+            ...options.headers,
+            ...commonHeader
+          }
+        });
         break;
     }
     return res;
@@ -64,14 +78,15 @@ class RequestMethods {
         };
         data.append('file', filePath);
         data.append('key', key);
-        res = await this._uploadWeb(url, data, options);
+        res = await this._uploadWeb(`${protocol}${url}`, data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        options.header = {
-          ...options.header,
-          ...commonHeader
-        };
-        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, options);
+        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data,  <WXRequestOptions>{
+          header: {
+            ...options.headers,
+            ...commonHeader
+          }
+        });
         break;
     }
     return res;
@@ -79,7 +94,7 @@ class RequestMethods {
   public download(url: string) {
     switch (this._mode) {
       case RequestMode.WEB:
-        this._downloadWeb(url);
+        this._downloadWeb(`${protocol}${url}`);
         break;
       case RequestMode.WX_MINIAPP:
         this._downloadWxMiniApp(url);
@@ -112,8 +127,8 @@ class RequestMethods {
       .get(url, {
         responseType: 'blob',
         headers: commonHeader
-      },)
-      .then(function (response) {
+      })
+      .then(function (response:any) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -131,7 +146,7 @@ class RequestMethods {
   private _postWeb(url: string, data: KV<any> = {}, options: KV<any> = {}) {
     return Axios.post(url, data, options);
   }
-  private _postWxMiniApp(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
+  private _postWxMiniApp(url: string, data: KV<any> = {}, options: WXRequestOptions = {}): Promise<any> {
     return new Promise((resolve, reject) => {
       wx.request({
         url,
@@ -156,7 +171,7 @@ const DEFAULT_REQUEST_CONFIG = {
   mode: RequestMode.WEB
 };
 /**
- * @internal
+ * @class Request
  */
 class Request extends RequestMethods {
   config: Config;
@@ -169,8 +184,6 @@ class Request extends RequestMethods {
 
   /**
    * 初始化
-   *
-   * @internal
    * @param config
    */
   constructor(config: Config = DEFAULT_REQUEST_CONFIG) {
@@ -205,7 +218,6 @@ class Request extends RequestMethods {
     if (!refreshToken) {
       throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
-
     const response = await this.request('auth.getJwt', {
       refresh_token: refreshToken
     });
@@ -310,7 +322,6 @@ class Request extends RequestMethods {
       query: formatQuery
     });
 
-    // const res = await axios.post(newUrl, payload, opts);
     const res: any = await this.post(newUrl, payload, opts);
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
@@ -326,7 +337,6 @@ class Request extends RequestMethods {
     }, 3000);
     const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
     clearTimeout(slowQueryWarning);
-
     if (response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1) {
       // access_token过期，重新获取
       await this.refreshAccessToken();

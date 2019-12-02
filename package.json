@@ -51,8 +51,10 @@
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-typescript": "^0.14.0",
     "express": "^4.17.1",
+    "husky": "^3.1.0",
     "jest": "^24.7.1",
     "jest-puppeteer": "^4.3.0",
+    "lint-staged": "^9.5.0",
     "power-assert": "^1.6.1",
     "puppeteer": "^1.20.0",
     "serve-static": "^1.14.1",
@@ -67,5 +69,16 @@
     "webpack-dev-server": "^3.3.1",
     "webpack-merge": "^4.2.2",
     "webpack-visualizer-plugin": "^0.1.11"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

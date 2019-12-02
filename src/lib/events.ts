@@ -1,8 +1,8 @@
-import {isString, isInstanceOf} from './util';
+import { isString, isInstanceOf } from './util';
 
 interface Listeners {
-  [key: string]: Function[]
-};
+  [key: string]: Function[];
+}
 
 /**
  * @private
@@ -41,8 +41,8 @@ export class IEvent {
   public target: any;
   public data: any;
 
-  constructor(name: string, data:any) {
-    this.data = data||null;
+  constructor(name: string, data: any) {
+    this.data = data || null;
     this.name = name;
   }
 }
@@ -54,9 +54,9 @@ export class IEvent {
  * @param {any} data  - 数据
  */
 export class IErrorEvent extends IEvent {
-  public readonly error:Error;
-  constructor(error: Error, data?:any) {
-    super('error', {error,data});
+  public readonly error: Error;
+  constructor(error: Error, data?: any) {
+    super('error', { error, data });
     this.error = error;
   }
 }
@@ -71,16 +71,8 @@ class IEventEmitter {
    * @property {Listeners} _listeners - 响应函数集合
    * @default `{}`
    */
-  private readonly _listeners: Listeners={};
-  /**
-   * @private
-   * @method _listens - 判断是否监听了name事件
-   * @param {string} name - event名称
-   * @return `boolean`
-   */
-  private _listens(name: string):boolean {
-    return this._listeners[name] && this._listeners[name].length > 0;
-  }
+  private readonly _listeners: Listeners = {};
+
   /**
    * @public
    * @method on - 添加监听
@@ -88,7 +80,7 @@ class IEventEmitter {
    * @param {Function} listener - 响应函数
    * @return `this`
    */
-  public on(name: string , listener: Function): this {
+  public on(name: string, listener: Function): this {
     _addEventListener(name, listener, this._listeners);
     return this;
   }
@@ -99,7 +91,7 @@ class IEventEmitter {
    * @param {Function} listener - 响应函数
    * @return `this`
    */
-  public off(name: string , listener: Function):this {
+  public off(name: string, listener: Function): this {
     _removeEventListener(name, listener, this._listeners);
     return this;
   }
@@ -109,14 +101,14 @@ class IEventEmitter {
    * @param {string|IEvent} event - event
    * @return `this`
    */
-  public fire(event: string|IEvent,data?:any):this {
+  public fire(event: string | IEvent, data?: any): this {
     // 打印错误信息
     if (isInstanceOf(event, IErrorEvent)) {
       console.error((event as IErrorEvent).error);
       return this;
     }
 
-    const ev:IEvent = isString(event)?new IEvent(<string>event, data || {}):<IEvent>event;
+    const ev: IEvent = isString(event) ? new IEvent(<string>event, data || {}) : <IEvent>event;
 
     const name = ev.name;
 
@@ -131,14 +123,24 @@ class IEventEmitter {
 
     return this;
   }
+
+  /**
+   * @private
+   * @method _listens - 判断是否监听了name事件
+   * @param {string} name - event名称
+   * @return `boolean`
+   */
+  private _listens(name: string): boolean {
+    return this._listeners[name] && this._listeners[name].length > 0;
+  }
 }
 
 const iEventEmitter = new IEventEmitter();
 
-export function addEventListener(event:string,callback:Function){
-  iEventEmitter.on(event,callback);
+export function addEventListener(event: string, callback: Function) {
+  iEventEmitter.on(event, callback);
 }
 
-export function activateEvent(event:string,data:any={}){
-  iEventEmitter.fire(event,data)
+export function activateEvent(event: string, data: any = {}) {
+  iEventEmitter.fire(event, data);
 }

@@ -5,6 +5,7 @@ interface ICallFunctionOptions {
   name: string;
   data: Record<string, any>;
   query: Record<string, any>;
+  search: string;
   parse: boolean;
 }
 
@@ -16,7 +17,7 @@ interface ICallFunctionResponse {
 type CallbackFunction = (error: Error, res?: ICallFunctionResponse) => {};
 
 export const callFunction = function(
-  { name, data, query, parse }: ICallFunctionOptions,
+  { name, data, query, parse, search }: ICallFunctionOptions,
   callback?: CallbackFunction
 ) {
   const promisedCallback = callback || createPromiseCallback();
@@ -34,6 +35,7 @@ export const callFunction = function(
   const params = {
     query,
     parse,
+    search,
     function_name: name,
     request_data: jsonData
   };

@@ -23,7 +23,8 @@ export function test_function(app) {
             env: 'test',
             action: 'call_function',
             field: '中文'
-          }
+          },
+          search: '&exxxxxx'
         },
         callbackWithTryCatch(
           (err, res) => {

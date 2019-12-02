@@ -92,6 +92,6 @@ export function isString(val: any): boolean {
   return typeof val === 'string';
 }
 
-export function isInstanceOf(instance,construct){
+export function isInstanceOf(instance, construct) {
   return instance instanceof construct;
 }

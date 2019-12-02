@@ -19,7 +19,7 @@ declare global {
 }
 
 declare type CocosNamespace = {
-  sys:any;
+  sys: any;
 }
 // eslint-disable-next-line
 declare const wx: Weixin;

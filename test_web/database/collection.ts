@@ -1,4 +1,4 @@
-// database collection
+/*eslint max-nested-callbacks: 0 */
 import * as assert from 'power-assert';
 import { register,  isSuccess, callbackWithTryCatch, catchCallback } from '../util';
 

@@ -14,6 +14,7 @@ export function registerDate(app, collName) {
     const initialData = {
       name: 'test',
       date,
+      // eslint-disable-next-line
       serverDate1: new db.serverDate(),
       serverDate2: db.serverDate({ offset }),
       timestamp: {
@@ -79,6 +80,7 @@ export function registerDate(app, collName) {
 
         // Update
         const newDate = new Date();
+        // eslint-disable-next-line
         const newServerDate = new db.serverDate({ offset: 1000 * 60 * 60 }); // offset一小时
         result = await collection.where({
           date: db.command.lte(date).and(db.command.gte(date))

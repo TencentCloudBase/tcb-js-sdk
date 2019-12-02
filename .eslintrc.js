@@ -21,6 +21,7 @@ module.exports = {
                 flatTernaryExpressions: true
             }
         ],
+        "guard-for-in": 0,
         "no-param-reassign": 0,
         "no-undefined": 0
     }

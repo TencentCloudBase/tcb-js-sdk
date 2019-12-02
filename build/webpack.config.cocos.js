@@ -7,10 +7,10 @@ module.exports = merge.strategy({
   // entry和module覆盖baseConfig
   entry: 'replace',
   module: 'replace'
-})(baseConfig,{
+})(baseConfig, {
   target: 'web',
   entry: [
-    'regenerator-runtime/runtime',path.resolve(__dirname,'../src/index.ts')
+    'regenerator-runtime/runtime', path.resolve(__dirname, '../src/index.ts')
   ],
   output: {
     path: path.resolve(__dirname, '../tcbjs'),
@@ -39,7 +39,7 @@ module.exports = merge.strategy({
   },
   resolve: {
     alias: {
-      axios: path.resolve(__dirname,'../src/lib/iAxios.ts')
+      axios: path.resolve(__dirname, '../src/lib/iAxios.ts')
     }
   }
-})
+});

@@ -20,13 +20,13 @@ interface GetAccessTokenResult {
 }
 
 export type CommonRequestOptions = {
-  headers?:KV<string>;
-  responseType?:string;
-  onUploadProgress?:Function;
+  headers?: KV<string>;
+  responseType?: string;
+  onUploadProgress?: Function;
 }
 
-type WXRequestOptions = Pick<CommonRequestOptions,'onUploadProgress'>&{
-  header?:KV<string>;
+type WXRequestOptions = Pick<CommonRequestOptions, 'onUploadProgress'>&{
+  header?: KV<string>;
 }
 
 const actionsWithoutAccessToken = [
@@ -81,7 +81,7 @@ class RequestMethods {
         res = await this._uploadWeb(`${protocol}${url}`, data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data,  <WXRequestOptions>{
+        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, <WXRequestOptions>{
           header: {
             ...options.headers,
             ...commonHeader
@@ -128,7 +128,7 @@ class RequestMethods {
         responseType: 'blob',
         headers: commonHeader
       })
-      .then(function (response:any) {
+      .then(function (response: any) {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -138,7 +138,7 @@ class RequestMethods {
       });
   }
   private _downloadWxMiniApp(url: string) {
-    wx.downloadFile({ 
+    wx.downloadFile({
       url,
       header: commonHeader
     });
@@ -306,7 +306,7 @@ class Request extends RequestMethods {
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
     // 请求链接支持添加动态 query 参数，方便用户调试定位请求
-    const { parse, query } = params;
+    const { parse, query, search } = params;
     let formatQuery: Record<string, any> = {
       env: this.config.env
     };
@@ -317,10 +317,14 @@ class Request extends RequestMethods {
       ...formatQuery
     });
     // 生成请求 url
-    const newUrl = url.format({
+    let newUrl = url.format({
       pathname: BASE_URL,
       query: formatQuery
     });
+
+    if (search) {
+      newUrl += search;
+    }
 
     const res: any = await this.post(newUrl, payload, opts);
 

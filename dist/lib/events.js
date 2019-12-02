@@ -12,9 +12,15 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("./util");
-;
 function _addEventListener(name, listener, listeners) {
     listeners[name] = listeners[name] || [];
     listeners[name].push(listener);
@@ -49,9 +55,6 @@ var IEventEmitter = (function () {
     function IEventEmitter() {
         this._listeners = {};
     }
-    IEventEmitter.prototype._listens = function (name) {
-        return this._listeners[name] && this._listeners[name].length > 0;
-    };
     IEventEmitter.prototype.on = function (name, listener) {
         _addEventListener(name, listener, this._listeners);
         return this;
@@ -69,13 +72,16 @@ var IEventEmitter = (function () {
         var name = ev.name;
         if (this._listens(name)) {
             ev.target = this;
-            var handlers = this._listeners[name] ? this._listeners[name].slice() : [];
+            var handlers = this._listeners[name] ? __spreadArrays(this._listeners[name]) : [];
             for (var _i = 0, handlers_1 = handlers; _i < handlers_1.length; _i++) {
                 var fn = handlers_1[_i];
                 fn.call(this, ev);
             }
         }
         return this;
+    };
+    IEventEmitter.prototype._listens = function (name) {
+        return this._listeners[name] && this._listeners[name].length > 0;
     };
     return IEventEmitter;
 }());

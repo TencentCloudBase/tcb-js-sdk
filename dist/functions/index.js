@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var util_1 = require("../lib/util");
 exports.callFunction = function (_a, callback) {
-    var name = _a.name, data = _a.data, query = _a.query, parse = _a.parse;
+    var name = _a.name, data = _a.data, query = _a.query, parse = _a.parse, search = _a.search;
     var promisedCallback = callback || util_1.createPromiseCallback();
     var jsonData;
     try {
@@ -19,6 +19,7 @@ exports.callFunction = function (_a, callback) {
     var params = {
         query: query,
         parse: parse,
+        search: search,
         function_name: name,
         request_data: jsonData
     };

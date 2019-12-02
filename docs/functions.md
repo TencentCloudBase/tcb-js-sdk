@@ -36,7 +36,10 @@ app
 app.callFunction(
   {
     name: 'test',
-    data: { a: 1 }
+    data: { a: 1 },
+    query: {},
+    search: '',
+    parse: true
   },
   function(err, res) {
     if (err) {

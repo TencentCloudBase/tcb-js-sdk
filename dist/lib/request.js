@@ -24,10 +24,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -102,13 +103,13 @@ var RequestMethods = (function () {
                         }
                         return [3, 5];
                     case 1:
-                        options.headers = __assign({}, options.headers, commonHeader);
+                        options.headers = __assign(__assign({}, options.headers), commonHeader);
                         return [4, this._postWeb("" + types_1.protocol + url, data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
                     case 3: return [4, this._postWxMiniApp("https:" + url, data, {
-                            header: __assign({}, options.headers, commonHeader)
+                            header: __assign(__assign({}, options.headers), commonHeader)
                         })];
                     case 4:
                         res = _b.sent();
@@ -132,7 +133,7 @@ var RequestMethods = (function () {
                         }
                         return [3, 5];
                     case 1:
-                        options.headers = __assign({}, options.headers, commonHeader);
+                        options.headers = __assign(__assign({}, options.headers), commonHeader);
                         data.append('file', filePath);
                         data.append('key', key);
                         return [4, this._uploadWeb("" + types_1.protocol + url, data, options)];
@@ -140,7 +141,7 @@ var RequestMethods = (function () {
                         res = _b.sent();
                         return [3, 5];
                     case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, {
-                            header: __assign({}, options.headers, commonHeader)
+                            header: __assign(__assign({}, options.headers), commonHeader)
                         })];
                     case 4:
                         res = _b.sent();
@@ -169,8 +170,8 @@ var RequestMethods = (function () {
         if (formData === void 0) { formData = {}; }
         if (options === void 0) { options = {}; }
         return new Promise(function (resolve) {
-            wx.uploadFile(__assign({ url: url,
-                filePath: filePath, name: key, formData: formData }, options, { success: function (res) {
+            wx.uploadFile(__assign(__assign({ url: url,
+                filePath: filePath, name: key, formData: formData }, options), { success: function (res) {
                     resolve(res);
                 },
                 fail: function (err) {
@@ -209,8 +210,8 @@ var RequestMethods = (function () {
         if (data === void 0) { data = {}; }
         if (options === void 0) { options = {}; }
         return new Promise(function (resolve, reject) {
-            wx.request(__assign({ url: url,
-                data: data, method: 'POST' }, options, { success: function (res) {
+            wx.request(__assign(__assign({ url: url,
+                data: data, method: 'POST' }, options), { success: function (res) {
                     resolve(res);
                 },
                 fail: function (err) {
@@ -328,7 +329,7 @@ var Request = (function (_super) {
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, parse, query, formatQuery, newUrl, res;
+            var contentType, tmpObj, _a, payload, key, opts, parse, query, search, formatQuery, newUrl, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -362,16 +363,19 @@ var Request = (function (_super) {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
-                        parse = params.parse, query = params.query;
+                        parse = params.parse, query = params.query, search = params.search;
                         formatQuery = {
                             env: this.config.env
                         };
                         parse && (formatQuery.parse = true);
-                        query && (formatQuery = __assign({}, query, formatQuery));
+                        query && (formatQuery = __assign(__assign({}, query), formatQuery));
                         newUrl = url.format({
                             pathname: types_1.BASE_URL,
                             query: formatQuery
                         });
+                        if (search) {
+                            newUrl += search;
+                        }
                         return [4, this.post(newUrl, payload, opts)];
                     case 3:
                         res = _b.sent();

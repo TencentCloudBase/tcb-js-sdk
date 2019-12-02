@@ -103,13 +103,13 @@ var RequestMethods = (function () {
                         return [3, 5];
                     case 1:
                         options.headers = __assign({}, options.headers, commonHeader);
-                        return [4, this._postWeb(url, data, options)];
+                        return [4, this._postWeb("" + types_1.protocol + url, data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3:
-                        options.header = __assign({}, options.header, commonHeader);
-                        return [4, this._postWxMiniApp("https:" + url, data, options)];
+                    case 3: return [4, this._postWxMiniApp("https:" + url, data, {
+                            header: __assign({}, options.headers, commonHeader)
+                        })];
                     case 4:
                         res = _b.sent();
                         return [3, 5];
@@ -135,13 +135,13 @@ var RequestMethods = (function () {
                         options.headers = __assign({}, options.headers, commonHeader);
                         data.append('file', filePath);
                         data.append('key', key);
-                        return [4, this._uploadWeb(url, data, options)];
+                        return [4, this._uploadWeb("" + types_1.protocol + url, data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3:
-                        options.header = __assign({}, options.header, commonHeader);
-                        return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, options)];
+                    case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, {
+                            header: __assign({}, options.headers, commonHeader)
+                        })];
                     case 4:
                         res = _b.sent();
                         return [3, 5];
@@ -153,7 +153,7 @@ var RequestMethods = (function () {
     RequestMethods.prototype.download = function (url) {
         switch (this._mode) {
             case "WEB":
-                this._downloadWeb(url);
+                this._downloadWeb("" + types_1.protocol + url);
                 break;
             case "WX_MINIAPP":
                 this._downloadWxMiniApp(url);

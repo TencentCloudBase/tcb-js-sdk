@@ -1,4 +1,5 @@
 declare module '*.json';
+
 declare type Weixin = {
   setStorageSync(key: string, val: any): any;
   getStorageSync(key: string): any;
@@ -17,9 +18,10 @@ declare global {
   }
 }
 
+declare type CocosNamespace = {
+  sys:any;
+}
 // eslint-disable-next-line
 declare const wx: Weixin;
-
-declare type KV<T> = {
-  [key: string]: T;
-};
+// eslint-disable-next-line
+declare const cc: CocosNamespace;

@@ -4,7 +4,7 @@ class Cache {
   constructor(persistence: string) {
     switch (persistence) {
       case 'local':
-        this.storageClass = localStorage;
+        this.storageClass = typeof cc !=='undefined'&&cc.sys?cc.sys.localStorage:localStorage;
         break;
       case 'none':
         this.storageClass = new TcbObject();
@@ -13,7 +13,7 @@ class Cache {
         this.storageClass = new TcbMiniappStorage();
         break;
       default:
-        this.storageClass = sessionStorage;
+        this.storageClass = typeof cc !=='undefined'&&cc.sys?cc.sys.localStorage:sessionStorage;
         break;
     }
   }

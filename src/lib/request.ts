@@ -13,6 +13,7 @@ import {
 import { Cache } from './cache';
 import { activateEvent } from './events';
 import Axios from 'axios';
+import { genSeqId, getArgNames, isFormData, formatUrl } from './util';
 
 interface GetAccessTokenResult {
   accessToken: string;
@@ -29,6 +30,13 @@ type WXRequestOptions = Pick<CommonRequestOptions, 'onUploadProgress'>&{
   header?: KV<string>;
 }
 
+type AppendedRequestInfo = {
+  data: KV<any>;
+  headers: KV<string>;
+}
+interface RequestBeforeHook {
+  (...args: any[]): AppendedRequestInfo;
+}
 const actionsWithoutAccessToken = [
   'auth.getJwt',
   'auth.logout',
@@ -44,25 +52,80 @@ const commonHeader = {
  */
 class RequestMethods {
   private readonly _mode: RequestMode
+
   constructor(mode: RequestMode = RequestMode.WEB) {
     this._mode = mode;
+    RequestMethods.bindHooks(this, 'post', [RequestMethods.beforeEach]);
+    RequestMethods.bindHooks(this, 'upload', [RequestMethods.beforeEach]);
+    RequestMethods.bindHooks(this, 'download', [RequestMethods.beforeEach]);
+  }
+  /**
+   * 绑定hooks
+   * @static
+   */
+  static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]) {
+    const originMethod = instance[name];
+    const argNames = getArgNames(originMethod);
+    const indexOfDataArg = argNames.indexOf('data');
+    const indexOfOptionsArg = argNames.indexOf('options');
+    // 即不存在data参数也不存在options参数的method无需追加信息
+    if (indexOfDataArg === -1 && indexOfOptionsArg === -1) {
+      return;
+    }
+    instance[name] = function(...args: any[]) {
+      const data = {};
+      const headers = {};
+      hooks.forEach(hook => {
+        const { data: appendedData, headers: appendedHeaders } = hook.apply(instance, args);
+        Object.assign(data, appendedData);
+        Object.assign(headers, appendedHeaders);
+      });
+      const originData = args[indexOfDataArg];
+      const originOptions = args[indexOfOptionsArg];
+      originData && (() => {
+        if (isFormData(originData)) {
+          for (const key in data) {
+            (originData as FormData).append(key, data[key]);
+          }
+          return;
+        }
+        args[indexOfDataArg] = {
+          ...originData,
+          ...data
+        };
+      })();
+      originOptions && (args[indexOfOptionsArg] = {
+        ...originOptions,
+        headers: {
+          ...(originOptions.headers || {}),
+          ...headers
+        }
+      });
+      return (originMethod as Function).apply(instance, args);
+    };
+  }
+  /**
+   * 每次请求之前执行，追加data和headers
+   * @static
+   */
+  static beforeEach(): AppendedRequestInfo {
+    const seqId = genSeqId();
+    return {
+      data: {
+        seqId
+      },
+      headers: commonHeader
+    };
   }
   public async post(url: string, data: KV<any> = {}, options: CommonRequestOptions = {}): Promise<KV<any>> {
     let res;
     switch (this._mode) {
       case RequestMode.WEB:
-        options.headers = {
-          ...options.headers,
-          ...commonHeader
-        };
-        res = await this._postWeb(`${protocol}${url}`, data, options);
+        res = await this._postWeb(formatUrl(protocol, url), data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        res = await this._postWxMiniApp(`https:${url}`, data, <WXRequestOptions>{
-          header: {
-            ...options.headers,
-            ...commonHeader
-          }
+        res = await this._postWxMiniApp(formatUrl('https:', url), data, <WXRequestOptions>{
+          header: options.headers
         });
         break;
     }
@@ -72,32 +135,29 @@ class RequestMethods {
     let res;
     switch (this._mode) {
       case RequestMode.WEB:
-        options.headers = {
-          ...options.headers,
-          ...commonHeader
-        };
+        // options.headers = {
+        //   ...options.headers,
+        //   ...commonHeader
+        // };
         data.append('file', filePath);
         data.append('key', key);
-        res = await this._uploadWeb(`${protocol}${url}`, data, options);
+        res = await this._uploadWeb(formatUrl(protocol, url), data, options);
         break;
       case RequestMode.WX_MINIAPP:
-        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, <WXRequestOptions>{
-          header: {
-            ...options.headers,
-            ...commonHeader
-          }
+        res = await this._uploadWxMiniApp(formatUrl('https:', url), filePath, key, data, <WXRequestOptions>{
+          header: options.headers
         });
         break;
     }
     return res;
   }
-  public download(url: string) {
+  public download(url: string, data: KV<any> = {}) {
     switch (this._mode) {
       case RequestMode.WEB:
-        this._downloadWeb(`${protocol}${url}`);
+        this._downloadWeb(formatUrl(protocol, url), data);
         break;
       case RequestMode.WX_MINIAPP:
-        this._downloadWxMiniApp(url);
+        this._downloadWxMiniApp(formatUrl('https:', url));
         break;
     }
   }
@@ -121,10 +181,11 @@ class RequestMethods {
       });
     });
   }
-  private _downloadWeb(url: string) {
+  private _downloadWeb(url: string, data: KV<any> = {}) {
     const fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
     Axios
       .get(url, {
+        params: data,
         responseType: 'blob',
         headers: commonHeader
       })
@@ -147,6 +208,8 @@ class RequestMethods {
     return Axios.post(url, data, options);
   }
   private _postWxMiniApp(url: string, data: KV<any> = {}, options: WXRequestOptions = {}): Promise<any> {
+    console.log(options);
+    console.log(data);
     return new Promise((resolve, reject) => {
       wx.request({
         url,

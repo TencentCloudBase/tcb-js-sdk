@@ -24,11 +24,10 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -75,6 +74,7 @@ var types_1 = require("../types");
 var cache_1 = require("./cache");
 var events_1 = require("./events");
 var axios_1 = __importDefault(require("axios"));
+var util_1 = require("./util");
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
@@ -87,7 +87,54 @@ var RequestMethods = (function () {
     function RequestMethods(mode) {
         if (mode === void 0) { mode = "WEB"; }
         this._mode = mode;
+        RequestMethods.bindHooks(this, 'post', [RequestMethods.beforeEach]);
+        RequestMethods.bindHooks(this, 'upload', [RequestMethods.beforeEach]);
+        RequestMethods.bindHooks(this, 'download', [RequestMethods.beforeEach]);
     }
+    RequestMethods.bindHooks = function (instance, name, hooks) {
+        var originMethod = instance[name];
+        var argNames = util_1.getArgNames(originMethod);
+        var indexOfDataArg = argNames.indexOf('data');
+        var indexOfOptionsArg = argNames.indexOf('options');
+        if (indexOfDataArg === -1 && indexOfOptionsArg === -1) {
+            return;
+        }
+        instance[name] = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var data = {};
+            var headers = {};
+            hooks.forEach(function (hook) {
+                var _a = hook.apply(instance, args), appendedData = _a.data, appendedHeaders = _a.headers;
+                Object.assign(data, appendedData);
+                Object.assign(headers, appendedHeaders);
+            });
+            var originData = args[indexOfDataArg];
+            var originOptions = args[indexOfOptionsArg];
+            originData && (function () {
+                if (util_1.isFormData(originData)) {
+                    for (var key in data) {
+                        originData.append(key, data[key]);
+                    }
+                    return;
+                }
+                args[indexOfDataArg] = __assign({}, originData, data);
+            })();
+            originOptions && (args[indexOfOptionsArg] = __assign({}, originOptions, { headers: __assign({}, (originOptions.headers || {}), headers) }));
+            return originMethod.apply(instance, args);
+        };
+    };
+    RequestMethods.beforeEach = function () {
+        var seqId = util_1.genSeqId();
+        return {
+            data: {
+                seqId: seqId
+            },
+            headers: commonHeader
+        };
+    };
     RequestMethods.prototype.post = function (url, data, options) {
         if (data === void 0) { data = {}; }
         if (options === void 0) { options = {}; }
@@ -102,14 +149,12 @@ var RequestMethods = (function () {
                             case "WX_MINIAPP": return [3, 3];
                         }
                         return [3, 5];
-                    case 1:
-                        options.headers = __assign(__assign({}, options.headers), commonHeader);
-                        return [4, this._postWeb("" + types_1.protocol + url, data, options)];
+                    case 1: return [4, this._postWeb(util_1.formatUrl(types_1.protocol, url), data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._postWxMiniApp("https:" + url, data, {
-                            header: __assign(__assign({}, options.headers), commonHeader)
+                    case 3: return [4, this._postWxMiniApp(util_1.formatUrl('https:', url), data, {
+                            header: options.headers
                         })];
                     case 4:
                         res = _b.sent();
@@ -133,15 +178,14 @@ var RequestMethods = (function () {
                         }
                         return [3, 5];
                     case 1:
-                        options.headers = __assign(__assign({}, options.headers), commonHeader);
                         data.append('file', filePath);
                         data.append('key', key);
-                        return [4, this._uploadWeb("" + types_1.protocol + url, data, options)];
+                        return [4, this._uploadWeb(util_1.formatUrl(types_1.protocol, url), data, options)];
                     case 2:
                         res = _b.sent();
                         return [3, 5];
-                    case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, {
-                            header: __assign(__assign({}, options.headers), commonHeader)
+                    case 3: return [4, this._uploadWxMiniApp(util_1.formatUrl('https:', url), filePath, key, data, {
+                            header: options.headers
                         })];
                     case 4:
                         res = _b.sent();
@@ -151,13 +195,14 @@ var RequestMethods = (function () {
             });
         });
     };
-    RequestMethods.prototype.download = function (url) {
+    RequestMethods.prototype.download = function (url, data) {
+        if (data === void 0) { data = {}; }
         switch (this._mode) {
             case "WEB":
-                this._downloadWeb("" + types_1.protocol + url);
+                this._downloadWeb(util_1.formatUrl(types_1.protocol, url), data);
                 break;
             case "WX_MINIAPP":
-                this._downloadWxMiniApp(url);
+                this._downloadWxMiniApp(util_1.formatUrl('https:', url));
                 break;
         }
     };
@@ -170,8 +215,8 @@ var RequestMethods = (function () {
         if (formData === void 0) { formData = {}; }
         if (options === void 0) { options = {}; }
         return new Promise(function (resolve) {
-            wx.uploadFile(__assign(__assign({ url: url,
-                filePath: filePath, name: key, formData: formData }, options), { success: function (res) {
+            wx.uploadFile(__assign({ url: url,
+                filePath: filePath, name: key, formData: formData }, options, { success: function (res) {
                     resolve(res);
                 },
                 fail: function (err) {
@@ -179,10 +224,12 @@ var RequestMethods = (function () {
                 } }));
         });
     };
-    RequestMethods.prototype._downloadWeb = function (url) {
+    RequestMethods.prototype._downloadWeb = function (url, data) {
+        if (data === void 0) { data = {}; }
         var fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
         axios_1.default
             .get(url, {
+            params: data,
             responseType: 'blob',
             headers: commonHeader
         })
@@ -209,9 +256,11 @@ var RequestMethods = (function () {
     RequestMethods.prototype._postWxMiniApp = function (url, data, options) {
         if (data === void 0) { data = {}; }
         if (options === void 0) { options = {}; }
+        console.log(options);
+        console.log(data);
         return new Promise(function (resolve, reject) {
-            wx.request(__assign(__assign({ url: url,
-                data: data, method: 'POST' }, options), { success: function (res) {
+            wx.request(__assign({ url: url,
+                data: data, method: 'POST' }, options, { success: function (res) {
                     resolve(res);
                 },
                 fail: function (err) {
@@ -368,7 +417,7 @@ var Request = (function (_super) {
                             env: this.config.env
                         };
                         parse && (formatQuery.parse = true);
-                        query && (formatQuery = __assign(__assign({}, query), formatQuery));
+                        query && (formatQuery = __assign({}, query, formatQuery));
                         newUrl = url.format({
                             pathname: types_1.BASE_URL,
                             query: formatQuery

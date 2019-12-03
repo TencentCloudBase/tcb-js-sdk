@@ -29,7 +29,7 @@ export default class extends Base {
   private appid: string;
 
   constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string) {
-    if (scope === AllowedScopes.snsapi_miniapp) {
+    if (scope === AllowedScopes.snsapi_miniapp || config.persistence === 'weixin') {
       config.mode = RequestMode.WX_MINIAPP;
     }
     super(config);

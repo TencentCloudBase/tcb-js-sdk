@@ -9,12 +9,21 @@ export declare type CommonRequestOptions = {
     responseType?: string;
     onUploadProgress?: Function;
 };
+declare type AppendedRequestInfo = {
+    data: KV<any>;
+    headers: KV<string>;
+};
+interface RequestBeforeHook {
+    (...args: any[]): AppendedRequestInfo;
+}
 declare class RequestMethods {
     private readonly _mode;
     constructor(mode?: RequestMode);
+    static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]): void;
+    static beforeEach(): AppendedRequestInfo;
     post(url: string, data?: KV<any>, options?: CommonRequestOptions): Promise<KV<any>>;
     upload(url: string, filePath: string, key: string, data: FormData, options?: KV<any>): Promise<KV<any>>;
-    download(url: string): void;
+    download(url: string, data?: KV<any>): void;
     private _uploadWeb;
     private _uploadWxMiniApp;
     private _downloadWeb;

@@ -92,6 +92,26 @@ export function isString(val: any): boolean {
   return typeof val === 'string';
 }
 
-export function isInstanceOf(instance, construct) {
+export function isInstanceOf(instance, construct): boolean {
   return instance instanceof construct;
+}
+
+export function isFormData(val: any): boolean {
+  return Object.prototype.toString.call(val) === '[object FormData]';
+}
+
+export function genSeqId() {
+  return Math.random().toString(16).slice(2);
+}
+
+export function getArgNames(fn: Function) {
+  const funStr = fn.toString();
+  return funStr.slice(funStr.indexOf('(') + 1, funStr.indexOf(')')).match(/([^\s,]+)/g);
+}
+
+export function formatUrl(protocol: string, url: string): string {
+  if (/^http(s)\:\/\//.test(url)) {
+    return url;
+  }
+  return `${protocol}${url}`;
 }

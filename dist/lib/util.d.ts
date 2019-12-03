@@ -6,3 +6,7 @@ export declare const getWeixinCode: () => string;
 export declare const getMiniAppCode: () => Promise<string>;
 export declare function isString(val: any): boolean;
 export declare function isInstanceOf(instance: any, construct: any): boolean;
+export declare function isFormData(val: any): boolean;
+export declare function genSeqId(): string;
+export declare function getArgNames(fn: Function): RegExpMatchArray;
+export declare function formatUrl(protocol: string, url: string): string;

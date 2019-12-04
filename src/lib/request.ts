@@ -17,6 +17,9 @@ import { genSeqId, isFormData, formatUrl } from './util';
 import { Adapter } from '../adapters';
 import { LOGINTYPE } from '../auth/base';
 
+import { getTcbFingerprintId } from '../auth/fingerprint';
+
+
 interface GetAccessTokenResult {
   accessToken: string;
   accessTokenExpire: number;
@@ -48,7 +51,7 @@ const commonHeader = {
 
 function bindHooks(instance: SDKRequestInterface, name: string, hooks: RequestBeforeHook[]) {
   const originMethod = instance[name];
-  instance[name] = function(options: IRequestOptions) {
+  instance[name] = function (options: IRequestOptions) {
     const data = {};
     const headers = {};
     hooks.forEach(hook => {
@@ -230,9 +233,10 @@ class Request {
 
   async request(action, params, options?) {
     let contentType = 'application/x-www-form-urlencoded';
-
+    const webDeviceId = await getTcbFingerprintId();
     const tmpObj = {
       action,
+      webDeviceId,
       env: this.config.env,
       dataVersion: '2019-08-16',
       ...params

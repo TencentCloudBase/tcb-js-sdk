@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -38,6 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var cache_1 = require("../lib/cache");
 var types_1 = require("../types");
+var adapters_1 = require("../adapters");
+var types_2 = require("../adapters/types");
 var default_1 = (function () {
     function default_1(config) {
         this.httpRequest = new request_1.Request(config);
@@ -51,12 +54,13 @@ var default_1 = (function () {
         this.cache.removeStore(this.accessTokenExpireKey);
         this.cache.setStore(this.refreshTokenKey, refreshToken);
     };
-    default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code, hybridMiniapp) {
-        if (hybridMiniapp === void 0) { hybridMiniapp = '0'; }
+    default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
         return __awaiter(this, void 0, void 0, function () {
-            var action;
+            var action, hybridMiniapp;
             return __generator(this, function (_a) {
                 action = 'auth.getJwt';
+                hybridMiniapp = adapters_1.runtime === types_2.RUNTIME.WX_MP ? '1' : '0';
+                console.log(hybridMiniapp);
                 return [2, this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);

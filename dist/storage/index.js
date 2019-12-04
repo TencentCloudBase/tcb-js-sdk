@@ -13,19 +13,21 @@ exports.uploadFile = function (params, callback) {
     })
         .then(function (metaData) {
         var _a = metaData.data, url = _a.url, authorization = _a.authorization, token = _a.token, fileId = _a.fileId, cosFileId = _a.cosFileId, requestId = metaData.requestId;
-        var formData = new FormData();
-        formData.append('key', cloudPath);
-        formData.append('signature', authorization);
-        formData.append('x-cos-meta-fileid', cosFileId);
-        formData.append('success_action_status', '201');
-        formData.append('x-cos-security-token', token);
-        httpRequest.upload(url, filePath, cloudPath, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
+        var data = {
+            key: cloudPath,
+            signature: authorization,
+            'x-cos-meta-fileid': cosFileId,
+            'success_action_status': '201',
+            'x-cos-security-token': token
+        };
+        httpRequest.upload({
+            url: url,
+            data: data,
+            file: filePath,
+            name: cloudPath,
             onUploadProgress: onUploadProgress
         }).then(function (res) {
-            if (res.status === 201 || res.statusCode === 200) {
+            if (res.statusCode === 201) {
                 callback(null, {
                     fileID: fileId,
                     requestId: requestId
@@ -166,7 +168,7 @@ exports.downloadFile = function (_a, callback) {
         var tmpUrl = res.download_url;
         tmpUrl = encodeURI(tmpUrl);
         var httpRequest = new request_1.Request(_this.config);
-        httpRequest.download(tmpUrl);
+        httpRequest.download({ url: tmpUrl });
     });
     return callback.promise;
 };

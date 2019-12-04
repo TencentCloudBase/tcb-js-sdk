@@ -1,6 +1,6 @@
 import { Request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
-import { MetaDataRes, KV } from '../types';
+import { MetaDataRes } from '../types';
 
 
 /*
@@ -35,19 +35,21 @@ export const uploadFile = function (
 
       // 使用临时密匙上传文件
       // https://cloud.tencent.com/document/product/436/14048
-      const formData: FormData = new FormData();
-      formData.append('key', cloudPath);
-      formData.append('signature', authorization);
-      formData.append('x-cos-meta-fileid', cosFileId);
-      formData.append('success_action_status', '201');
-      formData.append('x-cos-security-token', token);
-      httpRequest.upload(url, filePath, cloudPath, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
+      const data = {
+        key: cloudPath,
+        signature: authorization,
+        'x-cos-meta-fileid': cosFileId,
+        'success_action_status': '201',
+        'x-cos-security-token': token
+      };
+      httpRequest.upload({
+        url,
+        data,
+        file: filePath,
+        name: cloudPath,
         onUploadProgress
-      }).then((res: KV<any>) => {
-        if (res.status === 201 || res.statusCode === 200) {
+      }).then((res: any) => {
+        if (res.statusCode === 201) {
           callback(null, {
             fileID: fileId,
             requestId
@@ -210,7 +212,7 @@ export const downloadFile = function ({ fileID }, callback?: any) {
     let tmpUrl = res.download_url;
     tmpUrl = encodeURI(tmpUrl);
     let httpRequest = new Request(this.config);
-    httpRequest.download(tmpUrl);
+    httpRequest.download({ url: tmpUrl });
   });
   return callback.promise;
 };

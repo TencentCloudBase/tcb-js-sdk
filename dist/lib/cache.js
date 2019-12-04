@@ -1,19 +1,31 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
+var adapters_1 = require("../adapters");
+var types_1 = require("../adapters/types");
 var Cache = (function () {
     function Cache(persistence) {
         switch (persistence) {
             case 'local':
-                this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : localStorage;
+                this.storageClass = adapters_1.adapter.localStorage || new TcbObject();
                 break;
             case 'none':
                 this.storageClass = new TcbObject();
                 break;
-            case 'weixin':
-                this.storageClass = new TcbMiniappStorage();
-                break;
             default:
-                this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : sessionStorage;
+                this.storageClass = adapters_1.adapter.sessionStorage || new TcbObject();
                 break;
         }
     }
@@ -70,40 +82,26 @@ var Cache = (function () {
     return Cache;
 }());
 exports.Cache = Cache;
-var TcbObject = (function () {
+var TcbObject = (function (_super) {
+    __extends(TcbObject, _super);
     function TcbObject() {
-        if (!window['tcbObject']) {
-            window['tcbObject'] = {};
+        var _this = _super.call(this) || this;
+        if (!adapters_1.adapter.root['tcbObject']) {
+            adapters_1.adapter.root['tcbObject'] = {};
         }
+        return _this;
     }
     TcbObject.prototype.setItem = function (key, value) {
-        window['tcbObject'][key] = value;
+        adapters_1.adapter.root['tcbObject'][key] = value;
     };
     TcbObject.prototype.getItem = function (key) {
-        return window['tcbObject'][key];
+        return adapters_1.adapter.root['tcbObject'][key];
     };
     TcbObject.prototype.removeItem = function (key) {
-        delete window['tcbObject'][key];
+        delete adapters_1.adapter.root['tcbObject'][key];
     };
     TcbObject.prototype.clear = function () {
-        delete window['tcbObject'];
+        delete adapters_1.adapter.root['tcbObject'];
     };
     return TcbObject;
-}());
-var TcbMiniappStorage = (function () {
-    function TcbMiniappStorage() {
-    }
-    TcbMiniappStorage.prototype.setItem = function (key, value) {
-        wx.setStorageSync(key, value);
-    };
-    TcbMiniappStorage.prototype.getItem = function (key) {
-        return wx.getStorageSync(key);
-    };
-    TcbMiniappStorage.prototype.removeItem = function (key) {
-        wx.removeStorageSync(key);
-    };
-    TcbMiniappStorage.prototype.clear = function () {
-        wx.clearStorageSync();
-    };
-    return TcbMiniappStorage;
-}());
+}(types_1.AbstractStorage));

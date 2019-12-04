@@ -26,6 +26,7 @@ var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
+var adapters_1 = require("./adapters");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
     mode: "WEB"
@@ -36,11 +37,12 @@ var TCB = (function () {
         this.authObj = undefined;
     }
     TCB.prototype.init = function (config) {
-        this.config = __assign({}, DEFAULT_INIT_CONFIG, config);
+        this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);
         return new TCB(this.config);
     };
     TCB.prototype.database = function (dbConfig) {
         database_1.Db.reqClass = request_1.Request;
+        database_1.Db.wsClass = adapters_1.adapter.wsClass;
         if (!this.authObj) {
             console.warn('需要app.auth()授权');
             return;
@@ -49,7 +51,7 @@ var TCB = (function () {
         if (!database_1.Db.ws) {
             database_1.Db.ws = null;
         }
-        return new database_1.Db(__assign({}, this.config, dbConfig));
+        return new database_1.Db(__assign(__assign({}, this.config), dbConfig));
     };
     TCB.prototype.auth = function (_a) {
         var persistence = (_a === void 0 ? {} : _a).persistence;
@@ -57,7 +59,7 @@ var TCB = (function () {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
         }
-        this.config = __assign({}, this.config, { persistence: persistence || 'session' });
+        this.config = __assign(__assign({}, this.config), { persistence: persistence || 'session' });
         this.authObj = new auth_1.default(this.config);
         return this.authObj;
     };

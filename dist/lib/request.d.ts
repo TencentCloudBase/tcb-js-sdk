@@ -1,5 +1,6 @@
-import { Config, RequestMode, KV } from '../types';
+import { Config, KV } from '../types';
 import { Cache } from './cache';
+import { adapter } from '../adapters';
 interface GetAccessTokenResult {
     accessToken: string;
     accessTokenExpire: number;
@@ -16,20 +17,10 @@ declare type AppendedRequestInfo = {
 interface RequestBeforeHook {
     (...args: any[]): AppendedRequestInfo;
 }
-declare class RequestMethods {
-    private readonly _mode;
-    constructor(mode?: RequestMode);
+declare class RequestMethods extends adapter.reqClass {
+    constructor();
     static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]): void;
     static beforeEach(): AppendedRequestInfo;
-    post(url: string, data?: KV<any>, options?: CommonRequestOptions): Promise<KV<any>>;
-    upload(url: string, filePath: string, key: string, data: FormData, options?: KV<any>): Promise<KV<any>>;
-    download(url: string, data?: KV<any>): void;
-    private _uploadWeb;
-    private _uploadWxMiniApp;
-    private _downloadWeb;
-    private _downloadWxMiniApp;
-    private _postWeb;
-    private _postWxMiniApp;
 }
 declare class Request extends RequestMethods {
     config: Config;

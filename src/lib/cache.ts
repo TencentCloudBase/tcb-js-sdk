@@ -1,19 +1,20 @@
+import { adapter } from '../adapters';
+import { AbstractStorage } from '../adapters/types';
+
 class Cache {
   storageClass: any;
 
   constructor(persistence: string) {
+
     switch (persistence) {
       case 'local':
-        this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : localStorage;
+        this.storageClass = adapter.localStorage || new TcbObject();
         break;
       case 'none':
         this.storageClass = new TcbObject();
         break;
-      case 'weixin':
-        this.storageClass = new TcbMiniappStorage();
-        break;
       default:
-        this.storageClass = typeof cc !== 'undefined' && cc.sys ? cc.sys.localStorage : sessionStorage;
+        this.storageClass = adapter.sessionStorage || new TcbObject();
         break;
     }
   }
@@ -88,53 +89,32 @@ class Cache {
 
 }
 
-class TcbObject {
+class TcbObject extends AbstractStorage {
   constructor() {
-    if (!window['tcbObject']) {
-      window['tcbObject'] = {};
+    super();
+    if (!adapter.root['tcbObject']) {
+      adapter.root['tcbObject'] = {};
     }
   }
 
   // 保存数据到
   setItem(key: string, value: any) {
-    window['tcbObject'][key] = value;
+    adapter.root['tcbObject'][key] = value;
   }
 
   // 获取数据
   getItem(key: string) {
-    return window['tcbObject'][key];
+    return adapter.root['tcbObject'][key];
   }
 
   // 删除保存的数据
   removeItem(key: string) {
-    delete window['tcbObject'][key];
+    delete adapter.root['tcbObject'][key];
   }
 
   // 删除所有保存的数据
   clear() {
-    delete window['tcbObject'];
-  }
-}
-
-class TcbMiniappStorage {
-  // 保存数据到
-  setItem(key: string, value: any) {
-    wx.setStorageSync(key, value);
-  }
-
-  // 获取数据
-  getItem(key: string) {
-    return wx.getStorageSync(key);
-  }
-
-  // 删除保存的数据
-  removeItem(key: string) {
-    wx.removeStorageSync(key);
-  }
-
-  // 删除所有保存的数据
-  clear() {
-    wx.clearStorageSync();
+    delete adapter.root['tcbObject'];
   }
 }
 export { Cache };

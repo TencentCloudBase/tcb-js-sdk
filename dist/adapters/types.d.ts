@@ -9,6 +9,11 @@ export declare enum RUNTIME {
     VV_GAME = 7,
     COCOS_NATIVE = 8
 }
+export declare enum StorageType {
+    local = "local",
+    none = "none",
+    session = "session"
+}
 export interface ResponseObject {
     data?: any;
     statusCode?: number;
@@ -53,11 +58,15 @@ export interface NodeRequestConstructor {
 export interface WebSocketInterface {
     send: (data?: string | ArrayBuffer) => void;
     close: (code?: number, reason?: string) => void;
-    onopen: (ev?: any) => void;
-    onclose: (ev?: any) => void;
-    onerror: (ev?: any) => void;
-    onmessage: (ev?: any) => void;
-    readyState?: number;
+    onopen: any;
+    onclose: any;
+    onerror: any;
+    onmessage: any;
+    readyState: number;
+    CONNECTING: number;
+    OPEN: number;
+    CLOSING: number;
+    CLOSED: number;
 }
 export interface WebSocketContructor {
     new (url: string, ...args: any[]): WebSocketInterface;
@@ -67,6 +76,7 @@ export interface StorageInterface {
     getItem: (key: string) => any;
     removeItem?: (key: string) => void;
     clear?: () => void;
+    [key: string]: any;
 }
 export declare abstract class AbstractStorage implements StorageInterface {
     abstract setItem(key: string, value: any): void;
@@ -78,6 +88,7 @@ export interface SDKAdapterInterface {
     reqClass: SDKRequestConstructor;
     localStorage?: StorageInterface;
     sessionStorage?: StorageInterface;
+    primaryStorage?: StorageType;
 }
 export interface NodeAdapterInterface {
     wsClass: WebSocketContructor;

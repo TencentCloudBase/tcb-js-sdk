@@ -80,12 +80,12 @@ function isWxMp() {
     return true;
 }
 exports.isWxMp = isWxMp;
-var Request = (function (_super) {
-    __extends(Request, _super);
-    function Request() {
+var WxRequest = (function (_super) {
+    __extends(WxRequest, _super);
+    function WxRequest() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Request.prototype.post = function (options) {
+    WxRequest.prototype.post = function (options) {
         var url = options.url, data = options.data, headers = options.headers;
         return new Promise(function (resolve, reject) {
             wx.request({
@@ -102,7 +102,7 @@ var Request = (function (_super) {
             });
         });
     };
-    Request.prototype.upload = function (options) {
+    WxRequest.prototype.upload = function (options) {
         return new Promise(function (resolve) {
             var url = options.url, file = options.file, name = options.name, data = options.data, headers = options.headers;
             wx.uploadFile({
@@ -127,16 +127,25 @@ var Request = (function (_super) {
             });
         });
     };
-    Request.prototype.download = function (options) {
+    WxRequest.prototype.download = function (options) {
         var url = options.url, headers = options.headers;
-        wx.downloadFile({
-            url: util_1.formatUrl('https:', url),
-            header: headers
+        return new Promise(function (resolve, reject) {
+            wx.downloadFile({
+                url: util_1.formatUrl('https:', url),
+                header: headers,
+                success: function (res) {
+                    resolve(res);
+                },
+                fail: function (err) {
+                    reject(err);
+                }
+            });
         });
     };
-    return Request;
+    return WxRequest;
 }(types_1.AbstractSDKRequest));
-var wxMpStorage = {
+exports.WxRequest = WxRequest;
+exports.wxMpStorage = {
     setItem: function (key, value) {
         wx.setStorageSync(key, value);
     },
@@ -155,26 +164,40 @@ var WxMpWebSocket = (function () {
         if (options === void 0) { options = {}; }
         var ws = wx.connectSocket(__assign({ url: url }, options));
         var socketTask = {
-            onopen: function (cb) { return ws.onOpen(cb); },
-            onclose: function (cb) { return ws.onClose(cb); },
-            onerror: function (cb) { return ws.onOpen(cb); },
-            onmessage: function (cb) { return ws.onMessage(cb); },
+            set onopen(cb) {
+                ws.onOpen(cb);
+            },
+            set onmessage(cb) {
+                ws.onMessage(cb);
+            },
+            set onclose(cb) {
+                ws.onClose(cb);
+            },
+            set onerror(cb) {
+                ws.onError(cb);
+            },
             send: function (data) { return ws.send({ data: data }); },
             close: function (code, reason) { return ws.close({ code: code, reason: reason }); },
             get readyState() {
                 return ws.readyState;
-            }
+            },
+            CONNECTING: 0,
+            OPEN: 1,
+            CLOSING: 2,
+            CLOSED: 3
         };
         return socketTask;
     }
     return WxMpWebSocket;
 }());
+exports.WxMpWebSocket = WxMpWebSocket;
 function genAdapter() {
     var adapter = {
         root: {},
-        reqClass: Request,
+        reqClass: WxRequest,
         wsClass: WxMpWebSocket,
-        localStorage: wxMpStorage
+        localStorage: exports.wxMpStorage,
+        primaryStorage: types_1.StorageType.local
     };
     return adapter;
 }

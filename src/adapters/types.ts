@@ -13,6 +13,13 @@ export enum RUNTIME {
   VV_GAME = 7, // VIVO 小游戏
   COCOS_NATIVE = 8 // COCOS Native
 }
+
+export enum StorageType {
+  local = 'local',
+  none = 'none',
+  session = 'session'
+}
+
 /**
  * 请求成功返回对象结构
  * @interface
@@ -56,6 +63,10 @@ export interface SDKRequestInterface {
   upload: (options: IRequestOptions) => any;
   download: (options: IRequestOptions) => any;
 }
+/**
+ * @class
+ * @abstract
+ */
 export abstract class AbstractSDKRequest implements SDKRequestInterface {
   abstract post(options: IRequestOptions): any;
   abstract upload(options: IRequestOptions): any;
@@ -90,11 +101,15 @@ export interface NodeRequestConstructor {
 export interface WebSocketInterface {
   send: (data? : string | ArrayBuffer) => void;
   close: (code? : number, reason? : string) => void;
-  onopen: (ev?: any) => void;
-  onclose: (ev?: any) => void;
-  onerror: (ev?: any) => void;
-  onmessage: (ev?: any) => void;
-  readyState?: number;
+  onopen: any;
+  onclose: any;
+  onerror: any;
+  onmessage: any;
+  readyState: number;
+  CONNECTING: number;
+  OPEN: number;
+  CLOSING: number;
+  CLOSED: number;
 }
 /**
  * 创建WebSocket的API与规范保持一致，即使用new
@@ -113,6 +128,7 @@ export interface StorageInterface {
   getItem: (key: string) => any;
   removeItem?: (key: string) => void;
   clear?: () => void;
+  [key: string]: any;
 }
 export abstract class AbstractStorage implements StorageInterface {
   abstract setItem(key: string, value: any): void;
@@ -128,6 +144,7 @@ export interface SDKAdapterInterface {
   reqClass: SDKRequestConstructor; // request类
   localStorage?: StorageInterface;
   sessionStorage?: StorageInterface;
+  primaryStorage?: StorageType;
 }
 /**
  * Node Adapter类仅需包含ws和req适配即可

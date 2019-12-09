@@ -34,7 +34,7 @@ export default class extends Base {
 
     this.config = config;
     this.appid = appid;
-    this.scope = scope;
+    this.scope = runtime === RUNTIME.WX_GAME || runtime === RUNTIME.WX_MP ? 'snsapi_base' : scope;
     this.state = state || 'weixin';
     this.loginMode = loginMode || 'redirect';
   }
@@ -63,7 +63,7 @@ export default class extends Base {
     }
 
     let code;
-    if (runtime === RUNTIME.WX_MP) {
+    if (runtime === RUNTIME.WX_MP || runtime === RUNTIME.WX_GAME) {
       code = await util.getMiniAppCode();
     } else {
       code = await util.getWeixinCode();

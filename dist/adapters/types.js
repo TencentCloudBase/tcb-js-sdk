@@ -12,6 +12,12 @@ var RUNTIME;
     RUNTIME[RUNTIME["VV_GAME"] = 7] = "VV_GAME";
     RUNTIME[RUNTIME["COCOS_NATIVE"] = 8] = "COCOS_NATIVE";
 })(RUNTIME = exports.RUNTIME || (exports.RUNTIME = {}));
+var StorageType;
+(function (StorageType) {
+    StorageType["local"] = "local";
+    StorageType["none"] = "none";
+    StorageType["session"] = "session";
+})(StorageType = exports.StorageType || (exports.StorageType = {}));
 var AbstractSDKRequest = (function () {
     function AbstractSDKRequest() {
     }

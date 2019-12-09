@@ -5,35 +5,19 @@ import {
   IUploadRequestOptions,
   AbstractSDKRequest,
   WebSocketInterface,
-  WebSocketContructor
+  WebSocketContructor,
+  StorageType
 } from '../types';
 import { formatUrl } from '../../lib/util';
 
-declare type WeixinMPObject = {
-  setStorageSync(key: string, val: any): any;
-  getStorageSync(key: string): any;
-  removeStorageSync(key: string): any;
-  clearStorageSync(): void;
-  login(...args: any[]): void;
-  request(...args: any[]): any;
-  uploadFile(...args: any[]): any;
-  downloadFile(...args: any[]): any;
-  getSystemInfoSync(...args: any[]): any;
-  onAppHide(...args: any[]): any;
-  offAppHide(...args: any[]): any;
-  onAppShow(...args: any[]): any;
-  offAppShow(...args: any[]): any;
-  connectSocket(...args: any[]): any;
-};
 // eslint-disable-next-line
-declare const wx: WeixinMPObject;
+declare const wx;
 declare const App;
 declare const Page;
 declare const getApp;
 
 /**
  * 判断是否为小程序runtime
- * {@link https://git.code.oa.com/gamecloud_proj/game_sdk/blob/master/game/src/sdk/util/adapter/channel/wx_mp.ts}
  */
 function isWxMp(): boolean {
   if (typeof wx === 'undefined') {
@@ -92,7 +76,7 @@ function isWxMp(): boolean {
   return true;
 }
 
-class Request extends AbstractSDKRequest {
+export class WxRequest extends AbstractSDKRequest {
   post(options: IRequestOptions) {
     const { url, data, headers } = options;
     return new Promise((resolve, reject) => {
@@ -138,17 +122,26 @@ class Request extends AbstractSDKRequest {
   }
   download(options: IRequestOptions) {
     const { url, headers } = options;
-    wx.downloadFile({
-      url: formatUrl('https:', url),
-      header: headers
+    return new Promise((resolve, reject) => {
+      wx.downloadFile({
+        url: formatUrl('https:', url),
+        header: headers,
+        success(res) {
+          resolve(res);
+        },
+        fail(err) {
+          reject(err);
+        }
+      });
     });
   }
 }
-const wxMpStorage: StorageInterface = {
+
+export const wxMpStorage: StorageInterface = {
   setItem(key: string, value: any) {
     wx.setStorageSync(key, value);
   },
-  getItem(key: string): any {
+  getItem(key: string): Promise<any> {
     return wx.getStorageSync(key);
   },
   removeItem(key: string) {
@@ -159,22 +152,35 @@ const wxMpStorage: StorageInterface = {
   }
 };
 
-class WxMpWebSocket {
+export class WxMpWebSocket {
   constructor(url: string, options: object = {}) {
     const ws = wx.connectSocket({
       url,
       ...options
     });
+
     const socketTask: WebSocketInterface = {
-      onopen: (cb) => ws.onOpen(cb),
-      onclose: (cb) => ws.onClose(cb),
-      onerror: (cb) => ws.onOpen(cb),
-      onmessage: (cb) => ws.onMessage(cb),
+      set onopen(cb) {
+        ws.onOpen(cb);
+      },
+      set onmessage(cb) {
+        ws.onMessage(cb);
+      },
+      set onclose(cb) {
+        ws.onClose(cb);
+      },
+      set onerror(cb) {
+        ws.onError(cb);
+      },
       send: (data) => ws.send({ data }),
       close: (code?: number, reason?: string) => ws.close({ code, reason }),
       get readyState() {
         return ws.readyState;
-      }
+      },
+      CONNECTING: 0,
+      OPEN: 1,
+      CLOSING: 2,
+      CLOSED: 3
     };
     return socketTask;
   }
@@ -184,9 +190,10 @@ function genAdapter() {
   // 小程序无sessionStorage
   const adapter: SDKAdapterInterface = {
     root: {},
-    reqClass: Request,
+    reqClass: WxRequest,
     wsClass: WxMpWebSocket as WebSocketContructor,
-    localStorage: wxMpStorage
+    localStorage: wxMpStorage,
+    primaryStorage: StorageType.local
   };
   return adapter;
 }

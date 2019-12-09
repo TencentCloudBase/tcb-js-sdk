@@ -187,12 +187,8 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
   return callback.promise;
 };
 
-export const downloadFile = function ({ fileID }, callback?: any) {
-  callback = callback || createPromiseCallback();
-
-  let promise: Promise<any>;
-
-  promise = getTempFileURL.call(this, {
+export const downloadFile = async function ({ fileID }, callback?: any) {
+  const tmpUrlRes = await getTempFileURL.call(this, {
     fileList: [
       {
         fileID,
@@ -201,18 +197,20 @@ export const downloadFile = function ({ fileID }, callback?: any) {
     ]
   });
 
-  promise.then(tmpUrlRes => {
-    const res = tmpUrlRes.fileList[0];
+  const res = tmpUrlRes.fileList[0];
 
-    if (res.code !== 'SUCCESS') {
-      callback(res);
-      return;
-    }
+  if (res.code !== 'SUCCESS') {
+    callback && callback(res);
+    return;
+  }
 
-    let tmpUrl = res.download_url;
-    tmpUrl = encodeURI(tmpUrl);
-    let httpRequest = new Request(this.config);
-    httpRequest.download({ url: tmpUrl });
-  });
-  return callback.promise;
+  let tmpUrl = res.download_url;
+  tmpUrl = encodeURI(tmpUrl);
+  let httpRequest = new Request(this.config);
+  if (callback) {
+    const result = await httpRequest.download({ url: tmpUrl });
+    callback(result);
+  } else {
+    return httpRequest.download({ url: tmpUrl });
+  }
 };

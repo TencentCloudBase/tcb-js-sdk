@@ -7,6 +7,7 @@ const modName = 'tcb';
 
 module.exports = {
   mode: 'production',
+  // mode: 'development',
   // regenerator-runtime/runtime是Generator的polyfill
   // 解决async/await被babel转成generator后的兼容问题
   entry: [

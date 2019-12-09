@@ -80,7 +80,7 @@ var default_1 = (function (_super) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
         _this.appid = appid;
-        _this.scope = scope;
+        _this.scope = adapters_1.runtime === types_1.RUNTIME.WX_GAME || adapters_1.runtime === types_1.RUNTIME.WX_MP ? 'snsapi_base' : scope;
         _this.state = state || 'weixin';
         _this.loginMode = loginMode || 'redirect';
         return _this;
@@ -110,7 +110,7 @@ var default_1 = (function (_super) {
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
                             throw new Error('错误的scope类型');
                         }
-                        if (!(adapters_1.runtime === types_1.RUNTIME.WX_MP)) return [3, 2];
+                        if (!(adapters_1.runtime === types_1.RUNTIME.WX_MP || adapters_1.runtime === types_1.RUNTIME.WX_GAME)) return [3, 2];
                         return [4, util.getMiniAppCode()];
                     case 1:
                         code = _a.sent();

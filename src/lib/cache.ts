@@ -5,7 +5,6 @@ class Cache {
   storageClass: any;
 
   constructor(persistence: string) {
-
     switch (persistence) {
       case 'local':
         this.storageClass = adapter.localStorage || new TcbObject();

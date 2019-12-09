@@ -60,7 +60,6 @@ var default_1 = (function () {
             return __generator(this, function (_a) {
                 action = 'auth.getJwt';
                 hybridMiniapp = adapters_1.runtime === types_2.RUNTIME.WX_MP ? '1' : '0';
-                console.log(hybridMiniapp);
                 return [2, this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);

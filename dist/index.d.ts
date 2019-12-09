@@ -40,7 +40,7 @@ declare class TCB {
     }, callback?: Function): any;
     downloadFile(params: {
         fileID: string;
-    }, callback?: Function): any;
+    }, callback?: Function): Promise<any>;
     uploadFile(params: {
         cloudPath: string;
         filePath: File;

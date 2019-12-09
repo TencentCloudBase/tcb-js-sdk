@@ -11,18 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var types_1 = require("./types");
 var Web = __importStar(require("./platforms/web"));
 var WX_MP = __importStar(require("./platforms/wx_mp"));
-var CocosNative = __importStar(require("./platforms/cocos_native"));
 exports.adapter = (_a = (function () {
     if (WX_MP.isWxMp()) {
         return {
             adapter: WX_MP.genAdapter(),
             runtime: types_1.RUNTIME.WX_MP
-        };
-    }
-    if (CocosNative.isCocosNative()) {
-        return {
-            adapter: CocosNative.genAdapter(),
-            runtime: types_1.RUNTIME.COCOS_NATIVE
         };
     }
     return {

@@ -34,7 +34,7 @@ export default class {
 
   public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
-    const hybridMiniapp = runtime === RUNTIME.WX_MP?'1':'0';
+    const hybridMiniapp = runtime === RUNTIME.WX_MP ? '1' : '0';
     return this.httpRequest.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);

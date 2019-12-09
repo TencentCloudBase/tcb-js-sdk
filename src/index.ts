@@ -73,7 +73,8 @@ class TCB {
     }
     this.config = {
       ...this.config,
-      persistence: persistence || 'session'
+      // 如不明确指定persistence则优先取各平台adapter首选，其次session
+      persistence: persistence || adapter.primaryStorage || 'session'
     };
 
     this.authObj = new Auth(this.config);

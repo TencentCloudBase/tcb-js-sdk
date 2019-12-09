@@ -11,4 +11,4 @@ export declare const getTempFileURL: ({ fileList }: {
 }, callback?: any) => any;
 export declare const downloadFile: ({ fileID }: {
     fileID: any;
-}, callback?: any) => any;
+}, callback?: any) => Promise<any>;

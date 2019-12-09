@@ -59,7 +59,7 @@ var TCB = (function () {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
         }
-        this.config = __assign(__assign({}, this.config), { persistence: persistence || 'session' });
+        this.config = __assign(__assign({}, this.config), { persistence: persistence || adapters_1.adapter.primaryStorage || 'session' });
         this.authObj = new auth_1.default(this.config);
         return this.authObj;
     };

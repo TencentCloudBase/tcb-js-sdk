@@ -1,3 +1,4 @@
+export declare const SDK_VERISON: any;
 export declare const enum RequestMode {
     WEB = "WEB",
     WX_MINIAPP = "WX_MINIAPP"
@@ -10,6 +11,9 @@ export interface Config {
     persistence?: string;
     mode?: RequestMode;
 }
+export declare type KV<T> = {
+    [key: string]: T;
+};
 interface MetaData {
     url: string;
     token: string;
@@ -24,5 +28,6 @@ export interface MetaDataRes {
 export declare const ACCESS_TOKEN = "access_token";
 export declare const ACCESS_TOKEN_Expire = "access_token_expire";
 export declare const REFRESH_TOKEN = "refresh_token";
+export declare const protocol: string;
 export declare const BASE_URL: string;
 export {};

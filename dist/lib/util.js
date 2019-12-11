@@ -68,3 +68,47 @@ exports.getMiniAppCode = function () {
         });
     });
 };
+function isString(val) {
+    return typeof val === 'string';
+}
+exports.isString = isString;
+function isUndefined(val) {
+    return typeof val === 'undefined';
+}
+exports.isUndefined = isUndefined;
+function isInstanceOf(instance, construct) {
+    return instance instanceof construct;
+}
+exports.isInstanceOf = isInstanceOf;
+function isFormData(val) {
+    return Object.prototype.toString.call(val) === '[object FormData]';
+}
+exports.isFormData = isFormData;
+function genSeqId() {
+    return Math.random().toString(16).slice(2);
+}
+exports.genSeqId = genSeqId;
+function getArgNames(fn) {
+    var funStr = fn.toString();
+    return funStr.slice(funStr.indexOf('(') + 1, funStr.indexOf(')')).match(/([^\s,]+)/g);
+}
+exports.getArgNames = getArgNames;
+function formatUrl(protocol, url, query) {
+    if (query === void 0) { query = {}; }
+    var urlHasQuery = /\?/.test(url);
+    var queryString = '';
+    for (var key in query) {
+        if (queryString === '') {
+            !urlHasQuery && (url += '?');
+        }
+        else {
+            queryString += '&';
+        }
+        queryString += key + "=" + encodeURIComponent(query[key]);
+    }
+    if (/^http(s)\:\/\//.test(url)) {
+        return url;
+    }
+    return "" + protocol + url;
+}
+exports.formatUrl = formatUrl;

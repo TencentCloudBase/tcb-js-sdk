@@ -47,14 +47,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var util = require("../lib/util");
-var base_1 = require("./base");
+var util = __importStar(require("../lib/util"));
+var base_1 = __importDefault(require("./base"));
+var adapters_1 = require("../adapters");
+var types_1 = require("../adapters/types");
+var events_1 = require("../lib/events");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
     AllowedScopes["snsapi_userinfo"] = "snsapi_userinfo";
-    AllowedScopes["snsapi_miniapp"] = "snsapi_miniapp";
     AllowedScopes["snsapi_login"] = "snsapi_login";
 })(AllowedScopes || (AllowedScopes = {}));
 var LoginModes;
@@ -65,23 +77,19 @@ var LoginModes;
 var default_1 = (function (_super) {
     __extends(default_1, _super);
     function default_1(config, appid, scope, loginMode, state) {
-        var _this = this;
-        if (scope === AllowedScopes.snsapi_miniapp) {
-            config.mode = "WX_MINIAPP";
-        }
-        _this = _super.call(this, config) || this;
+        var _this = _super.call(this, config) || this;
         _this.config = config;
         _this.appid = appid;
-        _this.scope = scope;
+        _this.scope = adapters_1.runtime === types_1.RUNTIME.WX_GAME || adapters_1.runtime === types_1.RUNTIME.WX_MP ? 'snsapi_base' : scope;
         _this.state = state || 'weixin';
         _this.loginMode = loginMode || 'redirect';
         return _this;
     }
     default_1.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, code, _a, loginType, refreshTokenRes, refreshToken;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         accessToken = this.cache.getStore(this.accessTokenKey);
                         accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
@@ -102,20 +110,19 @@ var default_1 = (function (_super) {
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
                             throw new Error('错误的scope类型');
                         }
-                        if (!(this.config.mode === "WEB")) return [3, 2];
-                        return [4, util.getWeixinCode()];
+                        if (!(adapters_1.runtime === types_1.RUNTIME.WX_MP || adapters_1.runtime === types_1.RUNTIME.WX_GAME)) return [3, 2];
+                        return [4, util.getMiniAppCode()];
                     case 1:
-                        _a = _b.sent();
+                        code = _a.sent();
                         return [3, 4];
-                    case 2: return [4, util.getMiniAppCode()];
+                    case 2: return [4, util.getWeixinCode()];
                     case 3:
-                        _a = _b.sent();
-                        _b.label = 4;
-                    case 4:
-                        code = _a;
-                        if (!code && this.config.mode === "WEB") {
+                        code = _a.sent();
+                        if (!code) {
                             return [2, this.redirect()];
                         }
+                        _a.label = 4;
+                    case 4:
                         loginType = (function (scope) {
                             switch (scope) {
                                 case AllowedScopes.snsapi_login:
@@ -124,9 +131,9 @@ var default_1 = (function (_super) {
                                     return 'WECHAT-PUBLIC';
                             }
                         })(this.scope);
-                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code, this.scope === AllowedScopes.snsapi_miniapp ? '1' : '0')];
+                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
                     case 5:
-                        refreshTokenRes = _b.sent();
+                        refreshTokenRes = _a.sent();
                         refreshToken = refreshTokenRes.refreshToken;
                         this.cache.setStore(this.refreshTokenKey, refreshToken);
                         if (refreshTokenRes.accessToken) {
@@ -135,6 +142,7 @@ var default_1 = (function (_super) {
                         if (refreshTokenRes.accessTokenExpire) {
                             this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

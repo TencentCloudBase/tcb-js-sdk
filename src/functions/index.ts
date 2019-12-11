@@ -1,48 +1,78 @@
 import { Request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 
-export const callFunction = function ({ name, data }, callback?: any): Promise<any> {
-  callback = callback || createPromiseCallback();
+interface ICallFunctionOptions {
+  name: string;
+  data: Record<string, any>;
+  query: Record<string, any>;
+  search: string;
+  parse: boolean;
+}
 
+interface ICallFunctionResponse {
+  requestId: string;
+  result: any;
+}
+
+type CallbackFunction = (error: Error, res?: ICallFunctionResponse) => {};
+
+export const callFunction = function(
+  { name, data, query, parse, search }: ICallFunctionOptions,
+  callback?: CallbackFunction
+) {
+  const promisedCallback = callback || createPromiseCallback();
+  let jsonData;
   try {
-    data = data ? JSON.stringify(data) : '';
+    jsonData = data ? JSON.stringify(data) : '';
   } catch (e) {
     return Promise.reject(e);
   }
   if (!name) {
-    return Promise.reject(
-      new Error('函数名不能为空')
-    );
+    return Promise.reject(new Error('函数名不能为空'));
   }
 
   const action = 'functions.invokeFunction';
-  let params = {
+  const params = {
+    query,
+    parse,
+    search,
     function_name: name,
-    request_data: data
+    request_data: jsonData
   };
 
-  let httpRequest = new Request(this.config);
+  const httpRequest = new Request(this.config);
 
-  httpRequest.send(action, params).then(res => {
-    if (res.code) {
-      callback(null, res);
-    } else {
-      let result = res.data.response_data;
-      try {
-        result = JSON.parse(res.data.response_data);
-        callback(null, {
-          result,
-          requestId: res.requestId
-        });
-      } catch (e) {
-        callback(new Error('response data must be json'));
+  httpRequest
+    .send(action, params)
+    .then((res) => {
+      if (res.code) {
+        promisedCallback(null, res);
+      } else {
+        let result = res.data.response_data;
+        // parse 为 true 时服务端解析 JSON，SDK 不再次解析
+        if (parse) {
+          promisedCallback(null, {
+            result,
+            requestId: res.requestId
+          });
+        } else {
+          try {
+            result = JSON.parse(res.data.response_data);
+            promisedCallback(null, {
+              result,
+              requestId: res.requestId
+            });
+          } catch (e) {
+            promisedCallback(new Error('response data must be json'));
+          }
+        }
       }
-    }
 
-    return callback.promise;
-  }).catch((err) => {
-    callback(err);
-  });
+      return promisedCallback.promise;
+    })
+    .catch((err) => {
+      promisedCallback(err);
+    });
 
-  return callback.promise;
+  return promisedCallback.promise;
 };

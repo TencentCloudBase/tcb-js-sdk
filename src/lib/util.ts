@@ -1,3 +1,5 @@
+import { KV } from '../types';
+
 export const getQuery = function(name: string, url?: string) {
   if (typeof window === 'undefined') {
     return false;
@@ -77,6 +79,7 @@ export const getWeixinCode = function() {
 
 export const getMiniAppCode = function(): Promise<string> {
   return new Promise(resolve => {
+    // @ts-ignore
     wx.login({
       success(res) {
         resolve(res.code);
@@ -87,3 +90,45 @@ export const getMiniAppCode = function(): Promise<string> {
     });
   });
 };
+
+export function isString(val: any): boolean {
+  return typeof val === 'string';
+}
+
+export function isUndefined(val: any): boolean {
+  return typeof val === 'undefined';
+}
+
+export function isInstanceOf(instance, construct): boolean {
+  return instance instanceof construct;
+}
+
+export function isFormData(val: any): boolean {
+  return Object.prototype.toString.call(val) === '[object FormData]';
+}
+
+export function genSeqId() {
+  return Math.random().toString(16).slice(2);
+}
+
+export function getArgNames(fn: Function) {
+  const funStr = fn.toString();
+  return funStr.slice(funStr.indexOf('(') + 1, funStr.indexOf(')')).match(/([^\s,]+)/g);
+}
+
+export function formatUrl(protocol: string, url: string, query: KV<any> = {}): string {
+  const urlHasQuery = /\?/.test(url);
+  let queryString = '';
+  for (let key in query) {
+    if (queryString === '') {
+      !urlHasQuery && (url += '?');
+    } else {
+      queryString += '&';
+    }
+    queryString += `${key}=${encodeURIComponent(query[key])}`;
+  }
+  if (/^http(s)\:\/\//.test(url)) {
+    return url;
+  }
+  return `${protocol}${url}`;
+}

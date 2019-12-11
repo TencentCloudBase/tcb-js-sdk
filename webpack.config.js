@@ -1,18 +1,18 @@
-// const webpack = require('webpack');
 const path = require('path');
+const webpack = require('webpack');
 const package = require('./package.json');
 const Visualizer = require('webpack-visualizer-plugin');
-const webpack = require('webpack');
-// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 const modName = 'tcb';
 
 module.exports = {
   mode: 'production',
+  // mode: 'development',
+  // regenerator-runtime/runtime是Generator的polyfill
+  // 解决async/await被babel转成generator后的兼容问题
   entry: [
-    './dist/index.js'
+    'regenerator-runtime/runtime', './dist/index.js'
   ],
-  // devtool: 'inline-source-map',
   devtool: false,
   output: {
     path: path.resolve(__dirname, 'tcbjs'),
@@ -43,7 +43,6 @@ module.exports = {
     }),
     new Visualizer({
       filename: './statistics.html'
-    }),
-    // new BundleAnalyzerPlugin()
+    })
   ]
 };

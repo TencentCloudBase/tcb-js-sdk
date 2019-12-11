@@ -1,3 +1,6 @@
+import * as packageInfo from '../package.json';
+
+export const SDK_VERISON = packageInfo.version;
 /*eslint-disable */
 export const enum RequestMode {
   WEB = 'WEB',
@@ -12,6 +15,10 @@ export interface Config {
   persistence?: string;
   mode?: RequestMode;
 }
+
+export type KV<T> = {
+  [key: string]: T;
+};
 
 interface MetaData {
   url: string;
@@ -30,11 +37,13 @@ export const ACCESS_TOKEN = 'access_token';
 export const ACCESS_TOKEN_Expire = 'access_token_expire';
 export const REFRESH_TOKEN = 'refresh_token';
 
+export const protocol = typeof location !== 'undefined' && location.protocol === 'http:' ? 'http:' : 'https:';
+
 // export const BASE_URL = '//118.126.68.63/web';
 export const BASE_URL =
-  process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre' ?
-    '//tcb-pre.tencentcloudapi.com/web' :
-    '//tcb-api.tencentcloudapi.com/web';
+  process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
+    ? '//tcb-pre.tencentcloudapi.com/web'
+    : '//tcb-api.tencentcloudapi.com/web';
 // export const BASE_URL = '//localhost:8002/web';
 // export const BASE_URL = '//tcb-api.tencentcloudapi.com:8002/web';
 

@@ -1,4 +1,9 @@
 {
-    "python.linting.enabled": false,
-    "C_Cpp.errorSquiggles": "Disabled"
+  "python.linting.enabled": false,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "dist": true,
+    "tcbjs": true
+  }
 }

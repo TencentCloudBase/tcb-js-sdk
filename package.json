@@ -1,11 +1,12 @@
 {
   "name": "tcb-js-sdk",
-  "version": "1.3.3-alpha.1",
+  "version": "1.3.5-alpha.0",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "yarn && npm run tsc && webpack",
+    "build": "npm run tsc && webpack",
+    "build:cocos": "webpack --config ./build/webpack.config.cocos.js",
     "tsc": "tsc -p tsconfig.json",
     "tsc:w": "tsc -p tsconfig.json -w",
     "test": "jest --verbose false -i",
@@ -13,7 +14,7 @@
     "start": "webpack-dev-server --hot --open",
     "eslint": "eslint \"./**/*.js\" \"./**/*.ts\"",
     "eslint-fix": "eslint --fix \"./**/*.js\" \"./**/*.ts\"",
-    "test_web": "webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true --mode development --config webpack.test.js"
+    "test_web": "npm run tsc && webpack-dev-server --devtool eval-source-map --progress --colors --hot --inline --content-base ./dist --host jimmytest-088bef.tcb.qcloud.la --port 80 --disableHostCheck true --mode development --config webpack.test.js"
   },
   "repository": {
     "type": "git",
@@ -26,10 +27,8 @@
   "author": "jimmyjzhang",
   "license": "ISC",
   "dependencies": {
-    "@cloudbase/database": "^0.8.0",
-    "axios": "^0.19.0",
-    "eventemitter3": "^4.0.0",
-    "node-cache": "^4.2.0"
+    "@cloudbase/database": "^0.9.6",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
@@ -41,6 +40,8 @@
     "@babel/runtime": "^7.6.2",
     "@types/jest": "^23.1.4",
     "@types/node": "^10.14.4",
+    "@types/superagent": "^4.1.4",
+    "axios": "^0.19.0",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
@@ -48,21 +49,35 @@
     "eslint-config-alloy": "^1.4.2",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-prettier": "^3.0.1",
-    "eslint-plugin-typescript": "^0.14.0",
+    "eslint-plugin-typescript": "^1.0.0-rc.3",
     "express": "^4.17.1",
+    "husky": "^3.1.0",
     "jest": "^24.7.1",
     "jest-puppeteer": "^4.3.0",
+    "lint-staged": "^9.5.0",
     "power-assert": "^1.6.1",
     "puppeteer": "^1.20.0",
     "serve-static": "^1.14.1",
     "ts-jest": "^23.10.4",
-    "ts-loader": "^6.2.0",
+    "ts-loader": "^6.2.1",
     "typescript": "^3.4.3",
     "typescript-eslint-parser": "^22.0.0",
     "webpack": "^4.30.0",
     "webpack-bundle-analyzer": "^3.4.1",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.3.1",
+    "webpack-merge": "^4.2.2",
     "webpack-visualizer-plugin": "^0.1.11"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

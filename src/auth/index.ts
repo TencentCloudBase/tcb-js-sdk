@@ -1,7 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
-import { addEventListener } from '../lib/events';
+import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 
@@ -48,12 +48,13 @@ export default class Auth extends AuthProvider {
     if (!refresh_token) {
       return;
     }
-    await this.httpRequest.send(action, { refresh_token });
+    const res = await this.httpRequest.send(action, { refresh_token });
 
     cache.removeStore(refreshTokenKey);
     cache.removeStore(accessTokenKey);
     cache.removeStore(accessTokenExpireKey);
-    return;
+    activateEvent(EVENTS.LOGIN_STATE_CHANGED);
+    return res;
   }
 
   async getAccessToken() {
@@ -67,14 +68,14 @@ export default class Auth extends AuthProvider {
     addEventListener('loginStateExpire', callback);
   }
 
-  async getLoginState(): Promise<LoginResult | undefined> {
+  async getLoginState(): Promise<LoginResult> {
     const { cache, refreshTokenKey, accessTokenKey } = this.httpRequest;
     const refreshToken = cache.getStore(refreshTokenKey);
     if (refreshToken) {
       try {
         await this.httpRequest.refreshAccessToken();
       } catch (e) {
-        return;
+        return null;
       }
       return {
         credential: {
@@ -83,7 +84,7 @@ export default class Auth extends AuthProvider {
         }
       };
     } else {
-      return;
+      return null;
     }
   }
 
@@ -91,16 +92,16 @@ export default class Auth extends AuthProvider {
     if (typeof ticket !== 'string') {
       throw new Error('ticket must be a string');
     }
-
-    // 先登出
-    await this.signOut();
+    const { cache, refreshTokenKey } = this.httpRequest;
 
     const res = await this.httpRequest.send('auth.signInWithTicket', {
-      ticket
+      ticket,
+      refresh_token: cache.getStore(refreshTokenKey) || undefined
     });
     if (res.refresh_token) {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
       await this.httpRequest.refreshAccessToken();
+      activateEvent(EVENTS.LOGIN_STATE_CHANGED);
       return {
         credential: {
           refreshToken: res.refresh_token

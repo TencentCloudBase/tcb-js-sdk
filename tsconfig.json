@@ -1,43 +1,33 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "allowJs": false,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "charset": "utf8",
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "importHelpers": false,
     "module": "commonjs",
-    "noEmitOnError": false,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "dist",
+    "rootDir": "src",
     "pretty": true,
     "removeComments": true,
-    "stripInternal": true,
-    "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "strictBindCallApply": true,
     "target": "es5",
     "moduleResolution": "node",
-    "types": [
-      "node",
-      "jest"
-    ],
-    "lib": [
-      "es2015",
-      "dom"
-    ]
+    "types": ["node", "jest"],
+    "lib": ["es2015", "dom"]
   },
   "include": [
     "src/**/*",
-    "test/**/*"
+    "test/**/*",
+    "package.json"
   ],
   "exclude": [
+    "src/lib/iAxios.ts",
     "node_modules",
     "test"
   ]

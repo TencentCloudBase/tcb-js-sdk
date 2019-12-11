@@ -4,3 +4,4 @@ tcbjs/statistics.html
 .DS_Store
 .history/
 tcbjs/e2e
+tsconfig.tsbuildinfo

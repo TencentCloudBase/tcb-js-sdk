@@ -1,127 +1,104 @@
+import * as url from 'url';
 import {
   Config,
   RequestMode,
   BASE_URL,
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
-  REFRESH_TOKEN
+  REFRESH_TOKEN,
+  SDK_VERISON,
+  KV
 } from '../types';
 import { Cache } from './cache';
-// import * as util from './util';
-import { activateEvent } from './events';
-import Axios from 'axios';
+import { activateEvent, EVENTS } from './events';
+import { adapter } from '../adapters';
+import { IRequestOptions } from '../adapters/types';
+import { genSeqId, isFormData } from './util';
 
 interface GetAccessTokenResult {
   accessToken: string;
   accessTokenExpire: number;
 }
 
+export type CommonRequestOptions = {
+  headers?: KV<string>;
+  responseType?: string;
+  onUploadProgress?: Function;
+}
+
+type AppendedRequestInfo = {
+  data: KV<any>;
+  headers: KV<string>;
+}
+interface RequestBeforeHook {
+  (...args: any[]): AppendedRequestInfo;
+}
 const actionsWithoutAccessToken = [
   'auth.getJwt',
   'auth.logout',
   'auth.signInWithTicket'
 ];
 
+const commonHeader = {
+  'X-SDK-Version': SDK_VERISON
+};
+
 /**
  * @class RequestMethods
  */
-class RequestMethods {
-  private readonly _mode: RequestMode
-  constructor(mode: RequestMode = RequestMode.WEB) {
-    this._mode = mode;
+class RequestMethods extends adapter.reqClass {
+  constructor() {
+    super();
+    RequestMethods.bindHooks(this, 'post', [RequestMethods.beforeEach]);
+    RequestMethods.bindHooks(this, 'upload', [RequestMethods.beforeEach]);
+    RequestMethods.bindHooks(this, 'download', [RequestMethods.beforeEach]);
   }
-  public async post(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<KV<any>> {
-    let res;
-    switch (this._mode) {
-      case RequestMode.WEB:
-        res = await this._postWeb(url, data, options);
-        break;
-      case RequestMode.WX_MINIAPP:
-        res = await this._postWxMiniApp(`https:${url}`, data, options);
-        break;
-    }
-    return res;
-  }
-  public async upload(url: string, filePath: string, key: string, data: FormData, options: KV<any> = {}): Promise<KV<any>> {
-    let res;
-    switch (this._mode) {
-      case RequestMode.WEB:
-        data.append('file', filePath);
-        data.append('key', key);
-        res = await this._uploadWeb(url, data, options);
-        break;
-      case RequestMode.WX_MINIAPP:
-        res = await this._uploadWxMiniApp(`https:${url}`, filePath, key, data, options);
-        break;
-    }
-    return res;
-  }
-  public download(url: string) {
-    switch (this._mode) {
-      case RequestMode.WEB:
-        this._downloadWeb(url);
-        break;
-      case RequestMode.WX_MINIAPP:
-        this._downloadWxMiniApp(url);
-        break;
-    }
-  }
-  private _uploadWeb(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
-    return Axios.post(url, data, options);
-  }
-  private _uploadWxMiniApp(url: string, filePath: string, key, formData: KV<any> = {}, options: KV<any> = {}) {
-    return new Promise(resolve => {
-      wx.uploadFile({
-        url,
-        filePath,
-        name: key,
-        formData,
-        ...options,
-        success(res) {
-          resolve(res);
-        },
-        fail(err) {
-          resolve(err);
+  /**
+   * 绑定hooks
+   * @static
+   */
+  static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]) {
+    const originMethod = instance[name];
+    instance[name] = function(options: IRequestOptions) {
+      const data = {};
+      const headers = {};
+      hooks.forEach(hook => {
+        const { data: appendedData, headers: appendedHeaders } = hook.call(instance, options);
+        Object.assign(data, appendedData);
+        Object.assign(headers, appendedHeaders);
+      });
+      const originData = options.data;
+      originData && (() => {
+        if (isFormData(originData)) {
+          for (const key in data) {
+            (originData as FormData).append(key, data[key]);
+          }
+          return;
         }
-      });
-    });
+        options.data = {
+          ...originData,
+          ...data
+        };
+      })();
+      options.headers = {
+        ...(options.headers || {}),
+        ...headers
+      };
+      return (originMethod as Function).call(instance, options);
+    };
   }
-  private _downloadWeb(url: string) {
-    const fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
-    Axios
-      .get(url, {
-        responseType: 'blob'
-      })
-      .then(function (response) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-      });
-  }
-  private _downloadWxMiniApp(url: string) {
-    wx.downloadFile({ url });
-  }
-  private _postWeb(url: string, data: KV<any> = {}, options: KV<any> = {}) {
-    return Axios.post(url, data, options);
-  }
-  private _postWxMiniApp(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url,
-        data,
-        method: 'POST',
-        ...options,
-        success(res) {
-          resolve(res);
-        },
-        fail(err) {
-          reject(err);
-        }
-      });
-    });
+  /**
+   * 每次请求之前执行，追加data和headers
+   * @static
+   */
+  static beforeEach(): AppendedRequestInfo {
+    const seqId = genSeqId();
+    return {
+      data: {
+        seqId
+      },
+      headers: commonHeader
+    };
   }
 }
 /**
@@ -132,7 +109,7 @@ const DEFAULT_REQUEST_CONFIG = {
   mode: RequestMode.WEB
 };
 /**
- * @internal
+ * @class Request
  */
 class Request extends RequestMethods {
   config: Config;
@@ -145,12 +122,10 @@ class Request extends RequestMethods {
 
   /**
    * 初始化
-   *
-   * @internal
    * @param config
    */
   constructor(config: Config = DEFAULT_REQUEST_CONFIG) {
-    super(config.mode);
+    super();
     this.config = config;
     this.cache = new Cache(config.persistence);
 
@@ -166,6 +141,7 @@ class Request extends RequestMethods {
       this._refreshAccessTokenPromise = this._refreshAccessToken();
     }
     const result = await this._refreshAccessTokenPromise;
+    this._refreshAccessTokenPromise = null;
     this._shouldRefreshAccessTokenHook = null;
     return result;
   }
@@ -180,17 +156,19 @@ class Request extends RequestMethods {
     if (!refreshToken) {
       throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
-
     const response = await this.request('auth.getJwt', {
       refresh_token: refreshToken
     });
-    if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-      activateEvent('loginStateExpire');
-      this.cache.removeStore(this.refreshTokenKey);
+    if (response.data.code) {
+      const { code } = response.data;
+      if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
+        activateEvent(EVENTS.LOGIN_STATE_EXPIRE);
+        this.cache.removeStore(this.refreshTokenKey);
+      }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {
-      activateEvent('refreshAccessToken');
+      activateEvent(EVENTS.REFRESH_ACCESS_TOKEN);
       this.cache.setStore(this.accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
       this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
@@ -265,9 +243,32 @@ class Request extends RequestMethods {
 
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
-    const newUrl = `${BASE_URL}?env=${this.config.env}`;
-    // const res = await axios.post(newUrl, payload, opts);
-    const res: any = await this.post(newUrl, payload, opts);
+    // 请求链接支持添加动态 query 参数，方便用户调试定位请求
+    const { parse, query, search } = params;
+    let formatQuery: Record<string, any> = {
+      env: this.config.env
+    };
+    // 尝试解析响应数据为 JSON
+    parse && (formatQuery.parse = true);
+    query && (formatQuery = {
+      ...query,
+      ...formatQuery
+    });
+    // 生成请求 url
+    let newUrl = url.format({
+      pathname: BASE_URL,
+      query: formatQuery
+    });
+
+    if (search) {
+      newUrl += search;
+    }
+
+    const res: any = await this.post({
+      url: newUrl,
+      data: payload,
+      ...opts
+    });
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
       throw new Error('network request error');
@@ -282,7 +283,6 @@ class Request extends RequestMethods {
     }, 3000);
     const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
     clearTimeout(slowQueryWarning);
-
     if (response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1) {
       // access_token过期，重新获取
       await this.refreshAccessToken();

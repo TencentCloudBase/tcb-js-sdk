@@ -58,9 +58,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var weixinAuthProvider_1 = require("./weixinAuthProvider");
-var base_1 = require("./base");
+var weixinAuthProvider_1 = __importDefault(require("./weixinAuthProvider"));
+var base_1 = __importDefault(require("./base"));
 var events_1 = require("../lib/events");
 var Auth = (function (_super) {
     __extends(Auth, _super);
@@ -76,7 +79,7 @@ var Auth = (function (_super) {
     };
     Auth.prototype.signOut = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action, refresh_token;
+            var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action, refresh_token, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -88,11 +91,12 @@ var Auth = (function (_super) {
                         }
                         return [4, this.httpRequest.send(action, { refresh_token: refresh_token })];
                     case 1:
-                        _b.sent();
+                        res = _b.sent();
                         cache.removeStore(refreshTokenKey);
                         cache.removeStore(accessTokenKey);
                         cache.removeStore(accessTokenExpireKey);
-                        return [2];
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
+                        return [2, res];
                 }
             });
         });
@@ -133,46 +137,46 @@ var Auth = (function (_super) {
                         return [3, 4];
                     case 3:
                         e_1 = _b.sent();
-                        return [2];
+                        return [2, null];
                     case 4: return [2, {
                             credential: {
                                 refreshToken: refreshToken,
                                 accessToken: cache.getStore(accessTokenKey)
                             }
                         }];
-                    case 5: return [2];
+                    case 5: return [2, null];
                 }
             });
         });
     };
     Auth.prototype.signInWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
-            var res;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, cache, refreshTokenKey, res;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         if (typeof ticket !== 'string') {
                             throw new Error('ticket must be a string');
                         }
-                        return [4, this.signOut()];
-                    case 1:
-                        _a.sent();
+                        _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey;
                         return [4, this.httpRequest.send('auth.signInWithTicket', {
-                                ticket: ticket
+                                ticket: ticket,
+                                refresh_token: cache.getStore(refreshTokenKey) || undefined
                             })];
-                    case 2:
-                        res = _a.sent();
-                        if (!res.refresh_token) return [3, 4];
+                    case 1:
+                        res = _b.sent();
+                        if (!res.refresh_token) return [3, 3];
                         this.customAuthProvider.setRefreshToken(res.refresh_token);
                         return [4, this.httpRequest.refreshAccessToken()];
-                    case 3:
-                        _a.sent();
+                    case 2:
+                        _b.sent();
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
                                 }
                             }];
-                    case 4: throw new Error('[tcb-js-sdk] 自定义登录失败');
+                    case 3: throw new Error('[tcb-js-sdk] 自定义登录失败');
                 }
             });
         });

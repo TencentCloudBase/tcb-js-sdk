@@ -58,142 +58,72 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var url = __importStar(require("url"));
 var types_1 = require("../types");
 var cache_1 = require("./cache");
 var events_1 = require("./events");
-var axios_1 = require("axios");
+var adapters_1 = require("../adapters");
+var util_1 = require("./util");
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
     'auth.signInWithTicket'
 ];
-var RequestMethods = (function () {
-    function RequestMethods(mode) {
-        if (mode === void 0) { mode = "WEB"; }
-        this._mode = mode;
+var commonHeader = {
+    'X-SDK-Version': types_1.SDK_VERISON
+};
+var RequestMethods = (function (_super) {
+    __extends(RequestMethods, _super);
+    function RequestMethods() {
+        var _this = _super.call(this) || this;
+        RequestMethods.bindHooks(_this, 'post', [RequestMethods.beforeEach]);
+        RequestMethods.bindHooks(_this, 'upload', [RequestMethods.beforeEach]);
+        RequestMethods.bindHooks(_this, 'download', [RequestMethods.beforeEach]);
+        return _this;
     }
-    RequestMethods.prototype.post = function (url, data, options) {
-        if (data === void 0) { data = {}; }
-        if (options === void 0) { options = {}; }
-        return __awaiter(this, void 0, void 0, function () {
-            var res, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this._mode;
-                        switch (_a) {
-                            case "WEB": return [3, 1];
-                            case "WX_MINIAPP": return [3, 3];
-                        }
-                        return [3, 5];
-                    case 1: return [4, this._postWeb(url, data, options)];
-                    case 2:
-                        res = _b.sent();
-                        return [3, 5];
-                    case 3: return [4, this._postWxMiniApp("https:" + url, data, options)];
-                    case 4:
-                        res = _b.sent();
-                        return [3, 5];
-                    case 5: return [2, res];
-                }
+    RequestMethods.bindHooks = function (instance, name, hooks) {
+        var originMethod = instance[name];
+        instance[name] = function (options) {
+            var data = {};
+            var headers = {};
+            hooks.forEach(function (hook) {
+                var _a = hook.call(instance, options), appendedData = _a.data, appendedHeaders = _a.headers;
+                Object.assign(data, appendedData);
+                Object.assign(headers, appendedHeaders);
             });
-        });
-    };
-    RequestMethods.prototype.upload = function (url, filePath, key, data, options) {
-        if (options === void 0) { options = {}; }
-        return __awaiter(this, void 0, void 0, function () {
-            var res, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this._mode;
-                        switch (_a) {
-                            case "WEB": return [3, 1];
-                            case "WX_MINIAPP": return [3, 3];
-                        }
-                        return [3, 5];
-                    case 1:
-                        data.append('file', filePath);
-                        data.append('key', key);
-                        return [4, this._uploadWeb(url, data, options)];
-                    case 2:
-                        res = _b.sent();
-                        return [3, 5];
-                    case 3: return [4, this._uploadWxMiniApp("https:" + url, filePath, key, data, options)];
-                    case 4:
-                        res = _b.sent();
-                        return [3, 5];
-                    case 5: return [2, res];
+            var originData = options.data;
+            originData && (function () {
+                if (util_1.isFormData(originData)) {
+                    for (var key in data) {
+                        originData.append(key, data[key]);
+                    }
+                    return;
                 }
-            });
-        });
+                options.data = __assign({}, originData, data);
+            })();
+            options.headers = __assign({}, (options.headers || {}), headers);
+            return originMethod.call(instance, options);
+        };
     };
-    RequestMethods.prototype.download = function (url) {
-        switch (this._mode) {
-            case "WEB":
-                this._downloadWeb(url);
-                break;
-            case "WX_MINIAPP":
-                this._downloadWxMiniApp(url);
-                break;
-        }
-    };
-    RequestMethods.prototype._uploadWeb = function (url, data, options) {
-        if (data === void 0) { data = {}; }
-        if (options === void 0) { options = {}; }
-        return axios_1.default.post(url, data, options);
-    };
-    RequestMethods.prototype._uploadWxMiniApp = function (url, filePath, key, formData, options) {
-        if (formData === void 0) { formData = {}; }
-        if (options === void 0) { options = {}; }
-        return new Promise(function (resolve) {
-            wx.uploadFile(__assign({ url: url,
-                filePath: filePath, name: key, formData: formData }, options, { success: function (res) {
-                    resolve(res);
-                },
-                fail: function (err) {
-                    resolve(err);
-                } }));
-        });
-    };
-    RequestMethods.prototype._downloadWeb = function (url) {
-        axios_1.default
-            .get(url, {
-            responseType: 'blob'
-        })
-            .then(function (response) {
-            var url = window.URL.createObjectURL(new Blob([response.data]));
-            var link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'file.pdf');
-            document.body.appendChild(link);
-            link.click();
-        });
-    };
-    RequestMethods.prototype._downloadWxMiniApp = function (url) {
-        wx.downloadFile({ url: url });
-    };
-    RequestMethods.prototype._postWeb = function (url, data, options) {
-        if (data === void 0) { data = {}; }
-        if (options === void 0) { options = {}; }
-        return axios_1.default.post(url, data, options);
-    };
-    RequestMethods.prototype._postWxMiniApp = function (url, data, options) {
-        if (data === void 0) { data = {}; }
-        if (options === void 0) { options = {}; }
-        return new Promise(function (resolve, reject) {
-            wx.request(__assign({ url: url,
-                data: data, method: 'POST' }, options, { success: function (res) {
-                    resolve(res);
-                },
-                fail: function (err) {
-                    reject(err);
-                } }));
-        });
+    RequestMethods.beforeEach = function () {
+        var seqId = util_1.genSeqId();
+        return {
+            data: {
+                seqId: seqId
+            },
+            headers: commonHeader
+        };
     };
     return RequestMethods;
-}());
+}(adapters_1.adapter.reqClass));
 var DEFAULT_REQUEST_CONFIG = {
     mode: "WEB"
 };
@@ -201,7 +131,7 @@ var Request = (function (_super) {
     __extends(Request, _super);
     function Request(config) {
         if (config === void 0) { config = DEFAULT_REQUEST_CONFIG; }
-        var _this = _super.call(this, config.mode) || this;
+        var _this = _super.call(this) || this;
         _this.config = config;
         _this.cache = new cache_1.Cache(config.persistence);
         _this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
@@ -221,6 +151,7 @@ var Request = (function (_super) {
                         return [4, this._refreshAccessTokenPromise];
                     case 1:
                         result = _a.sent();
+                        this._refreshAccessTokenPromise = null;
                         this._shouldRefreshAccessTokenHook = null;
                         return [2, result];
                 }
@@ -229,7 +160,7 @@ var Request = (function (_super) {
     };
     Request.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var refreshToken, response;
+            var refreshToken, response, code;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -244,13 +175,16 @@ var Request = (function (_super) {
                             })];
                     case 1:
                         response = _a.sent();
-                        if (response.data.code === 'SIGN_PARAM_INVALID' || response.data.code === 'REFRESH_TOKEN_EXPIRED') {
-                            events_1.activateEvent('loginStateExpire');
-                            this.cache.removeStore(this.refreshTokenKey);
+                        if (response.data.code) {
+                            code = response.data.code;
+                            if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
+                                events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRE);
+                                this.cache.removeStore(this.refreshTokenKey);
+                            }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {
-                            events_1.activateEvent('refreshAccessToken');
+                            events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
                             this.cache.setStore(this.accessTokenKey, response.data.access_token);
                             this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
                             return [2, {
@@ -298,7 +232,7 @@ var Request = (function (_super) {
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, newUrl, res;
+            var contentType, tmpObj, _a, payload, key, opts, parse, query, search, formatQuery, newUrl, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -332,8 +266,20 @@ var Request = (function (_super) {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
-                        newUrl = types_1.BASE_URL + "?env=" + this.config.env;
-                        return [4, this.post(newUrl, payload, opts)];
+                        parse = params.parse, query = params.query, search = params.search;
+                        formatQuery = {
+                            env: this.config.env
+                        };
+                        parse && (formatQuery.parse = true);
+                        query && (formatQuery = __assign({}, query, formatQuery));
+                        newUrl = url.format({
+                            pathname: types_1.BASE_URL,
+                            query: formatQuery
+                        });
+                        if (search) {
+                            newUrl += search;
+                        }
+                        return [4, this.post(__assign({ url: newUrl, data: payload }, opts))];
                     case 3:
                         res = _b.sent();
                         if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {

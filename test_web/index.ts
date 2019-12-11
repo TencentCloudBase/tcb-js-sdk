@@ -8,25 +8,24 @@ import {
 } from './storage';
 import { test_database } from './database';
 import { runAllTestCases, runSelectedTestCase } from './util';
+import tcb from '../dist/index';
 // 默认情况下不测试登录
 // import { test_auth } from './auth';
 
-import '../dist/index';
-
-let tcb = window['tcb'];
 let app;
 const appid = 'wxacfb81f2ced64e70';
+
 let init = async function() {
   console.log('web test starting init');
   // 初始化
   app = tcb.init({
-    //env: 'ianhu',
-    // env: 'jimmytest-088bef'
-    env: 'aaa-375b19'
+    // env: 'jimmytest-088bef',
+    // env: 'base-dev-c9ff99'
     // env: 'webtestjimmy-5328c3'
+    env: 'dev-97eb6c'
     // env: 'feature-env-billing-004'
     // env: 'dev-withnate-604e29'
-    // env: 'luke-3de127' // luke-3de127
+    // env: 'luke-3de127'
   });
 
   // await test_auth(app, appid);
@@ -42,7 +41,8 @@ let init = async function() {
     })
     .signIn(function() {});
 
-  // await test_storage(app);
+  // storage 有需要手动上传文件的测试用例，无法自动跑完
+  await test_storage(app);
 
   await test_function(app);
 

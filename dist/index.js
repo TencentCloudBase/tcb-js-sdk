@@ -10,12 +10,23 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 var database_1 = require("@cloudbase/database");
-var Storage = require("./storage");
-var auth_1 = require("./auth");
-var Functions = require("./functions");
+var auth_1 = __importDefault(require("./auth"));
+var Storage = __importStar(require("./storage"));
+var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
+var adapters_1 = require("./adapters");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
     mode: "WEB"
@@ -31,6 +42,7 @@ var TCB = (function () {
     };
     TCB.prototype.database = function (dbConfig) {
         database_1.Db.reqClass = request_1.Request;
+        database_1.Db.wsClass = adapters_1.adapter.wsClass;
         if (!this.authObj) {
             console.warn('需要app.auth()授权');
             return;
@@ -47,12 +59,15 @@ var TCB = (function () {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
         }
-        Object.assign(this.config, { persistence: persistence || 'session' });
+        this.config = __assign({}, this.config, { persistence: persistence || adapters_1.adapter.primaryStorage || 'session' });
         this.authObj = new auth_1.default(this.config);
         return this.authObj;
     };
     TCB.prototype.on = function (eventName, callback) {
         return events_1.addEventListener.apply(this, [eventName, callback]);
+    };
+    TCB.prototype.off = function (eventName, callback) {
+        return events_1.removeEventListener.apply(this, [eventName, callback]);
     };
     TCB.prototype.callFunction = function (params, callback) {
         return Functions.callFunction.apply(this, [params, callback]);
@@ -75,5 +90,6 @@ var tcb = new TCB();
 try {
     window.tcb = tcb;
 }
-catch (e) { }
+catch (e) {
+}
 module.exports = tcb;

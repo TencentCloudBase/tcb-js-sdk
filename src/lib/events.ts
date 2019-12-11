@@ -144,3 +144,13 @@ export function addEventListener(event: string, callback: Function) {
 export function activateEvent(event: string, data: any = {}) {
   iEventEmitter.fire(event, data);
 }
+
+export function removeEventListener(event: string, callback: Function) {
+  iEventEmitter.off(event, callback);
+}
+
+export const EVENTS = {
+  LOGIN_STATE_CHANGED: 'loginStateChanged',
+  LOGIN_STATE_EXPIRE: 'loginStateExpire',
+  REFRESH_ACCESS_TOKEN: 'refreshAccessToken'
+};

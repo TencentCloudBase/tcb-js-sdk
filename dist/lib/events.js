@@ -88,3 +88,12 @@ function activateEvent(event, data) {
     iEventEmitter.fire(event, data);
 }
 exports.activateEvent = activateEvent;
+function removeEventListener(event, callback) {
+    iEventEmitter.off(event, callback);
+}
+exports.removeEventListener = removeEventListener;
+exports.EVENTS = {
+    LOGIN_STATE_CHANGED: 'loginStateChanged',
+    LOGIN_STATE_EXPIRE: 'loginStateExpire',
+    REFRESH_ACCESS_TOKEN: 'refreshAccessToken'
+};

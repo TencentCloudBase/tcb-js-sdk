@@ -95,6 +95,7 @@ var Auth = (function (_super) {
                         cache.removeStore(refreshTokenKey);
                         cache.removeStore(accessTokenKey);
                         cache.removeStore(accessTokenExpireKey);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         return [2, res];
                 }
             });
@@ -169,6 +170,7 @@ var Auth = (function (_super) {
                         return [4, this.httpRequest.refreshAccessToken()];
                     case 2:
                         _b.sent();
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token

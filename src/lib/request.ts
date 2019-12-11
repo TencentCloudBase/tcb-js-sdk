@@ -10,7 +10,7 @@ import {
   KV
 } from '../types';
 import { Cache } from './cache';
-import { activateEvent } from './events';
+import { activateEvent, EVENTS } from './events';
 import { adapter } from '../adapters';
 import { IRequestOptions } from '../adapters/types';
 import { genSeqId, isFormData } from './util';
@@ -162,13 +162,13 @@ class Request extends RequestMethods {
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
-        activateEvent('loginStateExpire');
+        activateEvent(EVENTS.LOGIN_STATE_EXPIRE);
         this.cache.removeStore(this.refreshTokenKey);
       }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {
-      activateEvent('refreshAccessToken');
+      activateEvent(EVENTS.REFRESH_ACCESS_TOKEN);
       this.cache.setStore(this.accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
       this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());

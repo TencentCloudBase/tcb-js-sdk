@@ -5,6 +5,7 @@ import Base from './base';
 import { runtime } from '../adapters';
 import { RUNTIME } from '../adapters/types';
 
+import { activateEvent, EVENTS } from '../lib/events';
 
 /* eslint-disable no-unused-vars */
 enum AllowedScopes {
@@ -93,6 +94,7 @@ export default class extends Base {
     if (refreshTokenRes.accessTokenExpire) {
       this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
     }
+    activateEvent(EVENTS.LOGIN_STATE_CHANGED);
 
     return {
       credential: {

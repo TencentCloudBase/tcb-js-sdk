@@ -66,6 +66,9 @@ var TCB = (function () {
     TCB.prototype.on = function (eventName, callback) {
         return events_1.addEventListener.apply(this, [eventName, callback]);
     };
+    TCB.prototype.off = function (eventName, callback) {
+        return events_1.removeEventListener.apply(this, [eventName, callback]);
+    };
     TCB.prototype.callFunction = function (params, callback) {
         return Functions.callFunction.apply(this, [params, callback]);
     };

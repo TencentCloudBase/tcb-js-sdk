@@ -5,6 +5,8 @@ import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener } from './lib/events';
 import { RequestMode } from './types';
+import { adapter } from './adapters';
+import { SDKAdapterInterface, RUNTIME } from './adapters/types';
 
 // eslint-disable-next-line
 declare global {
@@ -18,6 +20,8 @@ interface ICloudbaseConfig {
   timeout?: number;
   mode?: RequestMode;
   persistence?: string;
+  adapter?: SDKAdapterInterface;
+  runtime?: RUNTIME;
 }
 
 const DEFAULT_INIT_CONFIG = {
@@ -47,6 +51,8 @@ class TCB {
 
   database(dbConfig?: object) {
     Db.reqClass = Request;
+    // @ts-ignore
+    Db.wsClass = adapter.wsClass;
 
     if (!this.authObj) {
       console.warn('需要app.auth()授权');
@@ -67,7 +73,8 @@ class TCB {
     }
     this.config = {
       ...this.config,
-      persistence: persistence || 'session'
+      // 如不明确指定persistence则优先取各平台adapter首选，其次session
+      persistence: persistence || adapter.primaryStorage || 'session'
     };
 
     this.authObj = new Auth(this.config);

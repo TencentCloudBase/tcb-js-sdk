@@ -7,13 +7,13 @@ import {
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN,
   SDK_VERISON,
-  KV,
-  protocol
+  KV
 } from '../types';
 import { Cache } from './cache';
 import { activateEvent } from './events';
-import Axios from 'axios';
-import { genSeqId, getArgNames, isFormData, formatUrl } from './util';
+import { adapter } from '../adapters';
+import { IRequestOptions } from '../adapters/types';
+import { genSeqId, isFormData } from './util';
 
 interface GetAccessTokenResult {
   accessToken: string;
@@ -24,10 +24,6 @@ export type CommonRequestOptions = {
   headers?: KV<string>;
   responseType?: string;
   onUploadProgress?: Function;
-}
-
-type WXRequestOptions = Pick<CommonRequestOptions, 'onUploadProgress'>&{
-  header?: KV<string>;
 }
 
 type AppendedRequestInfo = {
@@ -50,11 +46,9 @@ const commonHeader = {
 /**
  * @class RequestMethods
  */
-class RequestMethods {
-  private readonly _mode: RequestMode
-
-  constructor(mode: RequestMode = RequestMode.WEB) {
-    this._mode = mode;
+class RequestMethods extends adapter.reqClass {
+  constructor() {
+    super();
     RequestMethods.bindHooks(this, 'post', [RequestMethods.beforeEach]);
     RequestMethods.bindHooks(this, 'upload', [RequestMethods.beforeEach]);
     RequestMethods.bindHooks(this, 'download', [RequestMethods.beforeEach]);
@@ -65,23 +59,15 @@ class RequestMethods {
    */
   static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]) {
     const originMethod = instance[name];
-    const argNames = getArgNames(originMethod);
-    const indexOfDataArg = argNames.indexOf('data');
-    const indexOfOptionsArg = argNames.indexOf('options');
-    // 即不存在data参数也不存在options参数的method无需追加信息
-    if (indexOfDataArg === -1 && indexOfOptionsArg === -1) {
-      return;
-    }
-    instance[name] = function(...args: any[]) {
+    instance[name] = function(options: IRequestOptions) {
       const data = {};
       const headers = {};
       hooks.forEach(hook => {
-        const { data: appendedData, headers: appendedHeaders } = hook.apply(instance, args);
+        const { data: appendedData, headers: appendedHeaders } = hook.call(instance, options);
         Object.assign(data, appendedData);
         Object.assign(headers, appendedHeaders);
       });
-      const originData = args[indexOfDataArg];
-      const originOptions = args[indexOfOptionsArg];
+      const originData = options.data;
       originData && (() => {
         if (isFormData(originData)) {
           for (const key in data) {
@@ -89,19 +75,16 @@ class RequestMethods {
           }
           return;
         }
-        args[indexOfDataArg] = {
+        options.data = {
           ...originData,
           ...data
         };
       })();
-      originOptions && (args[indexOfOptionsArg] = {
-        ...originOptions,
-        headers: {
-          ...(originOptions.headers || {}),
-          ...headers
-        }
-      });
-      return (originMethod as Function).apply(instance, args);
+      options.headers = {
+        ...(options.headers || {}),
+        ...headers
+      };
+      return (originMethod as Function).call(instance, options);
     };
   }
   /**
@@ -116,114 +99,6 @@ class RequestMethods {
       },
       headers: commonHeader
     };
-  }
-  public async post(url: string, data: KV<any> = {}, options: CommonRequestOptions = {}): Promise<KV<any>> {
-    let res;
-    switch (this._mode) {
-      case RequestMode.WEB:
-        res = await this._postWeb(formatUrl(protocol, url), data, options);
-        break;
-      case RequestMode.WX_MINIAPP:
-        res = await this._postWxMiniApp(formatUrl('https:', url), data, <WXRequestOptions>{
-          header: options.headers
-        });
-        break;
-    }
-    return res;
-  }
-  public async upload(url: string, filePath: string, key: string, data: FormData, options: KV<any> = {}): Promise<KV<any>> {
-    let res;
-    switch (this._mode) {
-      case RequestMode.WEB:
-        // options.headers = {
-        //   ...options.headers,
-        //   ...commonHeader
-        // };
-        data.append('file', filePath);
-        data.append('key', key);
-        res = await this._uploadWeb(formatUrl(protocol, url), data, options);
-        break;
-      case RequestMode.WX_MINIAPP:
-        res = await this._uploadWxMiniApp(formatUrl('https:', url), filePath, key, data, <WXRequestOptions>{
-          header: options.headers
-        });
-        break;
-    }
-    return res;
-  }
-  public download(url: string, data: KV<any> = {}) {
-    switch (this._mode) {
-      case RequestMode.WEB:
-        this._downloadWeb(formatUrl(protocol, url), data);
-        break;
-      case RequestMode.WX_MINIAPP:
-        this._downloadWxMiniApp(formatUrl('https:', url));
-        break;
-    }
-  }
-  private _uploadWeb(url: string, data: KV<any> = {}, options: KV<any> = {}): Promise<any> {
-    return Axios.post(url, data, options);
-  }
-  private _uploadWxMiniApp(url: string, filePath: string, key, formData: KV<any> = {}, options: KV<any> = {}) {
-    return new Promise(resolve => {
-      wx.uploadFile({
-        url,
-        filePath,
-        name: key,
-        formData,
-        ...options,
-        success(res) {
-          resolve(res);
-        },
-        fail(err) {
-          resolve(err);
-        }
-      });
-    });
-  }
-  private _downloadWeb(url: string, data: KV<any> = {}) {
-    const fileName = decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
-    Axios
-      .get(url, {
-        params: data,
-        responseType: 'blob',
-        headers: commonHeader
-      })
-      .then(function (response: any) {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-      });
-  }
-  private _downloadWxMiniApp(url: string) {
-    wx.downloadFile({
-      url,
-      header: commonHeader
-    });
-  }
-  private _postWeb(url: string, data: KV<any> = {}, options: KV<any> = {}) {
-    return Axios.post(url, data, options);
-  }
-  private _postWxMiniApp(url: string, data: KV<any> = {}, options: WXRequestOptions = {}): Promise<any> {
-    console.log(options);
-    console.log(data);
-    return new Promise((resolve, reject) => {
-      wx.request({
-        url,
-        data,
-        method: 'POST',
-        ...options,
-        success(res) {
-          resolve(res);
-        },
-        fail(err) {
-          reject(err);
-        }
-      });
-    });
   }
 }
 /**
@@ -250,7 +125,7 @@ class Request extends RequestMethods {
    * @param config
    */
   constructor(config: Config = DEFAULT_REQUEST_CONFIG) {
-    super(config.mode);
+    super();
     this.config = config;
     this.cache = new Cache(config.persistence);
 
@@ -389,7 +264,11 @@ class Request extends RequestMethods {
       newUrl += search;
     }
 
-    const res: any = await this.post(newUrl, payload, opts);
+    const res: any = await this.post({
+      url: newUrl,
+      data: payload,
+      ...opts
+    });
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
       throw new Error('network request error');

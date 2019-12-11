@@ -1,6 +1,7 @@
 import { Db } from '@cloudbase/database';
 import Auth from './auth';
 import { RequestMode } from './types';
+import { SDKAdapterInterface, RUNTIME } from './adapters/types';
 declare global {
     interface Window {
         tcb: TCB;
@@ -11,6 +12,8 @@ interface ICloudbaseConfig {
     timeout?: number;
     mode?: RequestMode;
     persistence?: string;
+    adapter?: SDKAdapterInterface;
+    runtime?: RUNTIME;
 }
 declare type Persistence = 'local' | 'session' | 'none';
 declare class TCB {
@@ -37,7 +40,7 @@ declare class TCB {
     }, callback?: Function): any;
     downloadFile(params: {
         fileID: string;
-    }, callback?: Function): any;
+    }, callback?: Function): Promise<any>;
     uploadFile(params: {
         cloudPath: string;
         filePath: File;

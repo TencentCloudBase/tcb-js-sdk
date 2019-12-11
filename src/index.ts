@@ -3,7 +3,7 @@ import Auth from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request } from './lib/request';
-import { addEventListener } from './lib/events';
+import { addEventListener, removeEventListener } from './lib/events';
 import { RequestMode } from './types';
 import { adapter } from './adapters';
 import { SDKAdapterInterface, RUNTIME } from './adapters/types';
@@ -83,6 +83,10 @@ class TCB {
 
   on(eventName: string, callback: Function) {
     return addEventListener.apply(this, [eventName, callback]);
+  }
+
+  off(eventName: string, callback: Function) {
+    return removeEventListener.apply(this, [eventName, callback]);
   }
 
   callFunction(

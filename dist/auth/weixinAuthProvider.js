@@ -62,6 +62,7 @@ var util = __importStar(require("../lib/util"));
 var base_1 = __importDefault(require("./base"));
 var adapters_1 = require("../adapters");
 var types_1 = require("../adapters/types");
+var events_1 = require("../lib/events");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
@@ -141,6 +142,7 @@ var default_1 = (function (_super) {
                         if (refreshTokenRes.accessTokenExpire) {
                             this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

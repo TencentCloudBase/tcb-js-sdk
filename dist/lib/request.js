@@ -178,13 +178,13 @@ var Request = (function (_super) {
                         if (response.data.code) {
                             code = response.data.code;
                             if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
-                                events_1.activateEvent('loginStateExpire');
+                                events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRE);
                                 this.cache.removeStore(this.refreshTokenKey);
                             }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {
-                            events_1.activateEvent('refreshAccessToken');
+                            events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
                             this.cache.setStore(this.accessTokenKey, response.data.access_token);
                             this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
                             return [2, {

@@ -26,6 +26,7 @@ declare class TCB {
         persistence?: Persistence;
     }): Auth;
     on(eventName: string, callback: Function): void;
+    off(eventName: string, callback: Function): void;
     callFunction(params: {
         name: string;
         data: any;

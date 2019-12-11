@@ -1,7 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
 import AuthProvider from './base';
-import { addEventListener } from '../lib/events';
+import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 
@@ -53,6 +53,7 @@ export default class Auth extends AuthProvider {
     cache.removeStore(refreshTokenKey);
     cache.removeStore(accessTokenKey);
     cache.removeStore(accessTokenExpireKey);
+    activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     return res;
   }
 
@@ -100,6 +101,7 @@ export default class Auth extends AuthProvider {
     if (res.refresh_token) {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
       await this.httpRequest.refreshAccessToken();
+      activateEvent(EVENTS.LOGIN_STATE_CHANGED);
       return {
         credential: {
           refreshToken: res.refresh_token

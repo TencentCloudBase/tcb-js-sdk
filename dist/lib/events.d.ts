@@ -10,3 +10,9 @@ export declare class IErrorEvent extends IEvent {
 }
 export declare function addEventListener(event: string, callback: Function): void;
 export declare function activateEvent(event: string, data?: any): void;
+export declare function removeEventListener(event: string, callback: Function): void;
+export declare const EVENTS: {
+    LOGIN_STATE_CHANGED: string;
+    LOGIN_STATE_EXPIRE: string;
+    REFRESH_ACCESS_TOKEN: string;
+};

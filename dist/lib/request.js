@@ -24,11 +24,10 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -108,9 +107,9 @@ var RequestMethods = (function (_super) {
                     }
                     return;
                 }
-                options.data = __assign(__assign({}, originData), data);
+                options.data = __assign({}, originData, data);
             })();
-            options.headers = __assign(__assign({}, (options.headers || {})), headers);
+            options.headers = __assign({}, (options.headers || {}), headers);
             return originMethod.call(instance, options);
         };
     };
@@ -272,7 +271,7 @@ var Request = (function (_super) {
                             env: this.config.env
                         };
                         parse && (formatQuery.parse = true);
-                        query && (formatQuery = __assign(__assign({}, query), formatQuery));
+                        query && (formatQuery = __assign({}, query, formatQuery));
                         newUrl = url.format({
                             pathname: types_1.BASE_URL,
                             query: formatQuery

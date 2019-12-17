@@ -1,19 +1,19 @@
-import { adapter } from '../adapters';
-import { AbstractStorage } from '../adapters/types';
+import { AbstractStorage } from '@cloudbase/adapter-interface';
+import { Adapter } from '../adapters';
 
 class Cache {
   storageClass: any;
-
   constructor(persistence: string) {
-    switch (persistence) {
+    const _persistence = Adapter.adapter.primaryStorage || persistence;
+    switch (_persistence) {
       case 'local':
-        this.storageClass = adapter.localStorage || new TcbObject();
+        this.storageClass = Adapter.adapter.localStorage || new TcbObject();
         break;
       case 'none':
         this.storageClass = new TcbObject();
         break;
       default:
-        this.storageClass = adapter.sessionStorage || new TcbObject();
+        this.storageClass = Adapter.adapter.sessionStorage || new TcbObject();
         break;
     }
   }
@@ -91,29 +91,29 @@ class Cache {
 class TcbObject extends AbstractStorage {
   constructor() {
     super();
-    if (!adapter.root['tcbObject']) {
-      adapter.root['tcbObject'] = {};
+    if (!Adapter.adapter.root['tcbObject']) {
+      Adapter.adapter.root['tcbObject'] = {};
     }
   }
 
   // 保存数据到
   setItem(key: string, value: any) {
-    adapter.root['tcbObject'][key] = value;
+    Adapter.adapter.root['tcbObject'][key] = value;
   }
 
   // 获取数据
   getItem(key: string) {
-    return adapter.root['tcbObject'][key];
+    return Adapter.adapter.root['tcbObject'][key];
   }
 
   // 删除保存的数据
   removeItem(key: string) {
-    delete adapter.root['tcbObject'][key];
+    delete Adapter.adapter.root['tcbObject'][key];
   }
 
   // 删除所有保存的数据
   clear() {
-    delete adapter.root['tcbObject'];
+    delete Adapter.adapter.root['tcbObject'];
   }
 }
 export { Cache };

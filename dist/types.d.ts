@@ -1,15 +1,10 @@
 export declare const SDK_VERISON: any;
-export declare const enum RequestMode {
-    WEB = "WEB",
-    WX_MINIAPP = "WX_MINIAPP"
-}
 export interface Config {
     env?: string;
     token?: string;
     timeout?: number;
     proxy?: string;
     persistence?: string;
-    mode?: RequestMode;
 }
 export declare type KV<T> = {
     [key: string]: T;

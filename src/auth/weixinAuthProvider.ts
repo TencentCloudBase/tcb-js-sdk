@@ -2,10 +2,9 @@ import { Config } from '../types';
 import { LoginResult } from './interface';
 import * as util from '../lib/util';
 import Base from './base';
-import { runtime } from '../adapters';
-import { RUNTIME } from '../adapters/types';
-
 import { activateEvent, EVENTS } from '../lib/events';
+import { Adapter, RUNTIME } from '../adapters';
+
 
 /* eslint-disable no-unused-vars */
 enum AllowedScopes {
@@ -36,7 +35,7 @@ export default class extends Base {
 
     this.config = config;
     this.appid = appid;
-    this.scope = runtime === RUNTIME.WX_GAME || runtime === RUNTIME.WX_MP ? 'snsapi_base' : scope;
+    this.scope = Adapter.runtime === RUNTIME.WX_MP ? 'snsapi_base' : scope;
     this.state = state || 'weixin';
     this.loginMode = loginMode || 'redirect';
   }
@@ -83,7 +82,7 @@ export default class extends Base {
     }
 
     let code;
-    if (runtime === RUNTIME.WX_MP || runtime === RUNTIME.WX_GAME) {
+    if (Adapter.runtime === RUNTIME.WX_MP) {
       code = await util.getMiniAppCode();
     } else {
       code = await util.getWeixinCode();

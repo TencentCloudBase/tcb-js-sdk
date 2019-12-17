@@ -6,20 +6,36 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-var types_1 = require("./types");
 var Web = __importStar(require("./platforms/web"));
-var WX_MP = __importStar(require("./platforms/wx_mp"));
-exports.adapter = (_a = (function () {
-    if (WX_MP.isWxMp()) {
-        return {
-            adapter: WX_MP.genAdapter(),
-            runtime: types_1.RUNTIME.WX_MP
-        };
+var util_1 = require("../lib/util");
+var RUNTIME;
+(function (RUNTIME) {
+    RUNTIME["WEB"] = "web";
+    RUNTIME["WX_MP"] = "wx_mp";
+})(RUNTIME = exports.RUNTIME || (exports.RUNTIME = {}));
+function useAdapters(adapters) {
+    var adapterList = util_1.isArray(adapters) ? adapters : [adapters];
+    for (var _i = 0, adapterList_1 = adapterList; _i < adapterList_1.length; _i++) {
+        var adapter = adapterList_1[_i];
+        var isMatch = adapter.isMatch, genAdapter = adapter.genAdapter, runtime = adapter.runtime;
+        if (isMatch()) {
+            return {
+                adapter: genAdapter(),
+                runtime: runtime
+            };
+        }
     }
+}
+exports.useAdapters = useAdapters;
+function useDefaultAdapter() {
     return {
         adapter: Web.genAdapter(),
-        runtime: types_1.RUNTIME.WEB
+        runtime: RUNTIME.WEB
     };
-})(), _a.adapter), exports.runtime = _a.runtime;
+}
+exports.useDefaultAdapter = useDefaultAdapter;
+exports.Adapter = {
+    adapter: null,
+    runtime: undefined
+};

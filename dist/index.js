@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 var database_1 = require("@cloudbase/database");
+var adapter_wx_mp_1 = __importDefault(require("@cloudbase/adapter-wx_mp"));
 var auth_1 = __importDefault(require("./auth"));
 var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
@@ -28,8 +29,7 @@ var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
 var DEFAULT_INIT_CONFIG = {
-    timeout: 15000,
-    mode: "WEB"
+    timeout: 15000
 };
 var TCB = (function () {
     function TCB(config) {
@@ -38,11 +38,14 @@ var TCB = (function () {
     }
     TCB.prototype.init = function (config) {
         this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);
+        if (!adapters_1.Adapter.adapter) {
+            this._useDefaultAdapter();
+        }
         return new TCB(this.config);
     };
     TCB.prototype.database = function (dbConfig) {
         database_1.Db.reqClass = request_1.Request;
-        database_1.Db.wsClass = adapters_1.adapter.wsClass;
+        database_1.Db.wsClass = adapters_1.Adapter.adapter.wsClass;
         if (!this.authObj) {
             console.warn('需要app.auth()授权');
             return;
@@ -59,8 +62,9 @@ var TCB = (function () {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
         }
-        this.config = __assign(__assign({}, this.config), { persistence: persistence || adapters_1.adapter.primaryStorage || 'session' });
+        this.config = __assign(__assign({}, this.config), { persistence: persistence || adapters_1.Adapter.adapter.primaryStorage || 'session' });
         this.authObj = new auth_1.default(this.config);
+        this.authObj.init();
         return this.authObj;
     };
     TCB.prototype.on = function (eventName, callback) {
@@ -84,9 +88,20 @@ var TCB = (function () {
     TCB.prototype.uploadFile = function (params, callback) {
         return Storage.uploadFile.apply(this, [params, callback]);
     };
+    TCB.prototype.useAdapters = function (adapters) {
+        var _a = adapters_1.useAdapters(adapters) || {}, adapter = _a.adapter, runtime = _a.runtime;
+        adapter && (adapters_1.Adapter.adapter = adapter);
+        runtime && (adapters_1.Adapter.runtime = runtime);
+    };
+    TCB.prototype._useDefaultAdapter = function () {
+        var _a = adapters_1.useDefaultAdapter(), adapter = _a.adapter, runtime = _a.runtime;
+        adapters_1.Adapter.adapter = adapter;
+        adapters_1.Adapter.runtime = runtime;
+    };
     return TCB;
 }());
 var tcb = new TCB();
+tcb.useAdapters(adapter_wx_mp_1.default);
 try {
     window.tcb = tcb;
 }

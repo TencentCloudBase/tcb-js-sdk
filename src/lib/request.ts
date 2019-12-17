@@ -1,19 +1,18 @@
-import * as url from 'url';
 import {
   Config,
-  RequestMode,
   BASE_URL,
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN,
   SDK_VERISON,
-  KV
+  KV,
+  protocol
 } from '../types';
 import { Cache } from './cache';
 import { activateEvent, EVENTS } from './events';
-import { adapter } from '../adapters';
-import { IRequestOptions } from '../adapters/types';
-import { genSeqId, isFormData } from './util';
+import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
+import { genSeqId, isFormData, formatUrl } from './util';
+import { Adapter } from '../adapters';
 
 interface GetAccessTokenResult {
   accessToken: string;
@@ -43,75 +42,52 @@ const commonHeader = {
   'X-SDK-Version': SDK_VERISON
 };
 
-/**
- * @class RequestMethods
- */
-class RequestMethods extends adapter.reqClass {
-  constructor() {
-    super();
-    RequestMethods.bindHooks(this, 'post', [RequestMethods.beforeEach]);
-    RequestMethods.bindHooks(this, 'upload', [RequestMethods.beforeEach]);
-    RequestMethods.bindHooks(this, 'download', [RequestMethods.beforeEach]);
-  }
-  /**
-   * 绑定hooks
-   * @static
-   */
-  static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]) {
-    const originMethod = instance[name];
-    instance[name] = function (options: IRequestOptions) {
-      const data = {};
-      const headers = {};
-      hooks.forEach(hook => {
-        const { data: appendedData, headers: appendedHeaders } = hook.call(instance, options);
-        Object.assign(data, appendedData);
-        Object.assign(headers, appendedHeaders);
-      });
-      const originData = options.data;
-      originData && (() => {
-        if (isFormData(originData)) {
-          for (const key in data) {
-            (originData as FormData).append(key, data[key]);
-          }
-          return;
+function bindHooks(instance: SDKRequestInterface, name: string, hooks: RequestBeforeHook[]) {
+  const originMethod = instance[name];
+  instance[name] = function(options: IRequestOptions) {
+    const data = {};
+    const headers = {};
+    hooks.forEach(hook => {
+      const { data: appendedData, headers: appendedHeaders } = hook.call(instance, options);
+      Object.assign(data, appendedData);
+      Object.assign(headers, appendedHeaders);
+    });
+    const originData = options.data;
+    originData && (() => {
+      if (isFormData(originData)) {
+        for (const key in data) {
+          (originData as FormData).append(key, data[key]);
         }
-        options.data = {
-          ...originData,
-          ...data
-        };
-      })();
-      options.headers = {
-        ...(options.headers || {}),
-        ...headers
+        return;
+      }
+      options.data = {
+        ...originData,
+        ...data
       };
-      return (originMethod as Function).call(instance, options);
+    })();
+    options.headers = {
+      ...(options.headers || {}),
+      ...headers
     };
-  }
-  /**
-   * 每次请求之前执行，追加data和headers
-   * @static
-   */
-  static beforeEach(): AppendedRequestInfo {
-    const seqId = genSeqId();
-    return {
-      data: {
-        seqId
-      },
-      headers: commonHeader
-    };
-  }
+    return (originMethod as Function).call(instance, options);
+  };
 }
-/**
- * 默认配置
- * @constant DEFAULT_REQUEST_CONFIG
- */
-const DEFAULT_REQUEST_CONFIG = {
-  mode: RequestMode.WEB
-};
+function beforeEach(): AppendedRequestInfo {
+  const seqId = genSeqId();
+  return {
+    data: {
+      seqId
+    },
+    headers: {
+      ...commonHeader,
+      'x-seqid': seqId
+    }
+  };
+}
 /**
  * @class Request
  */
-class Request extends RequestMethods {
+class Request {
   config: Config;
   cache: Cache;
   accessTokenKey: string;
@@ -119,19 +95,35 @@ class Request extends RequestMethods {
   refreshTokenKey: string;
   _shouldRefreshAccessTokenHook: Function
   _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null
-
+  _reqClass: SDKRequestInterface;
   /**
    * 初始化
    * @param config
    */
-  constructor(config: Config = DEFAULT_REQUEST_CONFIG) {
-    super();
+  constructor(config: Config = {}) {
     this.config = config;
     this.cache = new Cache(config.persistence);
 
     this.accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
     this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
+    // eslint-disable-next-line
+    this._reqClass = new Adapter.adapter.reqClass();
+    bindHooks(this._reqClass, 'post', [beforeEach]);
+    bindHooks(this._reqClass, 'upload', [beforeEach]);
+    bindHooks(this._reqClass, 'download', [beforeEach]);
+  }
+  async post(options: IRequestOptions): Promise<ResponseObject> {
+    const res = await this._reqClass.post(options);
+    return res;
+  }
+  async upload(options: IUploadRequestOptions): Promise<ResponseObject> {
+    const res = await this._reqClass.upload(options);
+    return res;
+  }
+  async download(options: IRequestOptions): Promise<ResponseObject> {
+    const res = await this._reqClass.download(options);
+    return res;
   }
 
   async refreshAccessToken(): Promise<GetAccessTokenResult> {
@@ -265,10 +257,7 @@ class Request extends RequestMethods {
       ...formatQuery
     });
     // 生成请求 url
-    let newUrl = url.format({
-      pathname: BASE_URL,
-      query: formatQuery
-    });
+    let newUrl = formatUrl(protocol, BASE_URL, formatQuery);
 
     if (search) {
       newUrl += search;

@@ -60,22 +60,58 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var types_1 = require("../types");
-var types_2 = require("../../types");
+var adapter_interface_1 = require("@cloudbase/adapter-interface");
+var types_1 = require("../../types");
 var util_1 = require("../../lib/util");
-var Request = (function (_super) {
-    __extends(Request, _super);
-    function Request() {
+var WebRequest = (function (_super) {
+    __extends(WebRequest, _super);
+    function WebRequest() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Request.prototype._request = function (options) {
+    WebRequest.prototype.get = function (options) {
+        return this._request(__assign(__assign({}, options), { method: 'get' }));
+    };
+    WebRequest.prototype.post = function (options) {
+        return this._request(__assign(__assign({}, options), { method: 'post' }));
+    };
+    WebRequest.prototype.upload = function (options) {
+        var data = options.data, file = options.file;
+        var formData = new FormData();
+        for (var key in data) {
+            formData.append(key, data[key]);
+        }
+        formData.append('key', name);
+        formData.append('file', file);
+        return this._request(__assign(__assign({}, options), { data: formData, method: 'post' }));
+    };
+    WebRequest.prototype.download = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var fileName, link;
+            return __generator(this, function (_a) {
+                fileName = decodeURIComponent(new URL(options.url).pathname.split('/').pop() || '');
+                link = document.createElement('a');
+                link.href = options.url;
+                link.setAttribute('download', fileName);
+                link.setAttribute('target', '_blank');
+                document.body.appendChild(link);
+                link.click();
+                return [2, new Promise(function (resolve) {
+                        resolve({
+                            statusCode: 200,
+                            tempFilePath: options.url
+                        });
+                    })];
+            });
+        });
+    };
+    WebRequest.prototype._request = function (options) {
         var method = (String(options.method)).toLowerCase() || 'get';
         return new Promise(function (resolve) {
-            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data;
-            var realUrl = util_1.formatUrl(types_2.protocol, url, method === 'get' ? data : {});
+            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType;
+            var realUrl = util_1.formatUrl(types_1.protocol, url, method === 'get' ? data : {});
             var ajax = new XMLHttpRequest();
             ajax.open(method, realUrl);
-            ajax.setRequestHeader('Accept', 'application/json');
+            responseType && (ajax.responseType = responseType);
             for (var key in headers) {
                 ajax.setRequestHeader(key, headers[key]);
             }
@@ -94,49 +130,13 @@ var Request = (function (_super) {
             ajax.send(method === 'post' && util_1.isFormData(data) ? data : JSON.stringify(data || {}));
         });
     };
-    Request.prototype.get = function (options) {
-        return this._request(__assign(__assign({}, options), { method: 'get' }));
-    };
-    Request.prototype.post = function (options) {
-        return this._request(__assign(__assign({}, options), { method: 'post' }));
-    };
-    Request.prototype.upload = function (options) {
-        var data = options.data, file = options.file;
-        var formData = new FormData();
-        for (var key in data) {
-            formData.append(key, data[key]);
-        }
-        formData.append('file', file);
-        formData.append('key', name);
-        return this._request(__assign(__assign({}, options), { data: formData, method: 'post' }));
-    };
-    Request.prototype.download = function (options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var data, fileName, url, link;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, this.get(options)];
-                    case 1:
-                        data = (_a.sent()).data;
-                        fileName = decodeURIComponent(new URL(options.url).pathname.split('/').pop() || '');
-                        url = window.URL.createObjectURL(new Blob([data]));
-                        link = document.createElement('a');
-                        link.href = url;
-                        link.setAttribute('download', fileName);
-                        document.body.appendChild(link);
-                        link.click();
-                        return [2];
-                }
-            });
-        });
-    };
-    return Request;
-}(types_1.AbstractSDKRequest));
-exports.Request = Request;
+    return WebRequest;
+}(adapter_interface_1.AbstractSDKRequest));
+exports.WebRequest = WebRequest;
 function genAdapter() {
     var adapter = {
         root: window,
-        reqClass: Request,
+        reqClass: WebRequest,
         wsClass: WebSocket,
         localStorage: localStorage,
         sessionStorage: sessionStorage

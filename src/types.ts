@@ -1,11 +1,6 @@
 import * as packageInfo from '../package.json';
 
 export const SDK_VERISON = packageInfo.version;
-/*eslint-disable */
-export const enum RequestMode {
-  WEB = 'WEB',
-  WX_MINIAPP = 'WX_MINIAPP'
-}
 /*eslint-enable */
 export interface Config {
   env?: string;
@@ -13,7 +8,6 @@ export interface Config {
   timeout?: number;
   proxy?: string;
   persistence?: string;
-  mode?: RequestMode;
 }
 
 export type KV<T> = {

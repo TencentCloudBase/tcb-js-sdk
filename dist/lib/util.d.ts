@@ -5,6 +5,7 @@ export declare const removeParam: (key: string, sourceURL: string) => string;
 export declare const createPromiseCallback: () => any;
 export declare const getWeixinCode: () => string;
 export declare const getMiniAppCode: () => Promise<string>;
+export declare function isArray(val: any): boolean;
 export declare function isString(val: any): boolean;
 export declare function isUndefined(val: any): boolean;
 export declare function isInstanceOf(instance: any, construct: any): boolean;

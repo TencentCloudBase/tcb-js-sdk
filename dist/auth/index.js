@@ -71,12 +71,18 @@ var Auth = (function (_super) {
     function Auth(config) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
-        _this.customAuthProvider = new base_1.default(_this.config);
         return _this;
     }
+    Auth.prototype.init = function () {
+        _super.prototype.init.call(this);
+        this.customAuthProvider = new base_1.default(this.config);
+        this.customAuthProvider.init();
+    };
     Auth.prototype.weixinAuthProvider = function (_a) {
         var appid = _a.appid, scope = _a.scope, loginMode = _a.loginMode, state = _a.state;
-        return new weixinAuthProvider_1.default(this.config, appid, scope, loginMode, state);
+        var provider = new weixinAuthProvider_1.default(this.config, appid, scope, loginMode, state);
+        provider.init();
+        return provider;
     };
     Auth.prototype.signOut = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -162,7 +168,7 @@ var Auth = (function (_super) {
                         _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey;
                         return [4, this.httpRequest.send('auth.signInWithTicket', {
                                 ticket: ticket,
-                                refresh_token: cache.getStore(refreshTokenKey) || undefined
+                                refresh_token: cache.getStore(refreshTokenKey) || ''
                             })];
                     case 1:
                         res = _b.sent();

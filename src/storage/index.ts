@@ -2,7 +2,6 @@ import { Request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 import { MetaDataRes } from '../types';
 
-
 /*
  * 上传文件
  * @param {string} cloudPath 上传后的文件路径
@@ -42,6 +41,7 @@ export const uploadFile = function (
         'success_action_status': '201',
         'x-cos-security-token': token
       };
+      // @ts-ignore
       httpRequest.upload({
         url,
         data,
@@ -200,8 +200,7 @@ export const downloadFile = async function ({ fileID }, callback?: any) {
   const res = tmpUrlRes.fileList[0];
 
   if (res.code !== 'SUCCESS') {
-    callback && callback(res);
-    return;
+    return callback ? callback(res) : new Promise(resolve => { resolve(res) });
   }
 
   let tmpUrl = res.download_url;

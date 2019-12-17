@@ -1,12 +1,12 @@
 import { Db } from '@cloudbase/database';
+import adapterForWxMp from '@cloudbase/adapter-wx_mp';
 import Auth from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request } from './lib/request';
 import { addEventListener, removeEventListener } from './lib/events';
-import { RequestMode } from './types';
-import { adapter } from './adapters';
-import { SDKAdapterInterface, RUNTIME } from './adapters/types';
+import { useAdapters, Adapter, useDefaultAdapter } from './adapters';
+import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
 
 // eslint-disable-next-line
 declare global {
@@ -18,15 +18,12 @@ declare global {
 interface ICloudbaseConfig {
   env: string;
   timeout?: number;
-  mode?: RequestMode;
   persistence?: string;
   adapter?: SDKAdapterInterface;
-  runtime?: RUNTIME;
 }
 
 const DEFAULT_INIT_CONFIG = {
-  timeout: 15000,
-  mode: RequestMode.WEB
+  timeout: 15000
 };
 
 type Persistence = 'local' | 'session' | 'none';
@@ -45,14 +42,17 @@ class TCB {
       ...DEFAULT_INIT_CONFIG,
       ...config
     };
-
+    // 调用初始化时若未兼容平台，则使用默认adapter
+    if (!Adapter.adapter) {
+      this._useDefaultAdapter();
+    }
     return new TCB(this.config);
   }
 
   database(dbConfig?: object) {
     Db.reqClass = Request;
     // @ts-ignore
-    Db.wsClass = adapter.wsClass;
+    Db.wsClass = Adapter.adapter.wsClass;
 
     if (!this.authObj) {
       console.warn('需要app.auth()授权');
@@ -74,10 +74,11 @@ class TCB {
     this.config = {
       ...this.config,
       // 如不明确指定persistence则优先取各平台adapter首选，其次session
-      persistence: persistence || adapter.primaryStorage || 'session'
+      persistence: persistence || Adapter.adapter.primaryStorage || 'session'
     };
 
     this.authObj = new Auth(this.config);
+    this.authObj.init();
     return this.authObj;
   }
 
@@ -114,14 +115,27 @@ class TCB {
   ) {
     return Storage.uploadFile.apply(this, [params, callback]);
   }
+
+  useAdapters(adapters: CloudbaseAdapter|CloudbaseAdapter[]) {
+    const { adapter, runtime } = useAdapters(adapters) || {};
+    adapter && (Adapter.adapter = adapter as SDKAdapterInterface);
+    runtime && (Adapter.runtime = runtime as string);
+  }
+
+  private _useDefaultAdapter() {
+    const { adapter, runtime } = useDefaultAdapter();
+    Adapter.adapter = adapter as SDKAdapterInterface;
+    Adapter.runtime = runtime as string;
+  }
 }
 
 const tcb = new TCB();
+tcb.useAdapters(adapterForWxMp);
+
 // window 可能不存在
 try {
   window.tcb = tcb;
 } catch (e) {
   // 忽略错误
 }
-
 export = tcb;

@@ -91,6 +91,9 @@ export const getMiniAppCode = function(): Promise<string> {
   });
 };
 
+export function isArray(val: any): boolean {
+  return Object.prototype.toString.call(val) === '[object Array]';
+}
 export function isString(val: any): boolean {
   return typeof val === 'string';
 }
@@ -127,7 +130,8 @@ export function formatUrl(protocol: string, url: string, query: KV<any> = {}): s
     }
     queryString += `${key}=${encodeURIComponent(query[key])}`;
   }
-  if (/^http(s)\:\/\//.test(url)) {
+  url += queryString;
+  if (/^http(s)?\:\/\//.test(url)) {
     return url;
   }
   return `${protocol}${url}`;

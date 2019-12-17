@@ -84,6 +84,7 @@ const res = await app.callFunction({
 - [存储](docs/storage.md)
 - [数据库](docs/database.md)
 - [云函数](docs/functions.md)
+- [多平台适配](docs/adapters.md)
 
 ## 更新日志
 

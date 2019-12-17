@@ -59,7 +59,7 @@ class RequestMethods extends adapter.reqClass {
    */
   static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]) {
     const originMethod = instance[name];
-    instance[name] = function(options: IRequestOptions) {
+    instance[name] = function (options: IRequestOptions) {
       const data = {};
       const headers = {};
       hooks.forEach(hook => {
@@ -140,9 +140,19 @@ class Request extends RequestMethods {
       // 没有正在刷新，那么正常执行刷新逻辑
       this._refreshAccessTokenPromise = this._refreshAccessToken();
     }
-    const result = await this._refreshAccessTokenPromise;
+
+    let result;
+    let err;
+    try {
+      result = await this._refreshAccessTokenPromise;
+    } catch (e) {
+      err = e;
+    }
     this._refreshAccessTokenPromise = null;
     this._shouldRefreshAccessTokenHook = null;
+    if (err) {
+      throw err;
+    }
     return result;
   }
 

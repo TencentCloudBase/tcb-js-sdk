@@ -7,7 +7,9 @@ export default class extends Base {
     private state;
     private loginMode;
     private appid;
+    private _signInPromise;
     constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string);
     signIn(): Promise<LoginResult>;
+    _signIn(): Promise<LoginResult>;
     redirect(): any;
 }

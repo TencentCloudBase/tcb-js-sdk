@@ -33,11 +33,17 @@ export default class Auth extends AuthProvider {
     super(config);
     // this.httpRequest = new Request(config);
     this.config = config;
+  }
+  init() {
+    super.init();
     this.customAuthProvider = new AuthProvider(this.config);
+    this.customAuthProvider.init();
   }
 
   weixinAuthProvider({ appid, scope, loginMode, state }) {
-    return new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
+    const provider =  new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
+    provider.init();
+    return provider;
   }
 
   async signOut() {
@@ -93,10 +99,9 @@ export default class Auth extends AuthProvider {
       throw new Error('ticket must be a string');
     }
     const { cache, refreshTokenKey } = this.httpRequest;
-
     const res = await this.httpRequest.send('auth.signInWithTicket', {
       ticket,
-      refresh_token: cache.getStore(refreshTokenKey) || undefined
+      refresh_token: cache.getStore(refreshTokenKey) || ''
     });
     if (res.refresh_token) {
       this.customAuthProvider.setRefreshToken(res.refresh_token);

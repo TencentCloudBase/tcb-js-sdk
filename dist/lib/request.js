@@ -1,17 +1,4 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -59,20 +46,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var url = __importStar(require("url"));
 var types_1 = require("../types");
 var cache_1 = require("./cache");
 var events_1 = require("./events");
-var adapters_1 = require("../adapters");
 var util_1 = require("./util");
+var adapters_1 = require("../adapters");
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
@@ -81,65 +60,91 @@ var actionsWithoutAccessToken = [
 var commonHeader = {
     'X-SDK-Version': types_1.SDK_VERISON
 };
-var RequestMethods = (function (_super) {
-    __extends(RequestMethods, _super);
-    function RequestMethods() {
-        var _this = _super.call(this) || this;
-        RequestMethods.bindHooks(_this, 'post', [RequestMethods.beforeEach]);
-        RequestMethods.bindHooks(_this, 'upload', [RequestMethods.beforeEach]);
-        RequestMethods.bindHooks(_this, 'download', [RequestMethods.beforeEach]);
-        return _this;
-    }
-    RequestMethods.bindHooks = function (instance, name, hooks) {
-        var originMethod = instance[name];
-        instance[name] = function (options) {
-            var data = {};
-            var headers = {};
-            hooks.forEach(function (hook) {
-                var _a = hook.call(instance, options), appendedData = _a.data, appendedHeaders = _a.headers;
-                Object.assign(data, appendedData);
-                Object.assign(headers, appendedHeaders);
-            });
-            var originData = options.data;
-            originData && (function () {
-                if (util_1.isFormData(originData)) {
-                    for (var key in data) {
-                        originData.append(key, data[key]);
-                    }
-                    return;
+function bindHooks(instance, name, hooks) {
+    var originMethod = instance[name];
+    instance[name] = function (options) {
+        var data = {};
+        var headers = {};
+        hooks.forEach(function (hook) {
+            var _a = hook.call(instance, options), appendedData = _a.data, appendedHeaders = _a.headers;
+            Object.assign(data, appendedData);
+            Object.assign(headers, appendedHeaders);
+        });
+        var originData = options.data;
+        originData && (function () {
+            if (util_1.isFormData(originData)) {
+                for (var key in data) {
+                    originData.append(key, data[key]);
                 }
-                options.data = __assign(__assign({}, originData), data);
-            })();
-            options.headers = __assign(__assign({}, (options.headers || {})), headers);
-            return originMethod.call(instance, options);
-        };
+                return;
+            }
+            options.data = __assign(__assign({}, originData), data);
+        })();
+        options.headers = __assign(__assign({}, (options.headers || {})), headers);
+        return originMethod.call(instance, options);
     };
-    RequestMethods.beforeEach = function () {
-        var seqId = util_1.genSeqId();
-        return {
-            data: {
-                seqId: seqId
-            },
-            headers: commonHeader
-        };
+}
+function beforeEach() {
+    var seqId = util_1.genSeqId();
+    return {
+        data: {
+            seqId: seqId
+        },
+        headers: __assign(__assign({}, commonHeader), { 'x-seqid': seqId })
     };
-    return RequestMethods;
-}(adapters_1.adapter.reqClass));
-var DEFAULT_REQUEST_CONFIG = {
-    mode: "WEB"
-};
-var Request = (function (_super) {
-    __extends(Request, _super);
+}
+var Request = (function () {
     function Request(config) {
-        if (config === void 0) { config = DEFAULT_REQUEST_CONFIG; }
-        var _this = _super.call(this) || this;
-        _this.config = config;
-        _this.cache = new cache_1.Cache(config.persistence);
-        _this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
-        _this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
-        _this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
-        return _this;
+        if (config === void 0) { config = {}; }
+        this.config = config;
+        this.cache = new cache_1.Cache(config.persistence);
+        this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
+        this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
+        this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
+        this._reqClass = new adapters_1.Adapter.adapter.reqClass();
+        bindHooks(this._reqClass, 'post', [beforeEach]);
+        bindHooks(this._reqClass, 'upload', [beforeEach]);
+        bindHooks(this._reqClass, 'download', [beforeEach]);
     }
+    Request.prototype.post = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this._reqClass.post(options)];
+                    case 1:
+                        res = _a.sent();
+                        return [2, res];
+                }
+            });
+        });
+    };
+    Request.prototype.upload = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this._reqClass.upload(options)];
+                    case 1:
+                        res = _a.sent();
+                        return [2, res];
+                }
+            });
+        });
+    };
+    Request.prototype.download = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this._reqClass.download(options)];
+                    case 1:
+                        res = _a.sent();
+                        return [2, res];
+                }
+            });
+        });
+    };
     Request.prototype.refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result, err, e_1;
@@ -285,10 +290,7 @@ var Request = (function (_super) {
                         };
                         parse && (formatQuery.parse = true);
                         query && (formatQuery = __assign(__assign({}, query), formatQuery));
-                        newUrl = url.format({
-                            pathname: types_1.BASE_URL,
-                            query: formatQuery
-                        });
+                        newUrl = util_1.formatUrl(types_1.protocol, types_1.BASE_URL, formatQuery);
                         if (search) {
                             newUrl += search;
                         }
@@ -338,5 +340,5 @@ var Request = (function (_super) {
         });
     };
     return Request;
-}(RequestMethods));
+}());
 exports.Request = Request;

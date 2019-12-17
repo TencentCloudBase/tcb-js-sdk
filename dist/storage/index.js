@@ -200,8 +200,7 @@ exports.downloadFile = function (_a, callback) {
                     tmpUrlRes = _b.sent();
                     res = tmpUrlRes.fileList[0];
                     if (res.code !== 'SUCCESS') {
-                        callback && callback(res);
-                        return [2];
+                        return [2, callback ? callback(res) : new Promise(function (resolve) { resolve(res); })];
                     }
                     tmpUrl = res.download_url;
                     tmpUrl = encodeURI(tmpUrl);

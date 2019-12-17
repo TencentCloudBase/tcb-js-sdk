@@ -20,6 +20,7 @@ export default class Auth extends AuthProvider {
     customAuthProvider: AuthProvider;
     _shouldRefreshAccessToken: Function;
     constructor(config: Config);
+    init(): void;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
         scope: any;

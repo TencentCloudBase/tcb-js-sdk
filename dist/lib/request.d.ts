@@ -1,6 +1,6 @@
 import { Config, KV } from '../types';
 import { Cache } from './cache';
-import { adapter } from '../adapters';
+import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 interface GetAccessTokenResult {
     accessToken: string;
     accessTokenExpire: number;
@@ -10,19 +10,7 @@ export declare type CommonRequestOptions = {
     responseType?: string;
     onUploadProgress?: Function;
 };
-declare type AppendedRequestInfo = {
-    data: KV<any>;
-    headers: KV<string>;
-};
-interface RequestBeforeHook {
-    (...args: any[]): AppendedRequestInfo;
-}
-declare class RequestMethods extends adapter.reqClass {
-    constructor();
-    static bindHooks(instance: RequestMethods, name: string, hooks: RequestBeforeHook[]): void;
-    static beforeEach(): AppendedRequestInfo;
-}
-declare class Request extends RequestMethods {
+declare class Request {
     config: Config;
     cache: Cache;
     accessTokenKey: string;
@@ -30,7 +18,11 @@ declare class Request extends RequestMethods {
     refreshTokenKey: string;
     _shouldRefreshAccessTokenHook: Function;
     _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
+    _reqClass: SDKRequestInterface;
     constructor(config?: Config);
+    post(options: IRequestOptions): Promise<ResponseObject>;
+    upload(options: IUploadRequestOptions): Promise<ResponseObject>;
+    download(options: IRequestOptions): Promise<ResponseObject>;
     refreshAccessToken(): Promise<GetAccessTokenResult>;
     _refreshAccessToken(): Promise<GetAccessTokenResult>;
     getAccessToken(): Promise<GetAccessTokenResult>;

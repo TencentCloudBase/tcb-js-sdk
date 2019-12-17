@@ -68,6 +68,10 @@ exports.getMiniAppCode = function () {
         });
     });
 };
+function isArray(val) {
+    return Object.prototype.toString.call(val) === '[object Array]';
+}
+exports.isArray = isArray;
 function isString(val) {
     return typeof val === 'string';
 }
@@ -106,7 +110,8 @@ function formatUrl(protocol, url, query) {
         }
         queryString += key + "=" + encodeURIComponent(query[key]);
     }
-    if (/^http(s)\:\/\//.test(url)) {
+    url += queryString;
+    if (/^http(s)?\:\/\//.test(url)) {
         return url;
     }
     return "" + protocol + url;

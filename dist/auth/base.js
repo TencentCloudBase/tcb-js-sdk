@@ -40,15 +40,17 @@ var request_1 = require("../lib/request");
 var cache_1 = require("../lib/cache");
 var types_1 = require("../types");
 var adapters_1 = require("../adapters");
-var types_2 = require("../adapters/types");
 var default_1 = (function () {
     function default_1(config) {
-        this.httpRequest = new request_1.Request(config);
-        this.cache = new cache_1.Cache(config.persistence);
-        this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
-        this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
-        this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
+        this.config = config;
     }
+    default_1.prototype.init = function () {
+        this.httpRequest = new request_1.Request(this.config);
+        this.cache = new cache_1.Cache(this.config.persistence);
+        this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + this.config.env;
+        this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + this.config.env;
+        this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + this.config.env;
+    };
     default_1.prototype.setRefreshToken = function (refreshToken) {
         this.cache.removeStore(this.accessTokenKey);
         this.cache.removeStore(this.accessTokenExpireKey);
@@ -59,7 +61,7 @@ var default_1 = (function () {
             var action, hybridMiniapp;
             return __generator(this, function (_a) {
                 action = 'auth.getJwt';
-                hybridMiniapp = adapters_1.runtime === types_2.RUNTIME.WX_MP ? '1' : '0';
+                hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
                 return [2, this.httpRequest.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);

@@ -6,8 +6,7 @@ import {
   REFRESH_TOKEN,
   Config
 } from '../types';
-import { runtime } from '../adapters';
-import { RUNTIME } from '../adapters/types';
+import { RUNTIME, Adapter } from '../adapters';
 
 export default class {
   httpRequest: Request;
@@ -15,14 +14,18 @@ export default class {
   accessTokenKey: string;
   accessTokenExpireKey: string;
   refreshTokenKey: string;
+  config: Config;
 
   constructor(config: Config) {
-    this.httpRequest = new Request(config);
-    this.cache = new Cache(config.persistence);
+    this.config = config;
+  }
+  init() {
+    this.httpRequest = new Request(this.config);
+    this.cache = new Cache(this.config.persistence);
 
-    this.accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
-    this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
-    this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
+    this.accessTokenKey = `${ACCESS_TOKEN}_${this.config.env}`;
+    this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${this.config.env}`;
+    this.refreshTokenKey = `${REFRESH_TOKEN}_${this.config.env}`;
   }
 
   setRefreshToken(refreshToken) {
@@ -34,7 +37,7 @@ export default class {
 
   public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
-    const hybridMiniapp = runtime === RUNTIME.WX_MP ? '1' : '0';
+    const hybridMiniapp =  Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
     return this.httpRequest.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);

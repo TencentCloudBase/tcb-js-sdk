@@ -711,10 +711,29 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+<<<<<<< HEAD
 "@cloudbase/database@^0.9.6":
   version "0.9.6"
   resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.6.tgz#705bd2b8651bb756c95c4cc7f80dfb2bf064ce32"
   integrity sha512-zbOQS0PnF9CQA6ytqKaWMQdHrf3ahU0HSqEuf+eZU/NTysJCeA7PqoS7oFWY5fJ0287TsxaxKU4JPwT6tniAIw==
+=======
+"@cloudbase/adapter-interface@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.npmjs.org/@cloudbase/adapter-interface/-/adapter-interface-0.2.0.tgz#bcddc21e3f9fc3167b99cd3e2df24cbb97e07a82"
+  integrity sha512-zdjMf4+MeHvBgGDgpqm1DrA2o+qt/kbzyWXEySIBGW1Pk8wGQAQaarCPC9lda24thq1lPZwGS7N+kNdgb2F4Hw==
+
+"@cloudbase/adapter-wx_mp@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.npmjs.org/@cloudbase/adapter-wx_mp/-/adapter-wx_mp-0.2.1.tgz#c4440181115dff9a8da33f9e45ef12d20d3aaae6"
+  integrity sha512-fiICA1dmZ+9Sg8V+Vp4hsrPLbxKOJNQE7p0VAa9h0VdV5gOwZD8jtUFj5kXfXSR8UtIeLdRHrSALNzIX3BMnWg==
+  dependencies:
+    "@cloudbase/adapter-interface" "^0.2.0"
+
+"@cloudbase/database@^0.9.8":
+  version "0.9.8"
+  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.8.tgz#c4d1838f09b9430f2736d76e0968c9ebf6fe415b"
+  integrity sha512-pbZrC0kw+kHjgEHvQ7+v82VkxWgbrrk7pujj459H9OXVf+p2gbsxs/gcNaTQpglPVcU9GDLzOE59p6oz1g16rQ==
+>>>>>>> feature:adapter
   dependencies:
     bson "^4.0.2"
     lodash.clonedeep "4.5.0"
@@ -5486,7 +5505,7 @@ mime-db@1.42.0, "mime-db@>= 1.40.0 < 2":
   resolved "https://registry.npmjs.org/mime-db/-/mime-db-1.42.0.tgz#3e252907b4c7adb906597b4b65636272cf9e7bac"
   integrity sha512-UbfJCR4UAVRNgMpfImz05smAXK7+c+ZntjaA26ANtkXLlOe947Aag5zdIcKQULAiF9Cq4WxBi9jUs5zkA84bYQ==
 
-mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
+mime-types@^2.1.12, mime-types@^2.1.25, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24:
   version "2.1.25"
   resolved "https://registry.npmjs.org/mime-types/-/mime-types-2.1.25.tgz#39772d46621f93e2a80a856c53b86a62156a6437"
   integrity sha512-5KhStqB5xpTAeGqKBAMgwaYMnQik7teQN4IAzC7npDv6kzeU6prfkR67bc87J1kWMPGkoaZSq1npmexMgkmEVg==

@@ -13,19 +13,20 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var adapter_interface_1 = require("@cloudbase/adapter-interface");
 var adapters_1 = require("../adapters");
-var types_1 = require("../adapters/types");
 var Cache = (function () {
     function Cache(persistence) {
-        switch (persistence) {
+        var _persistence = adapters_1.Adapter.adapter.primaryStorage || persistence;
+        switch (_persistence) {
             case 'local':
-                this.storageClass = adapters_1.adapter.localStorage || new TcbObject();
+                this.storageClass = adapters_1.Adapter.adapter.localStorage || new TcbObject();
                 break;
             case 'none':
                 this.storageClass = new TcbObject();
                 break;
             default:
-                this.storageClass = adapters_1.adapter.sessionStorage || new TcbObject();
+                this.storageClass = adapters_1.Adapter.adapter.sessionStorage || new TcbObject();
                 break;
         }
     }
@@ -86,22 +87,22 @@ var TcbObject = (function (_super) {
     __extends(TcbObject, _super);
     function TcbObject() {
         var _this = _super.call(this) || this;
-        if (!adapters_1.adapter.root['tcbObject']) {
-            adapters_1.adapter.root['tcbObject'] = {};
+        if (!adapters_1.Adapter.adapter.root['tcbObject']) {
+            adapters_1.Adapter.adapter.root['tcbObject'] = {};
         }
         return _this;
     }
     TcbObject.prototype.setItem = function (key, value) {
-        adapters_1.adapter.root['tcbObject'][key] = value;
+        adapters_1.Adapter.adapter.root['tcbObject'][key] = value;
     };
     TcbObject.prototype.getItem = function (key) {
-        return adapters_1.adapter.root['tcbObject'][key];
+        return adapters_1.Adapter.adapter.root['tcbObject'][key];
     };
     TcbObject.prototype.removeItem = function (key) {
-        delete adapters_1.adapter.root['tcbObject'][key];
+        delete adapters_1.Adapter.adapter.root['tcbObject'][key];
     };
     TcbObject.prototype.clear = function () {
-        delete adapters_1.adapter.root['tcbObject'];
+        delete adapters_1.Adapter.adapter.root['tcbObject'];
     };
     return TcbObject;
-}(types_1.AbstractStorage));
+}(adapter_interface_1.AbstractStorage));

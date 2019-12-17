@@ -13,10 +13,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -86,6 +87,36 @@ var default_1 = (function (_super) {
         return _this;
     }
     default_1.prototype.signIn = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result, err, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this._signInPromise) {
+                            this._signInPromise = this._signIn();
+                        }
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4, this._signInPromise];
+                    case 2:
+                        result = _a.sent();
+                        return [3, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        err = e_1;
+                        return [3, 4];
+                    case 4:
+                        this._signInPromise = null;
+                        if (err) {
+                            throw err;
+                        }
+                        return [2, result];
+                }
+            });
+        });
+    };
+    default_1.prototype._signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
             return __generator(this, function (_a) {

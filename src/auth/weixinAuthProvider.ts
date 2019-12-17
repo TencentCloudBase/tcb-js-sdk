@@ -29,6 +29,7 @@ export default class extends Base {
   private state: string;
   private loginMode: string;
   private appid: string;
+  private _signInPromise: Promise<LoginResult> | null
 
   constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string) {
     super(config);
@@ -41,6 +42,24 @@ export default class extends Base {
   }
 
   async signIn(): Promise<LoginResult> {
+    if (!this._signInPromise) {
+      this._signInPromise = this._signIn();
+    }
+    let result;
+    let err;
+    try {
+      result = await this._signInPromise;
+    } catch (e) {
+      err = e;
+    }
+    this._signInPromise = null;
+    if (err) {
+      throw err;
+    }
+    return result;
+  }
+
+  async _signIn(): Promise<LoginResult> {
     let accessToken = this.cache.getStore(this.accessTokenKey);
     let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
 

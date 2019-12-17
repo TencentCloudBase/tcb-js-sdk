@@ -24,10 +24,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -107,9 +108,9 @@ var RequestMethods = (function (_super) {
                     }
                     return;
                 }
-                options.data = __assign({}, originData, data);
+                options.data = __assign(__assign({}, originData), data);
             })();
-            options.headers = __assign({}, (options.headers || {}), headers);
+            options.headers = __assign(__assign({}, (options.headers || {})), headers);
             return originMethod.call(instance, options);
         };
     };
@@ -141,18 +142,30 @@ var Request = (function (_super) {
     }
     Request.prototype.refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var result, err, e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (!this._refreshAccessTokenPromise) {
                             this._refreshAccessTokenPromise = this._refreshAccessToken();
                         }
-                        return [4, this._refreshAccessTokenPromise];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4, this._refreshAccessTokenPromise];
+                    case 2:
                         result = _a.sent();
+                        return [3, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        err = e_1;
+                        return [3, 4];
+                    case 4:
                         this._refreshAccessTokenPromise = null;
                         this._shouldRefreshAccessTokenHook = null;
+                        if (err) {
+                            throw err;
+                        }
                         return [2, result];
                 }
             });
@@ -271,7 +284,7 @@ var Request = (function (_super) {
                             env: this.config.env
                         };
                         parse && (formatQuery.parse = true);
-                        query && (formatQuery = __assign({}, query, formatQuery));
+                        query && (formatQuery = __assign(__assign({}, query), formatQuery));
                         newUrl = url.format({
                             pathname: types_1.BASE_URL,
                             query: formatQuery

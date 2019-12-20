@@ -1,6 +1,6 @@
 import { KV } from '../types';
 
-export const getQuery = function(name: string, url?: string) {
+export const getQuery = function (name: string, url?: string) {
   if (typeof window === 'undefined') {
     return false;
   }
@@ -11,7 +11,7 @@ export const getQuery = function(name: string, url?: string) {
   return r != null ? r[2] : '';
 };
 
-export const getHash = function(name: string) {
+export const getHash = function (name: string) {
   const matches = window.location.hash.match(
     new RegExp(`[#\?&\/]${name}=([^&#]*)`)
   );
@@ -26,7 +26,7 @@ export const getHash = function(name: string) {
   // return '';
 };
 
-export const removeParam = function(key: string, sourceURL: string) {
+export const removeParam = function (key: string, sourceURL: string) {
   let rtn = sourceURL.split('?')[0];
   let param;
   let params_arr = [];
@@ -48,13 +48,13 @@ export const removeParam = function(key: string, sourceURL: string) {
 export const createPromiseCallback = () => {
   let cb: any;
   if (!Promise) {
-    cb = () => {};
+    cb = () => { };
     cb.promise = {};
 
     const throwPromiseNotDefined = () => {
       throw new Error(
         'Your Node runtime does support ES6 Promises. ' +
-          'Set "global.Promise" to your preferred implementation of promises.'
+        'Set "global.Promise" to your preferred implementation of promises.'
       );
     };
 
@@ -73,19 +73,19 @@ export const createPromiseCallback = () => {
   return cb;
 };
 
-export const getWeixinCode = function() {
+export const getWeixinCode = function () {
   return getQuery('code') || getHash('code');
 };
 
-export const getMiniAppCode = function(): Promise<string> {
-  return new Promise(resolve => {
+export const getMiniAppCode = function (): Promise<string> {
+  return new Promise((resolve, reject) => {
     // @ts-ignore
     wx.login({
       success(res) {
         resolve(res.code);
       },
       fail(err) {
-        resolve(err);
+        reject(err);
       }
     });
   });

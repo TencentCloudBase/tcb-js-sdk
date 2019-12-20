@@ -57,13 +57,13 @@ exports.getWeixinCode = function () {
     return exports.getQuery('code') || exports.getHash('code');
 };
 exports.getMiniAppCode = function () {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
         wx.login({
             success: function (res) {
                 resolve(res.code);
             },
             fail: function (err) {
-                resolve(err);
+                reject(err);
             }
         });
     });

@@ -75,7 +75,7 @@ var WebRequest = (function (_super) {
         return this._request(__assign(__assign({}, options), { method: 'post' }));
     };
     WebRequest.prototype.upload = function (options) {
-        var data = options.data, file = options.file;
+        var data = options.data, file = options.file, name = options.name;
         var formData = new FormData();
         for (var key in data) {
             formData.append(key, data[key]);

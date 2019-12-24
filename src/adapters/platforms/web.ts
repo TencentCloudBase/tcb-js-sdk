@@ -25,7 +25,7 @@ class WebRequest extends AbstractSDKRequest {
     });
   }
   public upload(options: IUploadRequestOptions): Promise<ResponseObject> {
-    const { data, file } = options;
+    const { data, file, name } = options;
     // upload调用data为object类型，在此处转为FormData
     const formData = new FormData();
     for (const key in data) {

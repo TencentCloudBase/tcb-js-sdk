@@ -55,12 +55,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = __importStar(require("../lib/util"));
-var base_1 = __importDefault(require("./base"));
+var base_1 = __importStar(require("./base"));
 var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
 var AllowedScopes;
@@ -173,6 +170,7 @@ var default_1 = (function (_super) {
                             this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.WECHAT);
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

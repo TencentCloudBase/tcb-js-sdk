@@ -22,7 +22,8 @@ let init = async function() {
     // env: 'jimmytest-088bef',
     // env: 'base-dev-c9ff99'
     // env: 'webtestjimmy-5328c3'
-    env: 'dev-97eb6c'
+    // env: 'dev-97eb6c'
+    env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
     // env: 'dev-withnate-604e29'
     // env: 'luke-3de127'

@@ -1,6 +1,7 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
-import AuthProvider from './base';
+import { AnonymousAuthProvider } from './anonymousAuthProvider';
+import AuthProvider, { LOGINTYPE } from './base';
 import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
@@ -28,6 +29,7 @@ export default class Auth extends AuthProvider {
   config: Config;
   customAuthProvider: AuthProvider
   _shouldRefreshAccessToken: Function
+  _anonymousAuthProvider: AnonymousAuthProvider
 
   constructor(config: Config) {
     super(config);
@@ -46,7 +48,28 @@ export default class Auth extends AuthProvider {
     return provider;
   }
 
+  async signInAnonymously() {
+    if (!this._anonymousAuthProvider) {
+      this._anonymousAuthProvider = new AnonymousAuthProvider(this.config);
+      this._anonymousAuthProvider.init();
+    }
+    const result = await this._anonymousAuthProvider.signIn();
+    return result;
+  }
+
+  async linkAndRetrieveDataWithTicket(ticket: string) {
+    if (!this._anonymousAuthProvider) {
+      this._anonymousAuthProvider = new AnonymousAuthProvider(this.config);
+      this._anonymousAuthProvider.init();
+    }
+    const result = await this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(ticket);
+    return result;
+  }
+
   async signOut() {
+    if (this.loginType === LOGINTYPE.ANONYMOUS) {
+      throw new Error('[tcb-js-sdk] 匿名用户不支持登出操作');
+    }
     const { cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this.httpRequest;
     const action = 'auth.logout';
 
@@ -60,6 +83,7 @@ export default class Auth extends AuthProvider {
     cache.removeStore(accessTokenKey);
     cache.removeStore(accessTokenExpireKey);
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGE, LOGINTYPE.NULL);
     return res;
   }
 
@@ -84,6 +108,7 @@ export default class Auth extends AuthProvider {
         return null;
       }
       return {
+        isAnonymous: this.loginType === LOGINTYPE.ANONYMOUS,
         credential: {
           refreshToken,
           accessToken: cache.getStore(accessTokenKey)
@@ -107,6 +132,7 @@ export default class Auth extends AuthProvider {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
       await this.httpRequest.refreshAccessToken();
       activateEvent(EVENTS.LOGIN_STATE_CHANGED);
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGE, LOGINTYPE.CUSTOM);
       return {
         credential: {
           refreshToken: res.refresh_token

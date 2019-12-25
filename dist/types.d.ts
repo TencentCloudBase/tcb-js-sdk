@@ -20,9 +20,12 @@ export interface MetaDataRes {
     data: MetaData;
     requestId: string;
 }
+export declare type LOGIN_TYPE = 'WECHAT-OPEN' | 'WECHAT-PUBLIC' | 'ANONYMOUS' | 'CUSTOM';
 export declare const ACCESS_TOKEN = "access_token";
 export declare const ACCESS_TOKEN_Expire = "access_token_expire";
 export declare const REFRESH_TOKEN = "refresh_token";
+export declare const ANONYMOUS_UUID = "anonymous_uuid";
+export declare const LOGIN_TYPE_KEY = "login_type";
 export declare const protocol: string;
 export declare const BASE_URL: string;
 export {};

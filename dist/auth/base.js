@@ -38,11 +38,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var cache_1 = require("../lib/cache");
+var events_1 = require("../lib/events");
 var types_1 = require("../types");
 var adapters_1 = require("../adapters");
+var LOGINTYPE;
+(function (LOGINTYPE) {
+    LOGINTYPE["ANONYMOUS"] = "ANONYMOUS";
+    LOGINTYPE["WECHAT"] = "WECHAT";
+    LOGINTYPE["CUSTOM"] = "CUSTOM";
+    LOGINTYPE["NULL"] = "NULL";
+})(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
 var default_1 = (function () {
     function default_1(config) {
+        this._loginType = LOGINTYPE.NULL;
         this.config = config;
+        this.onLoginTypeChanged = this.onLoginTypeChanged.bind(this);
+        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGE, this.onLoginTypeChanged);
     }
     default_1.prototype.init = function () {
         this.httpRequest = new request_1.Request(this.config);
@@ -50,7 +61,19 @@ var default_1 = (function () {
         this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + this.config.env;
         this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + this.config.env;
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + this.config.env;
+        this.loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + this.config.env;
     };
+    default_1.prototype.onLoginTypeChanged = function (ev) {
+        this._loginType = ev.data;
+        this.cache.setStore(this.loginTypeKey, this._loginType);
+    };
+    Object.defineProperty(default_1.prototype, "loginType", {
+        get: function () {
+            return this._loginType;
+        },
+        enumerable: true,
+        configurable: true
+    });
     default_1.prototype.setRefreshToken = function (refreshToken) {
         this.cache.removeStore(this.accessTokenKey);
         this.cache.removeStore(this.accessTokenExpireKey);

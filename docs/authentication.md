@@ -2,8 +2,9 @@
 
 * 微信授权，包括微信公众平台（公众号网页）和开放平台（普通网站应用）的网页授权
 * 自定义登录
+* 匿名登录
 
-暂不支持匿名访问，因此请在**初始化资源后即调用登录授权方法**，登录成功后即可调用 Cloudbase 提供的功能性接口。
+请在**初始化资源后即调用登录授权方法**，登录成功后即可调用 Cloudbase 提供的功能性接口。
 
 使用 JS SDK 时，您可以指定身份认证状态如何持久保留，以避免需要用户频繁登录授权。相关选项包括：
 
@@ -25,11 +26,11 @@
 ```js
 const tcb = require('tcb-js-sdk');
 
-tcb.init({
+const app = tcb.init({
   env: 'xxxx-yyy'
 });
 
-let auth = tcb.auth({
+let auth = app.auth({
   persistence: 'local' //用户显式退出或更改密码之前的30天一直有效
 })
 ```
@@ -41,7 +42,10 @@ let auth = tcb.auth({
 ### 示例代码
 
 ```js
-tcb.auth().getLoginState().then(loginState => {
+const app = tcb.init({
+  env: 'xxxx-yyy'
+});
+app.auth().getLoginState().then(loginState => {
   if (loginState) {
     // 登录态有效
   } else {
@@ -61,11 +65,11 @@ tcb.auth().getLoginState().then(loginState => {
 
 ### 示例代码
 ```javascript
-tcb.init({
+const app = tcb.init({
   env: 'xxxx-yyy'
 });
 
-tcb.auth({
+app.auth({
   persistence: 'session'
 }).weixinAuthProvider({
   appid: 'wx73932328juof23',
@@ -165,11 +169,11 @@ auth.signInWithTicket(ticket).then(() => {
 
 ### 示例代码
 ```js
-tcb.init({
+const app = tcb.init({
   env: 'xxxx-yyy'
 });
 
-const auth = tcb.auth({
+const auth = app.auth({
   persistence: 'session'
 })
 auth
@@ -186,6 +190,49 @@ auth
   .then(userInfo => {
     //...
   })
+```
+
+## 匿名登录
+Cloudbase允许开发者使用匿名登录的方式进行静默授权，C端用户可以避免强制登录。在匿名状态下可正常的调用Cloudbase的资源，开发者同时可以配合安全规则针对匿名用户制定对应的访问限制。
+
+### 开启匿名登录授权
+登录腾讯云[云开发控制台](https://console.cloud.tencent.com/tcb)，在[用户管理页面](https://console.cloud.tencent.com/tcb/user)中，点击“登录设置”，然后在“匿名登录”一栏打开/关闭可用状态。
+
+### 客户端进行匿名登录
+```js
+const app = tcb.init({
+  env: 'xxxx-yyy'
+});
+const auth = app.auth();
+await auth.signInAnonymously().catch(err=>{
+  // 登录失败会抛出错误
+});
+// 匿名登录成功检测登录状态isAnonymous字段为true
+const loginState = await auth.getLoginState();
+console.log(loginState.isAnonymous) // true
+```
+
+### 匿名用户转化为正式用户
+C端用户在匿名状态下体验应用程序并且获得了一些成就（比如游戏中的装备），如果想将此匿名账号转化为正式账号长久持有，Cloudbase提供匿名转正功能以支撑此类需求。
+
+#### 匿名用户转化为自定义用户
+目前Cloudbase支持将匿名用户转化为自定义登录用户（后续会支持更多登录类型），流程如下：
+1. 首先需要按照自定义登录的流程搭建获取自定义登录凭证`ticket`的服务；
+2. 客户端请求接口获取自定义登录凭证`ticket`。**请注意**，此`ticket`必须未注册过Cloudbase，换句话说，匿名用户只能转化为新的Cloudbase用户；
+3. 客户端调用`auth.linkAndRetrieveDataWithTicket`API，如下：
+```js
+const app = tcb.init({
+  env: 'xxxx-yyy'
+});
+
+const auth = app.auth();
+
+// 调用此API之前需先请求接口获取到ticket
+auth.linkAndRetrieveDataWithTicket(ticket).then(res => {
+  // 转正成功
+}).catch(err => {
+  // 转正失败会抛出错误
+});
 ```
 
 ## 登录授权相关事件及钩子函数
@@ -235,3 +282,4 @@ auth.shouldRefreshAccessToken(() => {
   }
 });
 ```
+

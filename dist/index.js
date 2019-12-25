@@ -28,13 +28,20 @@ var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
+var base_1 = require("./auth/base");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000
 };
 var TCB = (function () {
     function TCB(config) {
+        var _this = this;
         this.config = config ? config : this.config;
         this.authObj = undefined;
+        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGE, function (ev) {
+            if (ev.data === base_1.LOGINTYPE.ANONYMOUS) {
+                _this.config.persistence = 'local';
+            }
+        });
     }
     TCB.prototype.init = function (config) {
         this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);

@@ -71,6 +71,7 @@ var LoginModes;
     LoginModes["redirect"] = "redirect";
     LoginModes["prompt"] = "prompt";
 })(LoginModes || (LoginModes = {}));
+var signInPromise;
 var default_1 = (function (_super) {
     __extends(default_1, _super);
     function default_1(config, appid, scope, loginMode, state) {
@@ -88,13 +89,13 @@ var default_1 = (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!this._signInPromise) {
-                            this._signInPromise = this._signIn();
+                        if (!signInPromise) {
+                            signInPromise = this._signIn();
                         }
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4, this._signInPromise];
+                        return [4, signInPromise];
                     case 2:
                         result = _a.sent();
                         return [3, 4];
@@ -103,7 +104,7 @@ var default_1 = (function (_super) {
                         err = e_1;
                         return [3, 4];
                     case 4:
-                        this._signInPromise = null;
+                        signInPromise = null;
                         if (err) {
                             throw err;
                         }

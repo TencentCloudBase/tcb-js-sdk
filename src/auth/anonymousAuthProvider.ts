@@ -44,8 +44,10 @@ export class AnonymousAuthProvider extends Base {
   }
   public async linkAndRetrieveDataWithTicket(ticket: string) {
     const uuid = this.cache.getStore(this._anonymousUuidKey);
+    const refresh_token = this.cache.getStore(this.refreshTokenKey);
     const res = await this.httpRequest.send('auth.linkAndRetrieveDataWithTicket', {
       anonymous_uuid: uuid,
+      refresh_token,
       ticket
     });
     if (res.refresh_token) {
@@ -53,7 +55,7 @@ export class AnonymousAuthProvider extends Base {
       this._clearAnonymousUUID();
       this.setRefreshToken(res.refresh_token);
       await this.httpRequest.refreshAccessToken();
-      activateEvent(EVENTS.ANONYMOUS_CONVERTED);
+      activateEvent(EVENTS.ANONYMOUS_CONVERTED, { refresh_token: res.refresh_token });
       activateEvent(EVENTS.LOGIN_TYPE_CHANGE, LOGINTYPE.CUSTOM);
       return {
         credential: {

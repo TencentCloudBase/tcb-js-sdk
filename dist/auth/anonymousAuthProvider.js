@@ -115,13 +115,15 @@ var AnonymousAuthProvider = (function (_super) {
     };
     AnonymousAuthProvider.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
-            var uuid, res;
+            var uuid, refresh_token, res;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         uuid = this.cache.getStore(this._anonymousUuidKey);
+                        refresh_token = this.cache.getStore(this.refreshTokenKey);
                         return [4, this.httpRequest.send('auth.linkAndRetrieveDataWithTicket', {
                                 anonymous_uuid: uuid,
+                                refresh_token: refresh_token,
                                 ticket: ticket
                             })];
                     case 1:
@@ -132,7 +134,7 @@ var AnonymousAuthProvider = (function (_super) {
                         return [4, this.httpRequest.refreshAccessToken()];
                     case 2:
                         _a.sent();
-                        events_1.activateEvent(events_1.EVENTS.ANONYMOUS_CONVERTED);
+                        events_1.activateEvent(events_1.EVENTS.ANONYMOUS_CONVERTED, { refresh_token: res.refresh_token });
                         events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.CUSTOM);
                         return [2, {
                                 credential: {

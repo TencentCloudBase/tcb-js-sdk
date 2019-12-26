@@ -113,6 +113,7 @@ var Auth = (function (_super) {
     Auth.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -120,6 +121,12 @@ var Auth = (function (_super) {
                             this._anonymousAuthProvider = new anonymousAuthProvider_1.AnonymousAuthProvider(this.config);
                             this._anonymousAuthProvider.init();
                         }
+                        events_1.addEventListener(events_1.EVENTS.ANONYMOUS_CONVERTED, function (ev) {
+                            var refresh_token = ev.data.refresh_token;
+                            if (refresh_token) {
+                                _this.httpRequest.cache.setStore(_this.refreshTokenKey, refresh_token);
+                            }
+                        });
                         return [4, this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(ticket)];
                     case 1:
                         result = _a.sent();

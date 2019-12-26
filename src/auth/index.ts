@@ -62,6 +62,12 @@ export default class Auth extends AuthProvider {
       this._anonymousAuthProvider = new AnonymousAuthProvider(this.config);
       this._anonymousAuthProvider.init();
     }
+    addEventListener(EVENTS.ANONYMOUS_CONVERTED, ev => {
+      const { refresh_token } = ev.data;
+      if (refresh_token) {
+        this.httpRequest.cache.setStore(this.refreshTokenKey, refresh_token);
+      }
+    });
     const result = await this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(ticket);
     return result;
   }

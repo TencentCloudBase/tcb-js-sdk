@@ -21,7 +21,7 @@ enum LoginModes {
   prompt = 'prompt'
 }
 
-let signInPromise;
+const SignInPromiseMap = {};
 
 export default class extends Base {
   config: Config;
@@ -42,17 +42,17 @@ export default class extends Base {
   }
 
   async signIn(): Promise<LoginResult> {
-    if (!signInPromise) {
-      signInPromise = this._signIn();
+    if (!SignInPromiseMap[this.config.env]) {
+      SignInPromiseMap[this.config.env] = this._signIn();
     }
     let result;
     let err;
     try {
-      result = await signInPromise;
+      result = await SignInPromiseMap[this.config.env];
     } catch (e) {
       err = e;
     }
-    signInPromise = null;
+    SignInPromiseMap[this.config.env] = null;
     if (err) {
       throw err;
     }

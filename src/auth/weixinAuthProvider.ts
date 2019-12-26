@@ -1,7 +1,7 @@
 import { Config } from '../types';
 import { LoginResult } from './interface';
 import * as util from '../lib/util';
-import Base from './base';
+import Base, { LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Adapter, RUNTIME } from '../adapters';
 
@@ -113,7 +113,8 @@ export default class extends Base {
       this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
     }
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-
+    // 抛出登录类型更改事件
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGE, LOGINTYPE.WECHAT);
     return {
       credential: {
         refreshToken

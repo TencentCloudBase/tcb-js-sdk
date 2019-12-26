@@ -62,9 +62,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var weixinAuthProvider_1 = __importDefault(require("./weixinAuthProvider"));
-var base_1 = __importDefault(require("./base"));
+var anonymousAuthProvider_1 = require("./anonymousAuthProvider");
+var base_1 = __importStar(require("./base"));
 var events_1 = require("../lib/events");
 var Auth = (function (_super) {
     __extends(Auth, _super);
@@ -84,12 +92,51 @@ var Auth = (function (_super) {
         provider.init();
         return provider;
     };
+    Auth.prototype.signInAnonymously = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this._anonymousAuthProvider) {
+                            this._anonymousAuthProvider = new anonymousAuthProvider_1.AnonymousAuthProvider(this.config);
+                            this._anonymousAuthProvider.init();
+                        }
+                        return [4, this._anonymousAuthProvider.signIn()];
+                    case 1:
+                        result = _a.sent();
+                        return [2, result];
+                }
+            });
+        });
+    };
+    Auth.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this._anonymousAuthProvider) {
+                            this._anonymousAuthProvider = new anonymousAuthProvider_1.AnonymousAuthProvider(this.config);
+                            this._anonymousAuthProvider.init();
+                        }
+                        return [4, this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(ticket)];
+                    case 1:
+                        result = _a.sent();
+                        return [2, result];
+                }
+            });
+        });
+    };
     Auth.prototype.signOut = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, cache, refreshTokenKey, accessTokenKey, accessTokenExpireKey, action, refresh_token, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        if (this.loginType === base_1.LOGINTYPE.ANONYMOUS) {
+                            throw new Error('[tcb-js-sdk] 匿名用户不支持登出操作');
+                        }
                         _a = this.httpRequest, cache = _a.cache, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
                         action = 'auth.logout';
                         refresh_token = cache.getStore(refreshTokenKey);
@@ -103,6 +150,7 @@ var Auth = (function (_super) {
                         cache.removeStore(accessTokenKey);
                         cache.removeStore(accessTokenExpireKey);
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.NULL);
                         return [2, res];
                 }
             });
@@ -146,6 +194,7 @@ var Auth = (function (_super) {
                         e_1 = _b.sent();
                         return [2, null];
                     case 4: return [2, {
+                            isAnonymous: this.loginType === base_1.LOGINTYPE.ANONYMOUS,
                             credential: {
                                 refreshToken: refreshToken,
                                 accessToken: cache.getStore(accessTokenKey)
@@ -178,6 +227,7 @@ var Auth = (function (_super) {
                     case 2:
                         _b.sent();
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.CUSTOM);
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token

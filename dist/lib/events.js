@@ -85,6 +85,7 @@ var IEventEmitter = (function () {
     };
     return IEventEmitter;
 }());
+exports.IEventEmitter = IEventEmitter;
 var iEventEmitter = new IEventEmitter();
 function addEventListener(event, callback) {
     iEventEmitter.on(event, callback);
@@ -102,5 +103,7 @@ exports.removeEventListener = removeEventListener;
 exports.EVENTS = {
     LOGIN_STATE_CHANGED: 'loginStateChanged',
     LOGIN_STATE_EXPIRE: 'loginStateExpire',
+    LOGIN_TYPE_CHANGE: 'loginTypeChanged',
+    ANONYMOUS_CONVERTED: 'anonymousConverted',
     REFRESH_ACCESS_TOKEN: 'refreshAccessToken'
 };

@@ -1,5 +1,6 @@
 import { Request } from '../lib/request';
 import WeixinAuthProvider from './weixinAuthProvider';
+import { AnonymousAuthProvider } from './anonymousAuthProvider';
 import AuthProvider from './base';
 import { LoginResult } from './interface';
 import { Config } from '../types';
@@ -19,6 +20,7 @@ export default class Auth extends AuthProvider {
     config: Config;
     customAuthProvider: AuthProvider;
     _shouldRefreshAccessToken: Function;
+    _anonymousAuthProvider: AnonymousAuthProvider;
     constructor(config: Config);
     init(): void;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
@@ -27,6 +29,16 @@ export default class Auth extends AuthProvider {
         loginMode: any;
         state: any;
     }): WeixinAuthProvider;
+    signInAnonymously(): Promise<{
+        credential: {
+            refreshToken: any;
+        };
+    }>;
+    linkAndRetrieveDataWithTicket(ticket: string): Promise<{
+        credential: {
+            refreshToken: any;
+        };
+    }>;
     signOut(): Promise<any>;
     getAccessToken(): Promise<{
         accessToken: string;

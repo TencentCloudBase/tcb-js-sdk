@@ -64,7 +64,7 @@ export class IErrorEvent extends IEvent {
 /**
  * @class IEventEmitter
  */
-class IEventEmitter {
+export class IEventEmitter {
   /**
    * @private
    * @readonly
@@ -152,5 +152,7 @@ export function removeEventListener(event: string, callback: Function) {
 export const EVENTS = {
   LOGIN_STATE_CHANGED: 'loginStateChanged',
   LOGIN_STATE_EXPIRE: 'loginStateExpire',
+  LOGIN_TYPE_CHANGE: 'loginTypeChanged',
+  ANONYMOUS_CONVERTED: 'anonymousConverted', //匿名账户被转正后触发
   REFRESH_ACCESS_TOKEN: 'refreshAccessToken'
 };

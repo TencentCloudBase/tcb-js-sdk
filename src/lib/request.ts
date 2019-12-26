@@ -6,13 +6,16 @@ import {
   REFRESH_TOKEN,
   SDK_VERISON,
   KV,
-  protocol
+  protocol,
+  ANONYMOUS_UUID,
+  LOGIN_TYPE_KEY
 } from '../types';
 import { Cache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 import { genSeqId, isFormData, formatUrl } from './util';
 import { Adapter } from '../adapters';
+import { LOGINTYPE } from '../auth/base';
 
 interface GetAccessTokenResult {
   accessToken: string;
@@ -35,7 +38,8 @@ interface RequestBeforeHook {
 const actionsWithoutAccessToken = [
   'auth.getJwt',
   'auth.logout',
-  'auth.signInWithTicket'
+  'auth.signInWithTicket',
+  'auth.signInAnonymously'
 ];
 
 const commonHeader = {
@@ -90,9 +94,11 @@ function beforeEach(): AppendedRequestInfo {
 class Request {
   config: Config;
   cache: Cache;
+  anonymousUuidKey: string;
   accessTokenKey: string;
   accessTokenExpireKey: string;
   refreshTokenKey: string;
+  loginTypeKey: string;
   _shouldRefreshAccessTokenHook: Function
   _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null
   _reqClass: SDKRequestInterface;
@@ -107,6 +113,9 @@ class Request {
     this.accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
     this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
     this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
+    this.anonymousUuidKey = `${ANONYMOUS_UUID}_${config.env}`;
+    this.loginTypeKey = `${LOGIN_TYPE_KEY}_${config.env}`;
+
     // eslint-disable-next-line
     this._reqClass = new Adapter.adapter.reqClass();
     bindHooks(this._reqClass, 'post', [beforeEach]);
@@ -154,13 +163,18 @@ class Request {
     this.cache.removeStore(this.accessTokenExpireKey);
 
     let refreshToken = this.cache.getStore(this.refreshTokenKey);
-
     if (!refreshToken) {
       throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
-    const response = await this.request('auth.getJwt', {
-      refresh_token: refreshToken
-    });
+    const params: KV<string> = {
+      refresh_token: refreshToken,
+    };
+    const isAnonymous = this.cache.getStore(this.loginTypeKey) === LOGINTYPE.ANONYMOUS;
+    if (isAnonymous) {
+      // 匿名登录时传入uuid，若refresh token过期则可根据此uuid进行延期
+      params.anonymous_uuid = this.cache.getStore(this.anonymousUuidKey);
+    }
+    const response = await this.request('auth.getJwt', params);
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
@@ -174,10 +188,19 @@ class Request {
       this.cache.setStore(this.accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
       this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+      // 更新登录类型
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGE, response.data.login_type);
       return {
         accessToken: response.data.access_token,
         accessTokenExpire: response.data.access_token_expire
       };
+    }
+    // 匿名登录refresh_token过期情况下返回refresh_token
+    // 此场景下使用新的refresh_token获取access_token
+    if (response.data.refresh_token) {
+      this.cache.removeStore(this.refreshTokenKey);
+      this.cache.setStore(this.refreshTokenKey, response.data.refresh_token);
+      this._refreshAccessToken();
     }
   }
 
@@ -237,7 +260,7 @@ class Request {
     let opts: any = {
       headers: {
         'content-type': contentType
-      },
+      }
     };
     if (options && options['onUploadProgress']) {
       opts.onUploadProgress = options['onUploadProgress'];

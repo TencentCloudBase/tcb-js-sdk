@@ -1,12 +1,21 @@
 import { Request } from '../lib/request';
 import { Cache } from '../lib/cache';
+import { EVENTS, addEventListener } from '../lib/events';
 import {
   ACCESS_TOKEN,
   ACCESS_TOKEN_Expire,
   REFRESH_TOKEN,
-  Config
+  Config,
+  LOGIN_TYPE_KEY
 } from '../types';
 import { RUNTIME, Adapter } from '../adapters';
+
+export enum LOGINTYPE {
+  ANONYMOUS = 'ANONYMOUS',
+  WECHAT = 'WECHAT',
+  CUSTOM = 'CUSTOM',
+  NULL = 'NULL' // 保留字，代表未登录
+}
 
 export default class {
   httpRequest: Request;
@@ -14,11 +23,17 @@ export default class {
   accessTokenKey: string;
   accessTokenExpireKey: string;
   refreshTokenKey: string;
+  loginTypeKey: string;
   config: Config;
+
+  private _loginType: LOGINTYPE = LOGINTYPE.NULL;
 
   constructor(config: Config) {
     this.config = config;
+    this.onLoginTypeChanged = this.onLoginTypeChanged.bind(this);
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGE, this.onLoginTypeChanged);
   }
+
   init() {
     this.httpRequest = new Request(this.config);
     this.cache = new Cache(this.config.persistence);
@@ -26,6 +41,16 @@ export default class {
     this.accessTokenKey = `${ACCESS_TOKEN}_${this.config.env}`;
     this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${this.config.env}`;
     this.refreshTokenKey = `${REFRESH_TOKEN}_${this.config.env}`;
+    this.loginTypeKey = `${LOGIN_TYPE_KEY}_${this.config.env}`;
+  }
+
+  onLoginTypeChanged(ev: {data: LOGINTYPE}) {
+    this._loginType = <LOGINTYPE>ev.data;
+    this.cache.setStore(this.loginTypeKey, this._loginType);
+  }
+
+  get loginType(): LOGINTYPE {
+    return this._loginType;
   }
 
   setRefreshToken(refreshToken) {

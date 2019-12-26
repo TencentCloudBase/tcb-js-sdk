@@ -4,9 +4,10 @@ import Auth from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request } from './lib/request';
-import { addEventListener, removeEventListener } from './lib/events';
+import { addEventListener, removeEventListener, EVENTS } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter } from './adapters';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
+import { LOGINTYPE } from './auth/base';
 
 // eslint-disable-next-line
 declare global {
@@ -35,6 +36,11 @@ class TCB {
   constructor(config?: ICloudbaseConfig) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGE, ev => {
+      if (ev.data === LOGINTYPE.ANONYMOUS) {
+        this.config.persistence = 'local';
+      }
+    });
   }
 
   init(config: ICloudbaseConfig) {

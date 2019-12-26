@@ -13,9 +13,11 @@ export declare type CommonRequestOptions = {
 declare class Request {
     config: Config;
     cache: Cache;
+    anonymousUuidKey: string;
     accessTokenKey: string;
     accessTokenExpireKey: string;
     refreshTokenKey: string;
+    loginTypeKey: string;
     _shouldRefreshAccessTokenHook: Function;
     _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
     _reqClass: SDKRequestInterface;

@@ -1,7 +1,6 @@
 import * as packageInfo from '../package.json';
 
 export const SDK_VERISON = packageInfo.version;
-/*eslint-enable */
 export interface Config {
   env?: string;
   token?: string;
@@ -27,9 +26,13 @@ export interface MetaDataRes {
   requestId: string;
 }
 
+export type LOGIN_TYPE = 'WECHAT-OPEN' | 'WECHAT-PUBLIC' | 'ANONYMOUS' | 'CUSTOM';
+
 export const ACCESS_TOKEN = 'access_token';
 export const ACCESS_TOKEN_Expire = 'access_token_expire';
 export const REFRESH_TOKEN = 'refresh_token';
+export const ANONYMOUS_UUID = 'anonymous_uuid';
+export const LOGIN_TYPE_KEY = 'login_type';
 
 export const protocol = typeof location !== 'undefined' && location.protocol === 'http:' ? 'http:' : 'https:';
 

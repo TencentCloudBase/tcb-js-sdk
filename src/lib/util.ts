@@ -77,7 +77,7 @@ export const getWeixinCode = function () {
   return getQuery('code') || getHash('code');
 };
 
-export const getMiniAppCode = function (): Promise<string> {
+export const getMiniAppCode = function(): Promise<string> {
   return new Promise((resolve, reject) => {
     // @ts-ignore
     wx.login({

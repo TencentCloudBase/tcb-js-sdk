@@ -52,10 +52,12 @@ var cache_1 = require("./cache");
 var events_1 = require("./events");
 var util_1 = require("./util");
 var adapters_1 = require("../adapters");
+var base_1 = require("../auth/base");
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
-    'auth.signInWithTicket'
+    'auth.signInWithTicket',
+    'auth.signInAnonymously'
 ];
 var commonHeader = {
     'X-SDK-Version': types_1.SDK_VERISON
@@ -101,6 +103,8 @@ var Request = (function () {
         this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
         this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
+        this.anonymousUuidKey = types_1.ANONYMOUS_UUID + "_" + config.env;
+        this.loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + config.env;
         this._reqClass = new adapters_1.Adapter.adapter.reqClass();
         bindHooks(this._reqClass, 'post', [beforeEach]);
         bindHooks(this._reqClass, 'upload', [beforeEach]);
@@ -178,7 +182,7 @@ var Request = (function () {
     };
     Request.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var refreshToken, response, code;
+            var refreshToken, params, isAnonymous, response, code;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -188,9 +192,14 @@ var Request = (function () {
                         if (!refreshToken) {
                             throw new Error('[tcb-js-sdk] 未登录CloudBase');
                         }
-                        return [4, this.request('auth.getJwt', {
-                                refresh_token: refreshToken
-                            })];
+                        params = {
+                            refresh_token: refreshToken,
+                        };
+                        isAnonymous = this.cache.getStore(this.loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
+                        if (isAnonymous) {
+                            params.anonymous_uuid = this.cache.getStore(this.anonymousUuidKey);
+                        }
+                        return [4, this.request('auth.getJwt', params)];
                     case 1:
                         response = _a.sent();
                         if (response.data.code) {
@@ -205,10 +214,16 @@ var Request = (function () {
                             events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
                             this.cache.setStore(this.accessTokenKey, response.data.access_token);
                             this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+                            events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, response.data.login_type);
                             return [2, {
                                     accessToken: response.data.access_token,
                                     accessTokenExpire: response.data.access_token_expire
                                 }];
+                        }
+                        if (response.data.refresh_token) {
+                            this.cache.removeStore(this.refreshTokenKey);
+                            this.cache.setStore(this.refreshTokenKey, response.data.refresh_token);
+                            this._refreshAccessToken();
                         }
                         return [2];
                 }
@@ -279,7 +294,7 @@ var Request = (function () {
                         opts = {
                             headers: {
                                 'content-type': contentType
-                            },
+                            }
                         };
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];

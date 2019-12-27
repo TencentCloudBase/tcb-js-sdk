@@ -53,6 +53,14 @@ export default class Auth extends AuthProvider {
       this._anonymousAuthProvider = new AnonymousAuthProvider(this.config);
       this._anonymousAuthProvider.init();
     }
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGE, ev => {
+      if (ev && ev.data === LOGINTYPE.ANONYMOUS) {
+        const info = this._anonymousAuthProvider.getAllStore();
+        for (const key in info) {
+          info[key] && this.httpRequest.cache.setStore(key, info[key]);
+        }
+      }
+    });
     const result = await this._anonymousAuthProvider.signIn();
     return result;
   }

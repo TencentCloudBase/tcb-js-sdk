@@ -95,6 +95,7 @@ var Auth = (function (_super) {
     Auth.prototype.signInAnonymously = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -102,6 +103,14 @@ var Auth = (function (_super) {
                             this._anonymousAuthProvider = new anonymousAuthProvider_1.AnonymousAuthProvider(this.config);
                             this._anonymousAuthProvider.init();
                         }
+                        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGE, function (ev) {
+                            if (ev && ev.data === base_1.LOGINTYPE.ANONYMOUS) {
+                                var info = _this._anonymousAuthProvider.getAllStore();
+                                for (var key in info) {
+                                    info[key] && _this.httpRequest.cache.setStore(key, info[key]);
+                                }
+                            }
+                        });
                         return [4, this._anonymousAuthProvider.signIn()];
                     case 1:
                         result = _a.sent();

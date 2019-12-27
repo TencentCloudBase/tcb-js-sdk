@@ -146,6 +146,14 @@ var AnonymousAuthProvider = (function (_super) {
             });
         });
     };
+    AnonymousAuthProvider.prototype.getAllStore = function () {
+        var result = {};
+        result[this.refreshTokenKey] = this.cache.getStore(this.refreshTokenKey) || '';
+        result[this._loginTypeKey] = this.cache.getStore(this._loginTypeKey) || '';
+        result[this.accessTokenKey] = this.cache.getStore(this.accessTokenKey) || '';
+        result[this.accessTokenExpireKey] = this.cache.getStore(this.accessTokenExpireKey) || '';
+        return result;
+    };
     AnonymousAuthProvider.prototype._setAnonymousUUID = function (id) {
         this.cache.removeStore(this._anonymousUuidKey);
         this.cache.setStore(this._anonymousUuidKey, id);

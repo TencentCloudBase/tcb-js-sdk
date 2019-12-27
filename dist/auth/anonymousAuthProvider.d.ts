@@ -15,6 +15,7 @@ export declare class AnonymousAuthProvider extends Base {
             refreshToken: any;
         };
     }>;
+    getAllStore(): {};
     private _setAnonymousUUID;
     private _clearAnonymousUUID;
 }

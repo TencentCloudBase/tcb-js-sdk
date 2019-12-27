@@ -66,6 +66,14 @@ export class AnonymousAuthProvider extends Base {
       throw new Error('[tcb-js-sdk] 匿名转化失败');
     }
   }
+  public getAllStore() {
+    const result = {};
+    result[this.refreshTokenKey] = this.cache.getStore(this.refreshTokenKey) || '';
+    result[this._loginTypeKey] = this.cache.getStore(this._loginTypeKey) || '';
+    result[this.accessTokenKey] = this.cache.getStore(this.accessTokenKey) || '';
+    result[this.accessTokenExpireKey] = this.cache.getStore(this.accessTokenExpireKey) || '';
+    return result;
+  }
   private _setAnonymousUUID(id: string) {
     this.cache.removeStore(this._anonymousUuidKey);
     this.cache.setStore(this._anonymousUuidKey, id);

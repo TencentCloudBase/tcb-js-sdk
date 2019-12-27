@@ -46,6 +46,7 @@ class WebRequest extends AbstractSDKRequest {
      */
     // const { data } = await this.get({
     //   ...options,
+    //   headers: {}, // 下载资源请求不经过service，header清空
     //   responseType: 'blob'
     // });
     // const url = window.URL.createObjectURL(new Blob([data]));
@@ -70,13 +71,10 @@ class WebRequest extends AbstractSDKRequest {
       const realUrl = formatUrl(protocol, url, method === 'get' ? data : {});
       const ajax = new XMLHttpRequest();
       ajax.open(method, realUrl);
-
       responseType && (ajax.responseType = responseType);
-      // ajax.setRequestHeader('Accept', 'application/json');
       for (const key in headers) {
         ajax.setRequestHeader(key, headers[key]);
       }
-
       ajax.onreadystatechange = () => {
         if (ajax.readyState === 4) {
           const result: ResponseObject = {

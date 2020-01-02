@@ -27,7 +27,6 @@
     "package.json"
   ],
   "exclude": [
-    "src/lib/iAxios.ts",
     "node_modules",
     "test"
   ]

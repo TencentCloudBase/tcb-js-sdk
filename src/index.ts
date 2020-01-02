@@ -1,6 +1,6 @@
 import { Db } from '@cloudbase/database';
 import adapterForWxMp from '@cloudbase/adapter-wx_mp';
-import Auth from './auth';
+import { Auth } from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request } from './lib/request';
@@ -8,13 +8,6 @@ import { addEventListener, removeEventListener, EVENTS } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter } from './adapters';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
 import { LOGINTYPE } from './auth/base';
-
-// eslint-disable-next-line
-declare global {
-  interface Window {
-    tcb: TCB;
-  }
-}
 
 interface ICloudbaseConfig {
   env: string;
@@ -140,7 +133,7 @@ tcb.useAdapters(adapterForWxMp);
 
 // window 可能不存在
 try {
-  window.tcb = tcb;
+  window['tcb'] = tcb;
 } catch (e) {
   // 忽略错误
 }

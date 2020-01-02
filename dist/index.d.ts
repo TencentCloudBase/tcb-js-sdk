@@ -1,11 +1,6 @@
 import { Db } from '@cloudbase/database';
-import Auth from './auth';
+import { Auth } from './auth';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
-declare global {
-    interface Window {
-        tcb: TCB;
-    }
-}
 interface ICloudbaseConfig {
     env: string;
     timeout?: number;

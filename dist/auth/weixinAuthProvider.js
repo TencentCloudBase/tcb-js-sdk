@@ -57,7 +57,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var util = __importStar(require("../lib/util"));
-var base_1 = __importStar(require("./base"));
+var base_1 = require("./base");
 var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
 var AllowedScopes;
@@ -72,9 +72,9 @@ var LoginModes;
     LoginModes["prompt"] = "prompt";
 })(LoginModes || (LoginModes = {}));
 var SignInPromiseMap = {};
-var default_1 = (function (_super) {
-    __extends(default_1, _super);
-    function default_1(config, appid, scope, loginMode, state) {
+var WeixinAuthProvider = (function (_super) {
+    __extends(WeixinAuthProvider, _super);
+    function WeixinAuthProvider(config, appid, scope, loginMode, state) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
         _this.appid = appid;
@@ -83,7 +83,7 @@ var default_1 = (function (_super) {
         _this.loginMode = loginMode || 'redirect';
         return _this;
     }
-    default_1.prototype.signIn = function () {
+    WeixinAuthProvider.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result, err, e_1;
             return __generator(this, function (_a) {
@@ -113,7 +113,7 @@ var default_1 = (function (_super) {
             });
         });
     };
-    default_1.prototype._signIn = function () {
+    WeixinAuthProvider.prototype._signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
             return __generator(this, function (_a) {
@@ -181,7 +181,7 @@ var default_1 = (function (_super) {
             });
         });
     };
-    default_1.prototype.redirect = function () {
+    WeixinAuthProvider.prototype.redirect = function () {
         var currUrl = util.removeParam('code', location.href);
         currUrl = util.removeParam('state', currUrl);
         currUrl = encodeURIComponent(currUrl);
@@ -193,6 +193,6 @@ var default_1 = (function (_super) {
             location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
         }
     };
-    return default_1;
-}(base_1.default));
-exports.default = default_1;
+    return WeixinAuthProvider;
+}(base_1.AuthProvider));
+exports.WeixinAuthProvider = WeixinAuthProvider;

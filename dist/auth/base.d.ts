@@ -7,7 +7,7 @@ export declare enum LOGINTYPE {
     CUSTOM = "CUSTOM",
     NULL = "NULL"
 }
-export default class {
+export declare class AuthProvider {
     httpRequest: Request;
     cache: Cache;
     accessTokenKey: string;

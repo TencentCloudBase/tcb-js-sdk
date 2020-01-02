@@ -22,7 +22,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 var database_1 = require("@cloudbase/database");
 var adapter_wx_mp_1 = __importDefault(require("@cloudbase/adapter-wx_mp"));
-var auth_1 = __importDefault(require("./auth"));
+var auth_1 = require("./auth");
 var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
@@ -70,7 +70,7 @@ var TCB = (function () {
             return this.authObj;
         }
         this.config = __assign(__assign({}, this.config), { persistence: persistence || adapters_1.Adapter.adapter.primaryStorage || 'session' });
-        this.authObj = new auth_1.default(this.config);
+        this.authObj = new auth_1.Auth(this.config);
         this.authObj.init();
         return this.authObj;
     };
@@ -110,7 +110,7 @@ var TCB = (function () {
 var tcb = new TCB();
 tcb.useAdapters(adapter_wx_mp_1.default);
 try {
-    window.tcb = tcb;
+    window['tcb'] = tcb;
 }
 catch (e) {
 }

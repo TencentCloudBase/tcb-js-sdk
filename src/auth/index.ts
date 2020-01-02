@@ -1,7 +1,7 @@
 import { Request } from '../lib/request';
-import WeixinAuthProvider from './weixinAuthProvider';
+import { WeixinAuthProvider } from './weixinAuthProvider';
 import { AnonymousAuthProvider } from './anonymousAuthProvider';
-import AuthProvider, { LOGINTYPE } from './base';
+import { AuthProvider, LOGINTYPE } from './base';
 import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
@@ -24,7 +24,7 @@ export interface UserInfo {
   unionid?: string;
 }
 
-export default class Auth extends AuthProvider {
+export class Auth extends AuthProvider {
   httpRequest: Request;
   config: Config;
   customAuthProvider: AuthProvider

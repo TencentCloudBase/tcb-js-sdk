@@ -59,20 +59,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var weixinAuthProvider_1 = __importDefault(require("./weixinAuthProvider"));
+var weixinAuthProvider_1 = require("./weixinAuthProvider");
 var anonymousAuthProvider_1 = require("./anonymousAuthProvider");
-var base_1 = __importStar(require("./base"));
+var base_1 = require("./base");
 var events_1 = require("../lib/events");
 var Auth = (function (_super) {
     __extends(Auth, _super);
@@ -83,12 +73,12 @@ var Auth = (function (_super) {
     }
     Auth.prototype.init = function () {
         _super.prototype.init.call(this);
-        this.customAuthProvider = new base_1.default(this.config);
+        this.customAuthProvider = new base_1.AuthProvider(this.config);
         this.customAuthProvider.init();
     };
     Auth.prototype.weixinAuthProvider = function (_a) {
         var appid = _a.appid, scope = _a.scope, loginMode = _a.loginMode, state = _a.state;
-        var provider = new weixinAuthProvider_1.default(this.config, appid, scope, loginMode, state);
+        var provider = new weixinAuthProvider_1.WeixinAuthProvider(this.config, appid, scope, loginMode, state);
         provider.init();
         return provider;
     };
@@ -269,5 +259,5 @@ var Auth = (function (_super) {
         });
     };
     return Auth;
-}(base_1.default));
-exports.default = Auth;
+}(base_1.AuthProvider));
+exports.Auth = Auth;

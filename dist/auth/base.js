@@ -48,14 +48,14 @@ var LOGINTYPE;
     LOGINTYPE["CUSTOM"] = "CUSTOM";
     LOGINTYPE["NULL"] = "NULL";
 })(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
-var default_1 = (function () {
-    function default_1(config) {
+var AuthProvider = (function () {
+    function AuthProvider(config) {
         this._loginType = LOGINTYPE.NULL;
         this.config = config;
         this.onLoginTypeChanged = this.onLoginTypeChanged.bind(this);
         events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGE, this.onLoginTypeChanged);
     }
-    default_1.prototype.init = function () {
+    AuthProvider.prototype.init = function () {
         this.httpRequest = new request_1.Request(this.config);
         this.cache = new cache_1.Cache(this.config.persistence);
         this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + this.config.env;
@@ -63,23 +63,23 @@ var default_1 = (function () {
         this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + this.config.env;
         this.loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + this.config.env;
     };
-    default_1.prototype.onLoginTypeChanged = function (ev) {
+    AuthProvider.prototype.onLoginTypeChanged = function (ev) {
         this._loginType = ev.data;
         this.cache.setStore(this.loginTypeKey, this._loginType);
     };
-    Object.defineProperty(default_1.prototype, "loginType", {
+    Object.defineProperty(AuthProvider.prototype, "loginType", {
         get: function () {
             return this._loginType;
         },
         enumerable: true,
         configurable: true
     });
-    default_1.prototype.setRefreshToken = function (refreshToken) {
+    AuthProvider.prototype.setRefreshToken = function (refreshToken) {
         this.cache.removeStore(this.accessTokenKey);
         this.cache.removeStore(this.accessTokenExpireKey);
         this.cache.setStore(this.refreshTokenKey, refreshToken);
     };
-    default_1.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
+    AuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
         return __awaiter(this, void 0, void 0, function () {
             var action, hybridMiniapp;
             return __generator(this, function (_a) {
@@ -103,6 +103,6 @@ var default_1 = (function () {
             });
         });
     };
-    return default_1;
+    return AuthProvider;
 }());
-exports.default = default_1;
+exports.AuthProvider = AuthProvider;

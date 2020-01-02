@@ -1,6 +1,6 @@
-import Base from './base';
+import { AuthProvider } from './base';
 import { Config } from '../types';
-export declare class AnonymousAuthProvider extends Base {
+export declare class AnonymousAuthProvider extends AuthProvider {
     private readonly _anonymousUuidKey;
     private readonly _loginTypeKey;
     constructor(config: Config);

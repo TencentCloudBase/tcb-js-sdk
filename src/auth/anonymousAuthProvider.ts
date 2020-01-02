@@ -1,8 +1,8 @@
-import Base, { LOGINTYPE } from './base';
+import { AuthProvider, LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Config, ANONYMOUS_UUID, LOGIN_TYPE_KEY } from '../types';
 
-export class AnonymousAuthProvider extends Base {
+export class AnonymousAuthProvider extends AuthProvider {
   private readonly _anonymousUuidKey: string;
   private readonly _loginTypeKey: string;
 

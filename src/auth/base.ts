@@ -17,7 +17,7 @@ export enum LOGINTYPE {
   NULL = 'NULL' // 保留字，代表未登录
 }
 
-export default class {
+export class AuthProvider {
   httpRequest: Request;
   cache: Cache;
   accessTokenKey: string;

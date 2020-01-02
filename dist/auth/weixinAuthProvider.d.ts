@@ -1,7 +1,7 @@
 import { Config } from '../types';
 import { LoginResult } from './interface';
-import Base from './base';
-export default class extends Base {
+import { AuthProvider } from './base';
+export declare class WeixinAuthProvider extends AuthProvider {
     config: Config;
     private scope;
     private state;

@@ -1,7 +1,7 @@
 import { Config } from '../types';
 import { LoginResult } from './interface';
 import * as util from '../lib/util';
-import Base, { LOGINTYPE } from './base';
+import { AuthProvider, LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Adapter, RUNTIME } from '../adapters';
 
@@ -23,7 +23,7 @@ enum LoginModes {
 
 const SignInPromiseMap = {};
 
-export default class extends Base {
+export class WeixinAuthProvider extends AuthProvider {
   config: Config;
 
   private scope: string;

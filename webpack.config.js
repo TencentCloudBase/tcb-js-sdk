@@ -5,6 +5,24 @@ const Visualizer = require('webpack-visualizer-plugin');
 
 const modName = 'tcb';
 
+// 合并声明文件plugin
+function DtsBundlePlugin() {}
+DtsBundlePlugin.prototype.apply = function (compiler) {
+  compiler.plugin('done', function() {
+    if (process.env.NODE_ENV === 'e2e') {
+      return;
+    }
+    const dts = require('dts-bundle');
+
+    dts.bundle({
+      name: modName,
+      main: 'dist/index.d.ts',
+      out: path.join(__dirname, `tcbjs/${package.version}/${modName}.d.ts`),
+      outputAsModuleFolder: true
+    });
+  });
+};
+
 module.exports = {
   mode: 'production',
   // mode: 'development',
@@ -43,6 +61,7 @@ module.exports = {
     }),
     new Visualizer({
       filename: './statistics.html'
-    })
+    }),
+    new DtsBundlePlugin()
   ]
 };

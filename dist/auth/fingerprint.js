@@ -42,18 +42,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fingerprintjs2_1 = __importDefault(require("fingerprintjs2"));
 var adapters_1 = require("../adapters");
 var TcbFingerprintIdName = 'TcbFingerprintId';
-var excludes = ['screenResolution', 'availableScreenResolution', 'plugins'];
+var excludesIdle = ['screenResolution', 'availableScreenResolution', 'plugins'];
+var excludesAni = ['screenResolution', 'availableScreenResolution', 'plugins', 'webgl', 'canvas', 'webglVendorAndRenderer'];
 var promise = new Promise(function (resolve) {
+    function genFingerprint(excludes) {
+        fingerprintjs2_1.default.get(function (components) {
+            components = components.filter(function (item) {
+                return excludes.indexOf(item.key) === -1;
+            });
+            console.log(JSON.stringify(components));
+            var values = components.map(function (component) { return component.value; });
+            var tcbFingerprintId = fingerprintjs2_1.default.x64hash128(values.join(''), 31);
+            resolve(tcbFingerprintId);
+        });
+    }
     if (window && window.requestIdleCallback) {
         window.requestIdleCallback(function () {
-            fingerprintjs2_1.default.get(function (components) {
-                components = components.filter(function (item) {
-                    return excludes.indexOf(item.key) === -1;
-                });
-                var values = components.map(function (component) { return component.value; });
-                var tcbFingerprintId = fingerprintjs2_1.default.x64hash128(values.join(''), 31);
-                resolve(tcbFingerprintId);
-            });
+            genFingerprint(excludesIdle);
+        });
+    }
+    else if (window && window.requestAnimationFrame) {
+        window.requestAnimationFrame(function () {
+            genFingerprint(excludesAni);
         });
     }
     setTimeout(function () {

@@ -3,23 +3,31 @@ import { Adapter } from '../adapters';
 
 const TcbFingerprintIdName = 'TcbFingerprintId';
 
-const excludes = ['screenResolution', 'availableScreenResolution', 'plugins'];
+const excludesIdle = ['screenResolution', 'availableScreenResolution', 'plugins'];
+const excludesAni = ['screenResolution', 'availableScreenResolution', 'plugins', 'webgl', 'canvas', 'webglVendorAndRenderer'];
+
 
 const promise = new Promise((resolve) => {
+
+  function genFingerprint(excludes) {
+    Fingerprint.get(function (components) {
+      components = components.filter(item => {
+        return excludes.indexOf(item.key) === -1;
+      });
+      console.log(JSON.stringify(components));
+      const values = components.map(function (component) { return component.value });
+      const tcbFingerprintId = Fingerprint.x64hash128(values.join(''), 31);
+      resolve(tcbFingerprintId);
+    });
+  }
+
   if (window && (window as any).requestIdleCallback) {
     (window as any).requestIdleCallback(function () {
-      Fingerprint.get(function (components) {
-
-        components = components.filter(item => {
-          return excludes.indexOf(item.key) === -1;
-        });
-        // console.log(JSON.stringify(components));
-
-        const values = components.map(function (component) { return component.value });
-        const tcbFingerprintId = Fingerprint.x64hash128(values.join(''), 31);
-
-        resolve(tcbFingerprintId);
-      });
+      genFingerprint(excludesIdle);
+    });
+  } else if (window && (window as any).requestAnimationFrame) {
+    (window as any).requestAnimationFrame(function () {
+      genFingerprint(excludesAni);
     });
   }
 

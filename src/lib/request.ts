@@ -17,7 +17,7 @@ import { genSeqId, isFormData, formatUrl } from './util';
 import { Adapter } from '../adapters';
 import { LOGINTYPE } from '../auth/base';
 
-import { getTcbFingerprintId } from '../auth/fingerprint';
+// import { getTcbFingerprintId } from '../auth/fingerprint';
 
 
 interface GetAccessTokenResult {
@@ -233,10 +233,10 @@ class Request {
 
   async request(action, params, options?) {
     let contentType = 'application/x-www-form-urlencoded';
-    const webDeviceId = await getTcbFingerprintId();
+    // const webDeviceId = await getTcbFingerprintId();
     const tmpObj = {
       action,
-      webDeviceId,
+      // webDeviceId,
       env: this.config.env,
       dataVersion: '2019-08-16',
       ...params

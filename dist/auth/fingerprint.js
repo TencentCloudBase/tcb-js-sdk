@@ -50,7 +50,6 @@ var promise = new Promise(function (resolve) {
             components = components.filter(function (item) {
                 return excludes.indexOf(item.key) === -1;
             });
-            console.log(JSON.stringify(components));
             var values = components.map(function (component) { return component.value; });
             var tcbFingerprintId = fingerprintjs2_1.default.x64hash128(values.join(''), 31);
             resolve(tcbFingerprintId);

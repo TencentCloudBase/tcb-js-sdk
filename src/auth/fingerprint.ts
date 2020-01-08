@@ -14,7 +14,6 @@ const promise = new Promise((resolve) => {
       components = components.filter(item => {
         return excludes.indexOf(item.key) === -1;
       });
-      console.log(JSON.stringify(components));
       const values = components.map(function (component) { return component.value });
       const tcbFingerprintId = Fingerprint.x64hash128(values.join(''), 31);
       resolve(tcbFingerprintId);

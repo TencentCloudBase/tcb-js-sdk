@@ -53,6 +53,7 @@ var events_1 = require("./events");
 var util_1 = require("./util");
 var adapters_1 = require("../adapters");
 var base_1 = require("../auth/base");
+var fingerprint_1 = require("../auth/fingerprint");
 var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
@@ -265,19 +266,23 @@ var Request = (function () {
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, parse, query, search, formatQuery, newUrl, res;
+            var contentType, webDeviceId, tmpObj, _a, payload, key, opts, parse, query, search, formatQuery, newUrl, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         contentType = 'application/x-www-form-urlencoded';
-                        tmpObj = __assign({ action: action, env: this.config.env, dataVersion: '2019-08-16' }, params);
-                        if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
+                        return [4, fingerprint_1.getTcbFingerprintId()];
+                    case 1:
+                        webDeviceId = _b.sent();
+                        tmpObj = __assign({ action: action,
+                            webDeviceId: webDeviceId, env: this.config.env, dataVersion: '2019-08-16' }, params);
+                        if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 3];
                         _a = tmpObj;
                         return [4, this.getAccessToken()];
-                    case 1:
-                        _a.access_token = (_b.sent()).accessToken;
-                        _b.label = 2;
                     case 2:
+                        _a.access_token = (_b.sent()).accessToken;
+                        _b.label = 3;
+                    case 3:
                         if (action === 'storage.uploadFile') {
                             payload = new FormData();
                             for (key in payload) {
@@ -310,7 +315,7 @@ var Request = (function () {
                             newUrl += search;
                         }
                         return [4, this.post(__assign({ url: newUrl, data: payload }, opts))];
-                    case 3:
+                    case 4:
                         res = _b.sent();
                         if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
                             throw new Error('network request error');

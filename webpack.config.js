@@ -37,7 +37,8 @@ module.exports = {
     filename: process.env.NODE_ENV === 'e2e' ? 'e2e/tcb.js' : `${package.version}/${modName}.js`,
     library: modName,
     libraryTarget: 'umd',
-    umdNamedDefine: true
+    umdNamedDefine: true,
+    globalObject: 'typeof window !== "undefined"?window:this'
   },
   resolve: {
     extensions: ['.ts', '.js']

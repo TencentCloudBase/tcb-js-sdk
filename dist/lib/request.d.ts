@@ -1,5 +1,4 @@
 import { Config, KV } from '../types';
-import { Cache } from './cache';
 import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 interface GetAccessTokenResult {
     accessToken: string;
@@ -12,16 +11,11 @@ export declare type CommonRequestOptions = {
 };
 declare class Request {
     config: Config;
-    cache: Cache;
-    anonymousUuidKey: string;
-    accessTokenKey: string;
-    accessTokenExpireKey: string;
-    refreshTokenKey: string;
-    loginTypeKey: string;
     _shouldRefreshAccessTokenHook: Function;
     _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
     _reqClass: SDKRequestInterface;
     constructor(config?: Config);
+    init(config?: Config): void;
     post(options: IRequestOptions): Promise<ResponseObject>;
     upload(options: IUploadRequestOptions): Promise<ResponseObject>;
     download(options: IRequestOptions): Promise<ResponseObject>;
@@ -31,4 +25,5 @@ declare class Request {
     request(action: any, params: any, options?: any): Promise<any>;
     send(action: string, data?: any): Promise<any>;
 }
-export { Request };
+declare const request: Request;
+export { request, Request };

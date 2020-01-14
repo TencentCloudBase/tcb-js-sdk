@@ -1,5 +1,3 @@
-import { Request } from '../lib/request';
-import { Cache } from '../lib/cache';
 import { Config } from '../types';
 export declare enum LOGINTYPE {
     ANONYMOUS = "ANONYMOUS",
@@ -8,19 +6,9 @@ export declare enum LOGINTYPE {
     NULL = "NULL"
 }
 export declare class AuthProvider {
-    httpRequest: Request;
-    cache: Cache;
-    accessTokenKey: string;
-    accessTokenExpireKey: string;
-    refreshTokenKey: string;
-    loginTypeKey: string;
     config: Config;
     private _loginType;
     constructor(config: Config);
-    init(): void;
-    onLoginTypeChanged(ev: {
-        data: LOGINTYPE;
-    }): void;
     get loginType(): LOGINTYPE;
     setRefreshToken(refreshToken: any): void;
     getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
@@ -28,4 +16,5 @@ export declare class AuthProvider {
         accessToken: string;
         accessTokenExpire: number;
     }>;
+    private _onLoginTypeChanged;
 }

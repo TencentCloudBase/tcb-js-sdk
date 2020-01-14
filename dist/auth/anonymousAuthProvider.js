@@ -12,17 +12,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -62,40 +51,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
-var types_1 = require("../types");
+var cache_1 = require("../lib/cache");
+var request_1 = require("../lib/request");
 var AnonymousAuthProvider = (function (_super) {
     __extends(AnonymousAuthProvider, _super);
-    function AnonymousAuthProvider(config) {
-        var _this = _super.call(this, __assign(__assign({}, config), { persistence: 'local' })) || this;
-        _this._anonymousUuidKey = types_1.ANONYMOUS_UUID + "_" + _this.config.env;
-        _this._loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + _this.config.env;
-        return _this;
+    function AnonymousAuthProvider() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    AnonymousAuthProvider.prototype.init = function () {
-        _super.prototype.init.call(this);
-    };
     AnonymousAuthProvider.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var anonymous_uuid, refresh_token, res;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, anonymousUuidKey, refreshTokenKey, anonymous_uuid, refresh_token, res;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        anonymous_uuid = this.cache.getStore(this._anonymousUuidKey) || undefined;
-                        refresh_token = this.cache.getStore(this.refreshTokenKey) || undefined;
-                        return [4, this.httpRequest.send('auth.signInAnonymously', {
+                        cache_1.cache.updatePersistence('local');
+                        _a = cache_1.cache.keys, anonymousUuidKey = _a.anonymousUuidKey, refreshTokenKey = _a.refreshTokenKey;
+                        anonymous_uuid = cache_1.cache.getStore(anonymousUuidKey) || undefined;
+                        refresh_token = cache_1.cache.getStore(refreshTokenKey) || undefined;
+                        return [4, request_1.request.send('auth.signInAnonymously', {
                                 anonymous_uuid: anonymous_uuid,
                                 refresh_token: refresh_token
                             })];
                     case 1:
-                        res = _a.sent();
+                        res = _b.sent();
                         if (!(res.uuid && res.refresh_token)) return [3, 3];
                         this._setAnonymousUUID(res.uuid);
                         this.setRefreshToken(res.refresh_token);
-                        return [4, this.httpRequest.refreshAccessToken()];
+                        return [4, request_1.request.refreshAccessToken()];
                     case 2:
-                        _a.sent();
+                        _b.sent();
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.ANONYMOUS);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.ANONYMOUS);
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
@@ -108,27 +94,28 @@ var AnonymousAuthProvider = (function (_super) {
     };
     AnonymousAuthProvider.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
-            var uuid, refresh_token, res;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, anonymousUuidKey, refreshTokenKey, uuid, refresh_token, res;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        uuid = this.cache.getStore(this._anonymousUuidKey);
-                        refresh_token = this.cache.getStore(this.refreshTokenKey);
-                        return [4, this.httpRequest.send('auth.linkAndRetrieveDataWithTicket', {
+                        _a = cache_1.cache.keys, anonymousUuidKey = _a.anonymousUuidKey, refreshTokenKey = _a.refreshTokenKey;
+                        uuid = cache_1.cache.getStore(anonymousUuidKey);
+                        refresh_token = cache_1.cache.getStore(refreshTokenKey);
+                        return [4, request_1.request.send('auth.linkAndRetrieveDataWithTicket', {
                                 anonymous_uuid: uuid,
                                 refresh_token: refresh_token,
                                 ticket: ticket
                             })];
                     case 1:
-                        res = _a.sent();
+                        res = _b.sent();
                         if (!res.refresh_token) return [3, 3];
                         this._clearAnonymousUUID();
                         this.setRefreshToken(res.refresh_token);
-                        return [4, this.httpRequest.refreshAccessToken()];
+                        return [4, request_1.request.refreshAccessToken()];
                     case 2:
-                        _a.sent();
-                        events_1.activateEvent(events_1.EVENTS.ANONYMOUS_CONVERTED, { refresh_token: res.refresh_token });
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.CUSTOM);
+                        _b.sent();
+                        events_1.activateEvent(events_1.EVENTS.ANONYMOUS_CONVERTED);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.CUSTOM);
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
@@ -139,21 +126,14 @@ var AnonymousAuthProvider = (function (_super) {
             });
         });
     };
-    AnonymousAuthProvider.prototype.getAllStore = function () {
-        var result = {};
-        result[this.refreshTokenKey] = this.cache.getStore(this.refreshTokenKey) || '';
-        result[this._loginTypeKey] = this.cache.getStore(this._loginTypeKey) || '';
-        result[this.accessTokenKey] = this.cache.getStore(this.accessTokenKey) || '';
-        result[this.accessTokenExpireKey] = this.cache.getStore(this.accessTokenExpireKey) || '';
-        return result;
-    };
     AnonymousAuthProvider.prototype._setAnonymousUUID = function (id) {
-        this.cache.removeStore(this._anonymousUuidKey);
-        this.cache.setStore(this._anonymousUuidKey, id);
-        this.cache.setStore(this._loginTypeKey, base_1.LOGINTYPE.ANONYMOUS);
+        var _a = cache_1.cache.keys, anonymousUuidKey = _a.anonymousUuidKey, loginTypeKey = _a.loginTypeKey;
+        cache_1.cache.removeStore(anonymousUuidKey);
+        cache_1.cache.setStore(anonymousUuidKey, id);
+        cache_1.cache.setStore(loginTypeKey, base_1.LOGINTYPE.ANONYMOUS);
     };
     AnonymousAuthProvider.prototype._clearAnonymousUUID = function () {
-        this.cache.removeStore(this._anonymousUuidKey);
+        cache_1.cache.removeStore(cache_1.cache.keys.anonymousUuidKey);
     };
     return AnonymousAuthProvider;
 }(base_1.AuthProvider));

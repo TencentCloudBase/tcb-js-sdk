@@ -1,4 +1,3 @@
-import { Request } from '../lib/request';
 import { WeixinAuthProvider } from './weixinAuthProvider';
 import { AnonymousAuthProvider } from './anonymousAuthProvider';
 import { AuthProvider } from './base';
@@ -16,13 +15,11 @@ export interface UserInfo {
     unionid?: string;
 }
 export declare class Auth extends AuthProvider {
-    httpRequest: Request;
     config: Config;
     customAuthProvider: AuthProvider;
     _shouldRefreshAccessToken: Function;
     _anonymousAuthProvider: AnonymousAuthProvider;
     constructor(config: Config);
-    init(): void;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
         scope: any;
@@ -49,4 +46,5 @@ export declare class Auth extends AuthProvider {
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
+    private _onAnonymousConverted;
 }

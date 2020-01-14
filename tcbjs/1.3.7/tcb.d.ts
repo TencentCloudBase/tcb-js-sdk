@@ -5,7 +5,6 @@
 
 import { Db } from '@cloudbase/database';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
-import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 
 interface ICloudbaseConfig {
     env: string;
@@ -62,13 +61,11 @@ export interface UserInfo {
     unionid?: string;
 }
 export class Auth extends AuthProvider {
-    httpRequest: Request;
     config: Config;
     customAuthProvider: AuthProvider;
     _shouldRefreshAccessToken: Function;
     _anonymousAuthProvider: AnonymousAuthProvider;
     constructor(config: Config);
-    init(): void;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
         scope: any;
@@ -97,38 +94,6 @@ export class Auth extends AuthProvider {
     getUserInfo(): any;
 }
 
-interface GetAccessTokenResult {
-    accessToken: string;
-    accessTokenExpire: number;
-}
-export type CommonRequestOptions = {
-    headers?: KV<string>;
-    responseType?: string;
-    onUploadProgress?: Function;
-};
-class Request {
-    config: Config;
-    cache: Cache;
-    anonymousUuidKey: string;
-    accessTokenKey: string;
-    accessTokenExpireKey: string;
-    refreshTokenKey: string;
-    loginTypeKey: string;
-    _shouldRefreshAccessTokenHook: Function;
-    _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
-    _reqClass: SDKRequestInterface;
-    constructor(config?: Config);
-    post(options: IRequestOptions): Promise<ResponseObject>;
-    upload(options: IUploadRequestOptions): Promise<ResponseObject>;
-    download(options: IRequestOptions): Promise<ResponseObject>;
-    refreshAccessToken(): Promise<GetAccessTokenResult>;
-    _refreshAccessToken(): Promise<GetAccessTokenResult>;
-    getAccessToken(): Promise<GetAccessTokenResult>;
-    request(action: any, params: any, options?: any): Promise<any>;
-    send(action: string, data?: any): Promise<any>;
-}
-export { Request };
-
 export class WeixinAuthProvider extends AuthProvider {
     config: Config;
     constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string);
@@ -138,8 +103,6 @@ export class WeixinAuthProvider extends AuthProvider {
 }
 
 export class AnonymousAuthProvider extends AuthProvider {
-    constructor(config: Config);
-    init(): void;
     signIn(): Promise<{
         credential: {
             refreshToken: any;
@@ -150,7 +113,6 @@ export class AnonymousAuthProvider extends AuthProvider {
             refreshToken: any;
         };
     }>;
-    getAllStore(): {};
 }
 
 export enum LOGINTYPE {
@@ -160,18 +122,8 @@ export enum LOGINTYPE {
     NULL = "NULL"
 }
 export class AuthProvider {
-    httpRequest: Request;
-    cache: Cache;
-    accessTokenKey: string;
-    accessTokenExpireKey: string;
-    refreshTokenKey: string;
-    loginTypeKey: string;
     config: Config;
     constructor(config: Config);
-    init(): void;
-    onLoginTypeChanged(ev: {
-        data: LOGINTYPE;
-    }): void;
     get loginType(): LOGINTYPE;
     setRefreshToken(refreshToken: any): void;
     getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
@@ -220,13 +172,4 @@ export const LOGIN_TYPE_KEY = "login_type";
 export const protocol: string;
 export const BASE_URL: string;
 export {};
-
-class Cache {
-    storageClass: any;
-    constructor(persistence: string);
-    setStore(key: string, value: any, version?: any): void;
-    getStore(key: string, version?: string): any;
-    removeStore(key: any): void;
-}
-export { Cache };
 

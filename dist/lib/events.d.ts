@@ -21,7 +21,7 @@ export declare function removeEventListener(event: string, callback: Function): 
 export declare const EVENTS: {
     LOGIN_STATE_CHANGED: string;
     LOGIN_STATE_EXPIRE: string;
-    LOGIN_TYPE_CHANGE: string;
+    LOGIN_TYPE_CHANGED: string;
     ANONYMOUS_CONVERTED: string;
     REFRESH_ACCESS_TOKEN: string;
 };

@@ -1,4 +1,4 @@
-import { Request } from '../lib/request';
+import { request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 
 interface ICallFunctionOptions {
@@ -40,9 +40,7 @@ export const callFunction = function(
     request_data: jsonData
   };
 
-  const httpRequest = new Request(this.config);
-
-  httpRequest
+  request
     .send(action, params)
     .then((res) => {
       if (res.code) {

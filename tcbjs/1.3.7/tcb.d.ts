@@ -11,6 +11,8 @@ interface ICloudbaseConfig {
     timeout?: number;
     persistence?: string;
     adapter?: SDKAdapterInterface;
+    appSecret?: AppSecret;
+    appSign?: string;
 }
 type Persistence = 'local' | 'session' | 'none';
 class TCB {
@@ -94,6 +96,45 @@ export class Auth extends AuthProvider {
     getUserInfo(): any;
 }
 
+export const SDK_VERISON: any;
+export interface AppSecret {
+    appAccessKeyId: string;
+    appAccessKey: string;
+}
+export interface Config {
+    env?: string;
+    token?: string;
+    timeout?: number;
+    proxy?: string;
+    persistence?: string;
+    appSecret?: AppSecret;
+    appSign?: string;
+}
+export type KV<T> = {
+    [key: string]: T;
+};
+interface MetaData {
+    url: string;
+    token: string;
+    authorization: string;
+    fileId: string;
+    cosFileId: string;
+}
+export interface MetaDataRes {
+    data: MetaData;
+    requestId: string;
+}
+export type LOGIN_TYPE = 'WECHAT-OPEN' | 'WECHAT-PUBLIC' | 'ANONYMOUS' | 'CUSTOM';
+export const ACCESS_TOKEN = "access_token";
+export const ACCESS_TOKEN_Expire = "access_token_expire";
+export const REFRESH_TOKEN = "refresh_token";
+export const ANONYMOUS_UUID = "anonymous_uuid";
+export const LOGIN_TYPE_KEY = "login_type";
+export const protocol: string;
+export const BASE_URL: string;
+export const dataVersion = "2020-01-10";
+export {};
+
 export class WeixinAuthProvider extends AuthProvider {
     config: Config;
     constructor(config: Config, appid: string, scope: string, loginMode?: string, state?: string);
@@ -140,36 +181,4 @@ export interface LoginResult {
         accessToken?: string;
     };
 }
-
-export const SDK_VERISON: any;
-export interface Config {
-    env?: string;
-    token?: string;
-    timeout?: number;
-    proxy?: string;
-    persistence?: string;
-}
-export type KV<T> = {
-    [key: string]: T;
-};
-interface MetaData {
-    url: string;
-    token: string;
-    authorization: string;
-    fileId: string;
-    cosFileId: string;
-}
-export interface MetaDataRes {
-    data: MetaData;
-    requestId: string;
-}
-export type LOGIN_TYPE = 'WECHAT-OPEN' | 'WECHAT-PUBLIC' | 'ANONYMOUS' | 'CUSTOM';
-export const ACCESS_TOKEN = "access_token";
-export const ACCESS_TOKEN_Expire = "access_token_expire";
-export const REFRESH_TOKEN = "refresh_token";
-export const ANONYMOUS_UUID = "anonymous_uuid";
-export const LOGIN_TYPE_KEY = "login_type";
-export const protocol: string;
-export const BASE_URL: string;
-export {};
 

@@ -1,5 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+var hmac_sha256_1 = __importDefault(require("crypto-js/hmac-sha256"));
+var enc_base64_1 = __importDefault(require("crypto-js/enc-base64"));
+var enc_utf8_1 = __importDefault(require("crypto-js/enc-utf8"));
 exports.getQuery = function (name, url) {
     if (typeof window === 'undefined') {
         return false;
@@ -10,6 +16,9 @@ exports.getQuery = function (name, url) {
     return r != null ? r[2] : '';
 };
 exports.getHash = function (name) {
+    if (typeof window === 'undefined') {
+        return '';
+    }
     var matches = window.location.hash.match(new RegExp("[#?&/]" + name + "=([^&#]*)"));
     return matches ? matches[1] : '';
 };
@@ -117,3 +126,22 @@ function formatUrl(protocol, url, query) {
     return "" + protocol + url;
 }
 exports.formatUrl = formatUrl;
+function base64url(source) {
+    var encodedSource = enc_base64_1.default.stringify(source);
+    encodedSource = encodedSource.replace(/=+$/, '');
+    encodedSource = encodedSource.replace(/\+/g, '-');
+    encodedSource = encodedSource.replace(/\//g, '_');
+    return encodedSource;
+}
+function createSign(payload, secret) {
+    var header = {
+        alg: 'HS256',
+        typ: 'JWT'
+    };
+    var headerStr = base64url(enc_utf8_1.default.parse(JSON.stringify(header)));
+    var payloadStr = base64url(enc_utf8_1.default.parse(JSON.stringify(payload)));
+    var token = headerStr + "." + payloadStr;
+    var sign = base64url(hmac_sha256_1.default(token, secret));
+    return token + "." + sign;
+}
+exports.createSign = createSign;

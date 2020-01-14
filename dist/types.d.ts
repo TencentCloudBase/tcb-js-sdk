@@ -1,10 +1,16 @@
 export declare const SDK_VERISON: any;
+export interface AppSecret {
+    appAccessKeyId: string;
+    appAccessKey: string;
+}
 export interface Config {
     env?: string;
     token?: string;
     timeout?: number;
     proxy?: string;
     persistence?: string;
+    appSecret?: AppSecret;
+    appSign?: string;
 }
 export declare type KV<T> = {
     [key: string]: T;
@@ -28,4 +34,5 @@ export declare const ANONYMOUS_UUID = "anonymous_uuid";
 export declare const LOGIN_TYPE_KEY = "login_type";
 export declare const protocol: string;
 export declare const BASE_URL: string;
+export declare const dataVersion = "2020-01-10";
 export {};

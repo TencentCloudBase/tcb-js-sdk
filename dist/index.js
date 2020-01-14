@@ -26,9 +26,11 @@ var auth_1 = require("./auth");
 var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
+var cache_1 = require("./lib/cache");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
-var cache_1 = require("./lib/cache");
+var types_1 = require("./types");
+var util_1 = require("./lib/util");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
     persistence: 'session'
@@ -39,10 +41,23 @@ var TCB = (function () {
         this.authObj = undefined;
     }
     TCB.prototype.init = function (config) {
-        this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);
         if (!adapters_1.Adapter.adapter) {
             this._useDefaultAdapter();
         }
+        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
+            if (!config.appSecret) {
+                throw new Error('[tcb-js-sdk]参数错误：请正确配置appSecret');
+            }
+            var appSign = adapters_1.Adapter.adapter.getAppSign ? adapters_1.Adapter.adapter.getAppSign() : '';
+            if (config.appSign && appSign && config.appSign !== appSign) {
+                throw new Error('[tcb-js-sdk]参数错误：非法的应用标识');
+            }
+            appSign && (config.appSign = appSign);
+            if (!config.appSign) {
+                throw new Error('[tcb-js-sdk]参数错误：请正确配置应用标识');
+            }
+        }
+        this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);
         return new TCB(this.config);
     };
     TCB.prototype.database = function (dbConfig) {
@@ -53,6 +68,12 @@ var TCB = (function () {
             return;
         }
         database_1.Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
+        database_1.Db.runtime = adapters_1.Adapter.runtime;
+        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
+            database_1.Db.dataVersion = types_1.dataVersion;
+            database_1.Db.createSign = util_1.createSign;
+            database_1.Db.appSecretInfo = __assign({ appSign: this.config.appSign }, this.config.appSecret);
+        }
         if (!database_1.Db.ws) {
             database_1.Db.ws = null;
         }

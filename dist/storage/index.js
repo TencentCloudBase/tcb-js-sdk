@@ -41,9 +41,8 @@ var util_1 = require("../lib/util");
 exports.uploadFile = function (params, callback) {
     callback = callback || util_1.createPromiseCallback();
     var metaData = 'storage.getUploadMetadata';
-    var httpRequest = new request_1.Request(this.config);
     var cloudPath = params.cloudPath, filePath = params.filePath, onUploadProgress = params.onUploadProgress;
-    httpRequest
+    request_1.request
         .send(metaData, {
         path: cloudPath
     })
@@ -56,7 +55,7 @@ exports.uploadFile = function (params, callback) {
             'success_action_status': '201',
             'x-cos-security-token': token
         };
-        httpRequest.upload({
+        request_1.request.upload({
             url: url,
             data: data,
             file: filePath,
@@ -104,8 +103,7 @@ exports.deleteFile = function (_a, callback) {
     var params = {
         fileid_list: fileList
     };
-    var httpRequest = new request_1.Request(this.config);
-    httpRequest
+    request_1.request
         .send(action, params)
         .then(function (res) {
         if (res.code) {
@@ -163,8 +161,7 @@ exports.getTempFileURL = function (_a, callback) {
     var params = {
         file_list: file_list
     };
-    var httpRequest = new request_1.Request(this.config);
-    httpRequest
+    request_1.request
         .send(action, params)
         .then(function (res) {
         if (res.code) {
@@ -185,7 +182,7 @@ exports.getTempFileURL = function (_a, callback) {
 exports.downloadFile = function (_a, callback) {
     var fileID = _a.fileID;
     return __awaiter(this, void 0, void 0, function () {
-        var tmpUrlRes, res, tmpUrl, httpRequest, result;
+        var tmpUrlRes, res, tmpUrl, result;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4, exports.getTempFileURL.call(this, {
@@ -204,14 +201,13 @@ exports.downloadFile = function (_a, callback) {
                     }
                     tmpUrl = res.download_url;
                     tmpUrl = encodeURI(tmpUrl);
-                    httpRequest = new request_1.Request(this.config);
                     if (!callback) return [3, 3];
-                    return [4, httpRequest.download({ url: tmpUrl })];
+                    return [4, request_1.request.download({ url: tmpUrl })];
                 case 2:
                     result = _b.sent();
                     callback(result);
                     return [3, 4];
-                case 3: return [2, httpRequest.download({ url: tmpUrl })];
+                case 3: return [2, request_1.request.download({ url: tmpUrl })];
                 case 4: return [2];
             }
         });

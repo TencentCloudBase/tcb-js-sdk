@@ -99,17 +99,19 @@ var Request = (function () {
     function Request(config) {
         if (config === void 0) { config = {}; }
         this.config = config;
-        this.cache = new cache_1.Cache(config.persistence);
-        this.accessTokenKey = types_1.ACCESS_TOKEN + "_" + config.env;
-        this.accessTokenExpireKey = types_1.ACCESS_TOKEN_Expire + "_" + config.env;
-        this.refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
-        this.anonymousUuidKey = types_1.ANONYMOUS_UUID + "_" + config.env;
-        this.loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + config.env;
+        try {
+            this.init(config);
+        }
+        catch (e) { }
+    }
+    Request.prototype.init = function (config) {
+        if (config === void 0) { config = {}; }
+        this.config = config;
         this._reqClass = new adapters_1.Adapter.adapter.reqClass();
         bindHooks(this._reqClass, 'post', [beforeEach]);
         bindHooks(this._reqClass, 'upload', [beforeEach]);
         bindHooks(this._reqClass, 'download', [beforeEach]);
-    }
+    };
     Request.prototype.post = function (options) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
@@ -182,47 +184,48 @@ var Request = (function () {
     };
     Request.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var refreshToken, params, isAnonymous, response, code;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey, refreshToken, params, isAnonymous, response, code;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        this.cache.removeStore(this.accessTokenKey);
-                        this.cache.removeStore(this.accessTokenExpireKey);
-                        refreshToken = this.cache.getStore(this.refreshTokenKey);
+                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey, loginTypeKey = _a.loginTypeKey, anonymousUuidKey = _a.anonymousUuidKey;
+                        cache_1.cache.removeStore(accessTokenKey);
+                        cache_1.cache.removeStore(accessTokenExpireKey);
+                        refreshToken = cache_1.cache.getStore(refreshTokenKey);
                         if (!refreshToken) {
                             throw new Error('[tcb-js-sdk] 未登录CloudBase');
                         }
                         params = {
                             refresh_token: refreshToken,
                         };
-                        isAnonymous = this.cache.getStore(this.loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
+                        isAnonymous = cache_1.cache.getStore(loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
                         if (isAnonymous) {
-                            params.anonymous_uuid = this.cache.getStore(this.anonymousUuidKey);
+                            params.anonymous_uuid = cache_1.cache.getStore(anonymousUuidKey);
                         }
                         return [4, this.request('auth.getJwt', params)];
                     case 1:
-                        response = _a.sent();
+                        response = _b.sent();
                         if (response.data.code) {
                             code = response.data.code;
                             if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
                                 events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRE);
-                                this.cache.removeStore(this.refreshTokenKey);
+                                cache_1.cache.removeStore(refreshTokenKey);
                             }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {
                             events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
-                            this.cache.setStore(this.accessTokenKey, response.data.access_token);
-                            this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
-                            events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, response.data.login_type);
+                            cache_1.cache.setStore(accessTokenKey, response.data.access_token);
+                            cache_1.cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
+                            events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
                             return [2, {
                                     accessToken: response.data.access_token,
                                     accessTokenExpire: response.data.access_token_expire
                                 }];
                         }
                         if (response.data.refresh_token) {
-                            this.cache.removeStore(this.refreshTokenKey);
-                            this.cache.setStore(this.refreshTokenKey, response.data.refresh_token);
+                            cache_1.cache.removeStore(refreshTokenKey);
+                            cache_1.cache.setStore(refreshTokenKey, response.data.refresh_token);
                             this._refreshAccessToken();
                         }
                         return [2];
@@ -232,21 +235,22 @@ var Request = (function () {
     };
     Request.prototype.getAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, shouldRefreshAccessToken, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var _a, accessTokenKey, accessTokenExpireKey, accessToken, accessTokenExpire, shouldRefreshAccessToken, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        accessToken = this.cache.getStore(this.accessTokenKey);
-                        accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
+                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+                        accessToken = cache_1.cache.getStore(accessTokenKey);
+                        accessTokenExpire = cache_1.cache.getStore(accessTokenExpireKey);
                         shouldRefreshAccessToken = true;
-                        _a = this._shouldRefreshAccessTokenHook;
-                        if (!_a) return [3, 2];
+                        _b = this._shouldRefreshAccessTokenHook;
+                        if (!_b) return [3, 2];
                         return [4, this._shouldRefreshAccessTokenHook(accessToken, accessTokenExpire)];
                     case 1:
-                        _a = !(_b.sent());
-                        _b.label = 2;
+                        _b = !(_c.sent());
+                        _c.label = 2;
                     case 2:
-                        if (_a) {
+                        if (_b) {
                             shouldRefreshAccessToken = false;
                         }
                         if ((!accessToken || !accessTokenExpire || accessTokenExpire < Date.now()) && shouldRefreshAccessToken) {
@@ -357,3 +361,5 @@ var Request = (function () {
     return Request;
 }());
 exports.Request = Request;
+var request = new Request();
+exports.request = request;

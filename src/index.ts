@@ -3,11 +3,11 @@ import adapterForWxMp from '@cloudbase/adapter-wx_mp';
 import { Auth } from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
-import { Request } from './lib/request';
-import { addEventListener, removeEventListener, EVENTS } from './lib/events';
+import { Request, request } from './lib/request';
+import { addEventListener, removeEventListener } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter } from './adapters';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
-import { LOGINTYPE } from './auth/base';
+import { cache } from './lib/cache';
 
 interface ICloudbaseConfig {
   env: string;
@@ -15,9 +15,12 @@ interface ICloudbaseConfig {
   persistence?: string;
   adapter?: SDKAdapterInterface;
 }
-
+/**
+ * @constant 默认配置
+ */
 const DEFAULT_INIT_CONFIG = {
-  timeout: 15000
+  timeout: 15000,
+  persistence: 'session'
 };
 
 type Persistence = 'local' | 'session' | 'none';
@@ -29,11 +32,6 @@ class TCB {
   constructor(config?: ICloudbaseConfig) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
-    addEventListener(EVENTS.LOGIN_TYPE_CHANGE, ev => {
-      if (ev.data === LOGINTYPE.ANONYMOUS) {
-        this.config.persistence = 'local';
-      }
-    });
   }
 
   init(config: ICloudbaseConfig) {
@@ -45,6 +43,7 @@ class TCB {
     if (!Adapter.adapter) {
       this._useDefaultAdapter();
     }
+
     return new TCB(this.config);
   }
 
@@ -70,14 +69,18 @@ class TCB {
       console.warn('tcb实例只存在一个auth对象');
       return this.authObj;
     }
-    this.config = {
-      ...this.config,
-      // 如不明确指定persistence则优先取各平台adapter首选，其次session
-      persistence: persistence || Adapter.adapter.primaryStorage || 'session'
-    };
+    // 如不明确指定persistence则优先取各平台adapter首选，其次session
+    const _persistence = persistence || Adapter.adapter.primaryStorage || DEFAULT_INIT_CONFIG.persistence;
+    if (_persistence !== this.config.persistence) {
+      this.config.persistence = _persistence;
+    }
+
+    // 初始化cache
+    cache.init(this.config);
+    // 初始化request
+    request.init(this.config);
 
     this.authObj = new Auth(this.config);
-    this.authObj.init();
     return this.authObj;
   }
 

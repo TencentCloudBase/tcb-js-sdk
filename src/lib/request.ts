@@ -1,16 +1,11 @@
 import {
   Config,
   BASE_URL,
-  ACCESS_TOKEN,
-  ACCESS_TOKEN_Expire,
-  REFRESH_TOKEN,
   SDK_VERISON,
   KV,
-  protocol,
-  ANONYMOUS_UUID,
-  LOGIN_TYPE_KEY
+  protocol
 } from '../types';
-import { Cache } from './cache';
+import { cache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 import { genSeqId, isFormData, formatUrl } from './util';
@@ -96,12 +91,6 @@ function beforeEach(): AppendedRequestInfo {
  */
 class Request {
   config: Config;
-  cache: Cache;
-  anonymousUuidKey: string;
-  accessTokenKey: string;
-  accessTokenExpireKey: string;
-  refreshTokenKey: string;
-  loginTypeKey: string;
   _shouldRefreshAccessTokenHook: Function
   _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null
   _reqClass: SDKRequestInterface;
@@ -111,14 +100,15 @@ class Request {
    */
   constructor(config: Config = {}) {
     this.config = config;
-    this.cache = new Cache(config.persistence);
-
-    this.accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
-    this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
-    this.refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
-    this.anonymousUuidKey = `${ANONYMOUS_UUID}_${config.env}`;
-    this.loginTypeKey = `${LOGIN_TYPE_KEY}_${config.env}`;
-
+    // init有两种场景：
+    // 1. adapter初始化后被调用,适用于tcb.init;
+    // 2. new Request被调用,适用于database中new Request
+    try {
+      this.init(config);
+    } catch (e) {}
+  }
+  init(config: Config = {}) {
+    this.config = config;
     // eslint-disable-next-line
     this._reqClass = new Adapter.adapter.reqClass();
     bindHooks(this._reqClass, 'post', [beforeEach]);
@@ -162,37 +152,38 @@ class Request {
 
   // 调用接口刷新access token，并且返回
   async _refreshAccessToken(): Promise<GetAccessTokenResult> {
-    this.cache.removeStore(this.accessTokenKey);
-    this.cache.removeStore(this.accessTokenExpireKey);
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey } = cache.keys;
+    cache.removeStore(accessTokenKey);
+    cache.removeStore(accessTokenExpireKey);
 
-    let refreshToken = this.cache.getStore(this.refreshTokenKey);
+    let refreshToken = cache.getStore(refreshTokenKey);
     if (!refreshToken) {
       throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
     const params: KV<string> = {
       refresh_token: refreshToken,
     };
-    const isAnonymous = this.cache.getStore(this.loginTypeKey) === LOGINTYPE.ANONYMOUS;
+    const isAnonymous = cache.getStore(loginTypeKey) === LOGINTYPE.ANONYMOUS;
     if (isAnonymous) {
       // 匿名登录时传入uuid，若refresh token过期则可根据此uuid进行延期
-      params.anonymous_uuid = this.cache.getStore(this.anonymousUuidKey);
+      params.anonymous_uuid = cache.getStore(anonymousUuidKey);
     }
     const response = await this.request('auth.getJwt', params);
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
         activateEvent(EVENTS.LOGIN_STATE_EXPIRE);
-        this.cache.removeStore(this.refreshTokenKey);
+        cache.removeStore(refreshTokenKey);
       }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {
       activateEvent(EVENTS.REFRESH_ACCESS_TOKEN);
-      this.cache.setStore(this.accessTokenKey, response.data.access_token);
+      cache.setStore(accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
-      this.cache.setStore(this.accessTokenExpireKey, response.data.access_token_expire + Date.now());
+      cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
       // 更新登录类型
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGE, response.data.login_type);
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
       return {
         accessToken: response.data.access_token,
         accessTokenExpire: response.data.access_token_expire
@@ -201,17 +192,18 @@ class Request {
     // 匿名登录refresh_token过期情况下返回refresh_token
     // 此场景下使用新的refresh_token获取access_token
     if (response.data.refresh_token) {
-      this.cache.removeStore(this.refreshTokenKey);
-      this.cache.setStore(this.refreshTokenKey, response.data.refresh_token);
+      cache.removeStore(refreshTokenKey);
+      cache.setStore(refreshTokenKey, response.data.refresh_token);
       this._refreshAccessToken();
     }
   }
 
   // 获取access token
   async getAccessToken(): Promise<GetAccessTokenResult> {
+    const { accessTokenKey, accessTokenExpireKey } = cache.keys;
     // 如果没有access token或者过期，那么刷新
-    let accessToken = this.cache.getStore(this.accessTokenKey);
-    let accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
+    let accessToken = cache.getStore(accessTokenKey);
+    let accessTokenExpire = cache.getStore(accessTokenExpireKey);
 
     // 调用钩子函数
     let shouldRefreshAccessToken = true;
@@ -327,4 +319,6 @@ class Request {
   }
 }
 
-export { Request };
+const request = new Request();
+
+export { request, Request };

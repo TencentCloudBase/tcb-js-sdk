@@ -60,6 +60,7 @@ var util = __importStar(require("../lib/util"));
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
+var cache_1 = require("../lib/cache");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
@@ -115,24 +116,25 @@ var WeixinAuthProvider = (function (_super) {
     };
     WeixinAuthProvider.prototype._signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
-                        accessToken = this.cache.getStore(this.accessTokenKey);
-                        accessTokenExpire = this.cache.getStore(this.accessTokenExpireKey);
+                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+                        accessToken = cache_1.cache.getStore(accessTokenKey);
+                        accessTokenExpire = cache_1.cache.getStore(accessTokenExpireKey);
                         if (accessToken) {
                             if (accessTokenExpire && accessTokenExpire > Date.now()) {
                                 return [2, {
                                         credential: {
                                             accessToken: accessToken,
-                                            refreshToken: this.cache.getStore(this.refreshTokenKey)
+                                            refreshToken: cache_1.cache.getStore(refreshTokenKey)
                                         }
                                     }];
                             }
                             else {
-                                this.cache.removeStore(this.accessTokenKey);
-                                this.cache.removeStore(this.accessTokenExpireKey);
+                                cache_1.cache.removeStore(accessTokenKey);
+                                cache_1.cache.removeStore(accessTokenExpireKey);
                             }
                         }
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
@@ -141,15 +143,15 @@ var WeixinAuthProvider = (function (_super) {
                         if (!(adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP)) return [3, 2];
                         return [4, util.getMiniAppCode()];
                     case 1:
-                        code = _a.sent();
+                        code = _b.sent();
                         return [3, 4];
                     case 2: return [4, util.getWeixinCode()];
                     case 3:
-                        code = _a.sent();
+                        code = _b.sent();
                         if (!code) {
                             return [2, this.redirect()];
                         }
-                        _a.label = 4;
+                        _b.label = 4;
                     case 4:
                         loginType = (function (scope) {
                             switch (scope) {
@@ -161,17 +163,17 @@ var WeixinAuthProvider = (function (_super) {
                         })(this.scope);
                         return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
                     case 5:
-                        refreshTokenRes = _a.sent();
+                        refreshTokenRes = _b.sent();
                         refreshToken = refreshTokenRes.refreshToken;
-                        this.cache.setStore(this.refreshTokenKey, refreshToken);
+                        cache_1.cache.setStore(refreshTokenKey, refreshToken);
                         if (refreshTokenRes.accessToken) {
-                            this.cache.setStore(this.accessTokenKey, refreshTokenRes.accessToken);
+                            cache_1.cache.setStore(accessTokenKey, refreshTokenRes.accessToken);
                         }
                         if (refreshTokenRes.accessTokenExpire) {
-                            this.cache.setStore(this.accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
+                            cache_1.cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGE, base_1.LOGINTYPE.WECHAT);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.WECHAT);
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

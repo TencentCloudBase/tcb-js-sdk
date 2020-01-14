@@ -23,8 +23,7 @@ exports.callFunction = function (_a, callback) {
         function_name: name,
         request_data: jsonData
     };
-    var httpRequest = new request_1.Request(this.config);
-    httpRequest
+    request_1.request
         .send(action, params)
         .then(function (res) {
         if (res.code) {

@@ -1,13 +1,7 @@
-import { Request } from '../lib/request';
-import { Cache } from '../lib/cache';
+import { request } from '../lib/request';
+import { cache } from '../lib/cache';
 import { EVENTS, addEventListener } from '../lib/events';
-import {
-  ACCESS_TOKEN,
-  ACCESS_TOKEN_Expire,
-  REFRESH_TOKEN,
-  Config,
-  LOGIN_TYPE_KEY
-} from '../types';
+import { Config } from '../types';
 import { RUNTIME, Adapter } from '../adapters';
 
 export enum LOGINTYPE {
@@ -18,35 +12,14 @@ export enum LOGINTYPE {
 }
 
 export class AuthProvider {
-  httpRequest: Request;
-  cache: Cache;
-  accessTokenKey: string;
-  accessTokenExpireKey: string;
-  refreshTokenKey: string;
-  loginTypeKey: string;
   config: Config;
 
   private _loginType: LOGINTYPE = LOGINTYPE.NULL;
 
   constructor(config: Config) {
     this.config = config;
-    this.onLoginTypeChanged = this.onLoginTypeChanged.bind(this);
-    addEventListener(EVENTS.LOGIN_TYPE_CHANGE, this.onLoginTypeChanged);
-  }
-
-  init() {
-    this.httpRequest = new Request(this.config);
-    this.cache = new Cache(this.config.persistence);
-
-    this.accessTokenKey = `${ACCESS_TOKEN}_${this.config.env}`;
-    this.accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${this.config.env}`;
-    this.refreshTokenKey = `${REFRESH_TOKEN}_${this.config.env}`;
-    this.loginTypeKey = `${LOGIN_TYPE_KEY}_${this.config.env}`;
-  }
-
-  onLoginTypeChanged(ev: {data: LOGINTYPE}) {
-    this._loginType = <LOGINTYPE>ev.data;
-    this.cache.setStore(this.loginTypeKey, this._loginType);
+    this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
   }
 
   get loginType(): LOGINTYPE {
@@ -54,16 +27,17 @@ export class AuthProvider {
   }
 
   setRefreshToken(refreshToken) {
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = cache.keys;
     // refresh token设置前，先清掉 access token
-    this.cache.removeStore(this.accessTokenKey);
-    this.cache.removeStore(this.accessTokenExpireKey);
-    this.cache.setStore(this.refreshTokenKey, refreshToken);
+    cache.removeStore(accessTokenKey);
+    cache.removeStore(accessTokenExpireKey);
+    cache.setStore(refreshTokenKey, refreshToken);
   }
 
   public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
     const hybridMiniapp =  Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
-    return this.httpRequest.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
+    return request.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);
       }
@@ -77,5 +51,12 @@ export class AuthProvider {
         throw new Error(`[tcb-js-sdk] getJwt未返回refreshToken`);
       }
     });
+  }
+
+  private _onLoginTypeChanged(ev: {data: LOGINTYPE}) {
+    this._loginType = <LOGINTYPE>ev.data;
+    // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
+    cache.updatePersistence(this.config.persistence);
+    cache.setStore(cache.keys.loginTypeKey, this._loginType);
   }
 }

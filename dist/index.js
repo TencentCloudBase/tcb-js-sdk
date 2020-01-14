@@ -28,20 +28,15 @@ var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
-var base_1 = require("./auth/base");
+var cache_1 = require("./lib/cache");
 var DEFAULT_INIT_CONFIG = {
-    timeout: 15000
+    timeout: 15000,
+    persistence: 'session'
 };
 var TCB = (function () {
     function TCB(config) {
-        var _this = this;
         this.config = config ? config : this.config;
         this.authObj = undefined;
-        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGE, function (ev) {
-            if (ev.data === base_1.LOGINTYPE.ANONYMOUS) {
-                _this.config.persistence = 'local';
-            }
-        });
     }
     TCB.prototype.init = function (config) {
         this.config = __assign(__assign({}, DEFAULT_INIT_CONFIG), config);
@@ -69,9 +64,13 @@ var TCB = (function () {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
         }
-        this.config = __assign(__assign({}, this.config), { persistence: persistence || adapters_1.Adapter.adapter.primaryStorage || 'session' });
+        var _persistence = persistence || adapters_1.Adapter.adapter.primaryStorage || DEFAULT_INIT_CONFIG.persistence;
+        if (_persistence !== this.config.persistence) {
+            this.config.persistence = _persistence;
+        }
+        cache_1.cache.init(this.config);
+        request_1.request.init(this.config);
         this.authObj = new auth_1.Auth(this.config);
-        this.authObj.init();
         return this.authObj;
     };
     TCB.prototype.on = function (eventName, callback) {

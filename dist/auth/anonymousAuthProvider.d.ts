@@ -1,10 +1,5 @@
 import { AuthProvider } from './base';
-import { Config } from '../types';
 export declare class AnonymousAuthProvider extends AuthProvider {
-    private readonly _anonymousUuidKey;
-    private readonly _loginTypeKey;
-    constructor(config: Config);
-    init(): void;
     signIn(): Promise<{
         credential: {
             refreshToken: any;
@@ -15,7 +10,6 @@ export declare class AnonymousAuthProvider extends AuthProvider {
             refreshToken: any;
         };
     }>;
-    getAllStore(): {};
     private _setAnonymousUUID;
     private _clearAnonymousUUID;
 }

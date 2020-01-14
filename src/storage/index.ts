@@ -1,4 +1,4 @@
-import { Request } from '../lib/request';
+import { request } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 import { MetaDataRes } from '../types';
 
@@ -19,10 +19,8 @@ export const uploadFile = function (
 
   const metaData = 'storage.getUploadMetadata';
 
-  const httpRequest = new Request(this.config);
-
   const { cloudPath, filePath, onUploadProgress } = params;
-  httpRequest
+  request
     .send(metaData, {
       path: cloudPath
     })
@@ -42,7 +40,7 @@ export const uploadFile = function (
         'x-cos-security-token': token
       };
       // @ts-ignore
-      httpRequest.upload({
+      request.upload({
         url,
         data,
         file: filePath,
@@ -97,9 +95,7 @@ export const deleteFile = function ({ fileList }, callback?: any) {
     fileid_list: fileList
   };
 
-  let httpRequest = new Request(this.config);
-
-  httpRequest
+  request
     .send(action, params)
     .then(res => {
       if (res.code) {
@@ -165,9 +161,7 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
   };
   // console.log(params);
 
-  let httpRequest = new Request(this.config);
-
-  httpRequest
+  request
     .send(action, params)
     .then(res => {
       // console.log(res);
@@ -205,11 +199,10 @@ export const downloadFile = async function ({ fileID }, callback?: any) {
 
   let tmpUrl = res.download_url;
   tmpUrl = encodeURI(tmpUrl);
-  let httpRequest = new Request(this.config);
   if (callback) {
-    const result = await httpRequest.download({ url: tmpUrl });
+    const result = await request.download({ url: tmpUrl });
     callback(result);
   } else {
-    return httpRequest.download({ url: tmpUrl });
+    return request.download({ url: tmpUrl });
   }
 };

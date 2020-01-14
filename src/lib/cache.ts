@@ -1,92 +1,12 @@
-import { AbstractStorage } from '@cloudbase/adapter-interface';
+import { StorageInterface, AbstractStorage } from '@cloudbase/adapter-interface';
 import { Adapter } from '../adapters';
+import { Config, ACCESS_TOKEN, ACCESS_TOKEN_Expire, REFRESH_TOKEN, ANONYMOUS_UUID, LOGIN_TYPE_KEY, KV } from '../types';
+import { isUndefined } from 'util';
 
-class Cache {
-  storageClass: any;
-  constructor(persistence: string) {
-    const _persistence = Adapter.adapter.primaryStorage || persistence;
-    switch (_persistence) {
-      case 'local':
-        this.storageClass = Adapter.adapter.localStorage || new TcbObject();
-        break;
-      case 'none':
-        this.storageClass = new TcbObject();
-        break;
-      default:
-        this.storageClass = Adapter.adapter.sessionStorage || new TcbObject();
-        break;
-    }
-  }
-
-  setStore(key: string, value: any, version?: any) {
-    try {
-      if (!this.storageClass) {
-        return;
-      }
-    }
-    catch (e) {
-      return;
-    }
-    let content = '';
-
-    let d: {
-      version?: any;
-      content?: any;
-    } = {};
-    d.version = version || 'localCachev1';
-    d.content = value;
-    content = JSON.stringify(d);
-
-    try {
-      this.storageClass.setItem(key, content);
-    }
-    catch (e) {
-      return;
-    }
-    return;
-  }
-
-  /*
-  *获取缓存
-  */
-  getStore(key: string, version?: string): any { // forceLocal强制取localstory
-    try {
-      //测试用例使用
-      if (process && process.env && process.env.tcb_token) {
-        return process.env.tcb_token;
-      }
-
-      if (!this.storageClass) {
-        return;
-      }
-    }
-    catch (e) {
-      return '';
-    }
-
-    version = version || 'localCachev1';
-
-    let content = this.storageClass.getItem(key);
-    if (!content) {
-      return '';
-    }
-
-    if (content.indexOf(version) >= 0) {
-      let d = JSON.parse(content);
-      return d.content;
-    } else {
-      return '';
-    }
-  }
-
-  /*
-  *删除缓存
-  */
-  removeStore(key) {
-    this.storageClass.removeItem(key);
-  }
-
-}
+/**
+ * @constant 始终存储在localstorage中的key集合
+ */
+const alwaysLocalKeys = ['anonymousUuidKey'];
 
 class TcbObject extends AbstractStorage {
   constructor() {
@@ -116,4 +36,123 @@ class TcbObject extends AbstractStorage {
     delete Adapter.adapter.root['tcbObject'];
   }
 }
-export { Cache };
+
+function createStorage(persistence: string, adapter: any): StorageInterface {
+  switch (persistence) {
+    case 'local':
+      return adapter.localStorage || new TcbObject();
+    case 'none':
+      return new TcbObject();
+    default:
+      return adapter.sessionStorage || new TcbObject();
+  }
+}
+
+class ICache {
+  public keys: KV<string> = {};
+
+  private _persistence: string;
+  private _storage: StorageInterface;
+  public init(config: Config) {
+    if (!this._storage) {
+      this._persistence = Adapter.adapter.primaryStorage || config.persistence;
+      this._storage = createStorage(this._persistence, Adapter.adapter);
+
+      const accessTokenKey = `${ACCESS_TOKEN}_${config.env}`;
+      const accessTokenExpireKey = `${ACCESS_TOKEN_Expire}_${config.env}`;
+      const refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
+      const anonymousUuidKey = `${ANONYMOUS_UUID}_${config.env}`;
+      const loginTypeKey = `${LOGIN_TYPE_KEY}_${config.env}`;
+      this.keys = {
+        accessTokenKey,
+        accessTokenExpireKey,
+        refreshTokenKey,
+        anonymousUuidKey,
+        loginTypeKey
+      };
+    }
+  }
+  public updatePersistence(persistence: string) {
+    if (persistence === this._persistence) {
+      return;
+    }
+    const isCurrentLocal = this._persistence === 'local';
+    this._persistence = persistence;
+    const storage = createStorage(persistence, Adapter.adapter);
+    // 切换persistence重新创建storage对象
+    for (const key in this.keys) {
+      const name = this.keys[key];
+      // 如果当前为local并且key被设定为始终存储在localstorage中，则不迁移
+      if (isCurrentLocal && alwaysLocalKeys.includes(key)) {
+        continue;
+      }
+      const val = this._storage.getItem(name);
+      if (!isUndefined(val)) {
+        storage.setItem(name, val);
+        this._storage.removeItem(name);
+      }
+    }
+    this._storage = storage;
+  }
+  public setStore(key: string, value: any, version?: any) {
+    if (!this._storage) {
+      return;
+    }
+
+    const d = {
+      version: version || 'localCachev1',
+      content: value
+    };
+    const content = JSON.stringify(d);
+
+    try {
+      this._storage.setItem(key, content);
+    } catch (e) {
+      return;
+    }
+    return;
+  }
+
+  /*
+  *获取缓存
+  */
+  getStore(key: string, version?: string): any { // forceLocal强制取localstory
+    try {
+      //测试用例使用
+      if (process && process.env && process.env.tcb_token) {
+        return process.env.tcb_token;
+      }
+
+      if (!this._storage) {
+        return;
+      }
+    } catch (e) {
+      return '';
+    }
+
+    version = version || 'localCachev1';
+
+    const content = this._storage.getItem(key);
+    if (!content) {
+      return '';
+    }
+
+    if (content.indexOf(version) >= 0) {
+      const d = JSON.parse(content);
+      return d.content;
+    } else {
+      return '';
+    }
+  }
+
+  /*
+  *删除缓存
+  */
+  removeStore(key) {
+    this._storage.removeItem(key);
+  }
+}
+
+const cache = new ICache();
+
+export { cache };

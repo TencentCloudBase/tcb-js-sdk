@@ -217,7 +217,6 @@ var Request = (function () {
                             events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
                             cache_1.cache.setStore(accessTokenKey, response.data.access_token);
                             cache_1.cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
-                            events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
                             return [2, {
                                     accessToken: response.data.access_token,
                                     accessTokenExpire: response.data.access_token_expire

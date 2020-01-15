@@ -117,7 +117,7 @@ export class WeixinAuthProvider extends AuthProvider {
     }
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     // 抛出登录类型更改事件
-    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, LOGINTYPE.WECHAT);
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.WECHAT, persistence: this.config.persistence });
     return {
       credential: {
         refreshToken

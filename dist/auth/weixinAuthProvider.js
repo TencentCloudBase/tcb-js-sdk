@@ -173,7 +173,7 @@ var WeixinAuthProvider = (function (_super) {
                             cache_1.cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.WECHAT);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.WECHAT, persistence: this.config.persistence });
                         return [2, {
                                 credential: {
                                     refreshToken: refreshToken

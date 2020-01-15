@@ -51,8 +51,6 @@ var AuthProvider = (function () {
     function AuthProvider(config) {
         this._loginType = LOGINTYPE.NULL;
         this.config = config;
-        this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
-        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
     }
     Object.defineProperty(AuthProvider.prototype, "loginType", {
         get: function () {
@@ -91,11 +89,13 @@ var AuthProvider = (function () {
             });
         });
     };
-    AuthProvider.prototype._onLoginTypeChanged = function (ev) {
-        this._loginType = ev.data;
-        cache_1.cache.updatePersistence(this.config.persistence);
-        cache_1.cache.setStore(cache_1.cache.keys.loginTypeKey, this._loginType);
-    };
     return AuthProvider;
 }());
 exports.AuthProvider = AuthProvider;
+function onLoginTypeChanged(ev) {
+    console.log('ev : ' + JSON.stringify(ev, null, 4));
+    var _a = ev.data, loginType = _a.loginType, persistence = _a.persistence;
+    cache_1.cache.updatePersistence(persistence);
+    cache_1.cache.setStore(cache_1.cache.keys.loginTypeKey, loginType);
+}
+events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, onLoginTypeChanged);

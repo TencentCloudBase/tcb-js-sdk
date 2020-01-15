@@ -136,7 +136,7 @@ var Auth = (function (_super) {
                         cache_1.cache.removeStore(accessTokenKey);
                         cache_1.cache.removeStore(accessTokenExpireKey);
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.NULL);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.NULL, persistence: this.config.persistence });
                         return [2, res];
                 }
             });
@@ -213,7 +213,7 @@ var Auth = (function (_super) {
                     case 2:
                         _a.sent();
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.CUSTOM);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.CUSTOM, persistence: this.config.persistence });
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token

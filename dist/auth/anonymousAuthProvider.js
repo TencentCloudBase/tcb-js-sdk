@@ -81,7 +81,7 @@ var AnonymousAuthProvider = (function (_super) {
                     case 2:
                         _b.sent();
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.ANONYMOUS);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.ANONYMOUS, persistence: 'local' });
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
@@ -115,7 +115,7 @@ var AnonymousAuthProvider = (function (_super) {
                     case 2:
                         _b.sent();
                         events_1.activateEvent(events_1.EVENTS.ANONYMOUS_CONVERTED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, base_1.LOGINTYPE.CUSTOM);
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.CUSTOM, persistence: 'local' });
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token

@@ -105,7 +105,7 @@ class Request {
     // 2. new Request被调用,适用于database中new Request
     try {
       this.init(config);
-    } catch (e) {}
+    } catch (e) { }
   }
   init(config: Config = {}) {
     this.config = config;
@@ -182,8 +182,8 @@ class Request {
       cache.setStore(accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
       cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
-      // 更新登录类型
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
+      // 刷新accessToken，不更新登录类型，
+      // activateEvent(EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
       return {
         accessToken: response.data.access_token,
         accessTokenExpire: response.data.access_token_expire

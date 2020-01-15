@@ -21,7 +21,7 @@ export class AnonymousAuthProvider extends AuthProvider {
       this.setRefreshToken(res.refresh_token);
       await request.refreshAccessToken();
       activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, LOGINTYPE.ANONYMOUS);
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.ANONYMOUS, persistence: 'local' });
       return {
         credential: {
           refreshToken: res.refresh_token
@@ -46,7 +46,7 @@ export class AnonymousAuthProvider extends AuthProvider {
       this.setRefreshToken(res.refresh_token);
       await request.refreshAccessToken();
       activateEvent(EVENTS.ANONYMOUS_CONVERTED);
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, LOGINTYPE.CUSTOM);
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.CUSTOM, persistence: 'local' });
       return {
         credential: {
           refreshToken: res.refresh_token

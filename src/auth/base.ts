@@ -18,8 +18,6 @@ export class AuthProvider {
 
   constructor(config: Config) {
     this.config = config;
-    this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
-    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
   }
 
   get loginType(): LOGINTYPE {
@@ -36,7 +34,7 @@ export class AuthProvider {
 
   public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
-    const hybridMiniapp =  Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
+    const hybridMiniapp = Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
     return request.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);
@@ -52,11 +50,14 @@ export class AuthProvider {
       }
     });
   }
-
-  private _onLoginTypeChanged(ev: {data: LOGINTYPE}) {
-    this._loginType = <LOGINTYPE>ev.data;
-    // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
-    cache.updatePersistence(this.config.persistence);
-    cache.setStore(cache.keys.loginTypeKey, this._loginType);
-  }
 }
+
+
+function onLoginTypeChanged(ev) {
+  const { loginType, persistence } = ev.data;
+  // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
+  cache.updatePersistence(persistence);
+  cache.setStore(cache.keys.loginTypeKey, loginType);
+}
+
+addEventListener(EVENTS.LOGIN_TYPE_CHANGED, onLoginTypeChanged);

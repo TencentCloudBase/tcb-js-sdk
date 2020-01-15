@@ -16,5 +16,4 @@ export declare class AuthProvider {
         accessToken: string;
         accessTokenExpire: number;
     }>;
-    private _onLoginTypeChanged;
 }

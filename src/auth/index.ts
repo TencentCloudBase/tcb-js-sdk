@@ -76,7 +76,7 @@ export class Auth extends AuthProvider {
     cache.removeStore(accessTokenKey);
     cache.removeStore(accessTokenExpireKey);
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, LOGINTYPE.NULL);
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.NULL, persistence: this.config.persistence });
     return res;
   }
 
@@ -125,7 +125,7 @@ export class Auth extends AuthProvider {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
       await request.refreshAccessToken();
       activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, LOGINTYPE.CUSTOM);
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.CUSTOM, persistence: this.config.persistence });
       return {
         credential: {
           refreshToken: res.refresh_token

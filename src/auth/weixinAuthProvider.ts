@@ -4,7 +4,6 @@ import * as util from '../lib/util';
 import { AuthProvider, LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Adapter, RUNTIME } from '../adapters';
-import { cache } from '../lib/cache';
 
 
 /* eslint-disable no-unused-vars */
@@ -61,9 +60,9 @@ export class WeixinAuthProvider extends AuthProvider {
   }
 
   async _signIn(): Promise<LoginResult> {
-    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = cache.keys;
-    let accessToken = cache.getStore(accessTokenKey);
-    let accessTokenExpire = cache.getStore(accessTokenExpireKey);
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
+    let accessToken = this._cache.getStore(accessTokenKey);
+    let accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
 
     if (accessToken) {
       if (accessTokenExpire && accessTokenExpire > Date.now()) {
@@ -71,13 +70,13 @@ export class WeixinAuthProvider extends AuthProvider {
         return {
           credential: {
             accessToken,
-            refreshToken: cache.getStore(refreshTokenKey)
+            refreshToken: this._cache.getStore(refreshTokenKey)
           }
         };
       } else {
         // access token存在但是过期了，那么删除掉重新拉
-        cache.removeStore(accessTokenKey);
-        cache.removeStore(accessTokenExpireKey);
+        this._cache.removeStore(accessTokenKey);
+        this._cache.removeStore(accessTokenExpireKey);
       }
     }
     if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
@@ -108,12 +107,12 @@ export class WeixinAuthProvider extends AuthProvider {
     const { refreshToken } = refreshTokenRes;
 
     // 本地存下
-    cache.setStore(refreshTokenKey, refreshToken);
+    this._cache.setStore(refreshTokenKey, refreshToken);
     if (refreshTokenRes.accessToken) {
-      cache.setStore(accessTokenKey, refreshTokenRes.accessToken);
+      this._cache.setStore(accessTokenKey, refreshTokenRes.accessToken);
     }
     if (refreshTokenRes.accessTokenExpire) {
-      cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
+      this._cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
     }
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     // 抛出登录类型更改事件

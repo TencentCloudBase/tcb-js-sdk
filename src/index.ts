@@ -3,13 +3,13 @@ import adapterForWxMp from '@cloudbase/adapter-wx_mp';
 import { Auth } from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
-import { Request, request } from './lib/request';
-import { cache } from './lib/cache';
+import { IRequest, initRequest } from './lib/request';
 import { addEventListener, removeEventListener } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter, RUNTIME } from './adapters';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
 import { AppSecret, dataVersion } from './types';
 import { createSign } from './lib/util';
+import { initCache } from './lib/cache';
 
 interface ICloudbaseConfig {
   env: string;
@@ -66,7 +66,8 @@ class TCB {
   }
 
   database(dbConfig?: object) {
-    Db.reqClass = Request;
+    Db.reqClass = IRequest;
+    // @ts-ignore
     Db.wsClass = Adapter.adapter.wsClass;
 
     if (!this.authObj) {
@@ -103,10 +104,9 @@ class TCB {
     }
 
     // 初始化cache
-    cache.init(this.config);
+    initCache(this.config);
     // 初始化request
-    request.init(this.config);
-
+    initRequest(this.config);
     this.authObj = new Auth(this.config);
     return this.authObj;
   }

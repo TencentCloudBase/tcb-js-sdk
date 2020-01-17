@@ -9,13 +9,13 @@ export declare type CommonRequestOptions = {
     responseType?: string;
     onUploadProgress?: Function;
 };
-declare class Request {
+declare class IRequest {
     config: Config;
     _shouldRefreshAccessTokenHook: Function;
     _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
     _reqClass: SDKRequestInterface;
+    private _cache;
     constructor(config?: Config);
-    init(config?: Config): void;
     post(options: IRequestOptions): Promise<ResponseObject>;
     upload(options: IUploadRequestOptions): Promise<ResponseObject>;
     download(options: IRequestOptions): Promise<ResponseObject>;
@@ -25,5 +25,6 @@ declare class Request {
     request(action: any, params: any, options?: any): Promise<any>;
     send(action: string, data?: any): Promise<any>;
 }
-declare const request: Request;
-export { request, Request };
+declare function initRequest(config: Config): void;
+declare function getRequestByEnvId(env: string): IRequest;
+export { getRequestByEnvId, IRequest, initRequest };

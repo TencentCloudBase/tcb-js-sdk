@@ -23,7 +23,8 @@ exports.callFunction = function (_a, callback) {
         function_name: name,
         request_data: jsonData
     };
-    request_1.request
+    var request = request_1.getRequestByEnvId(this.config.env);
+    request
         .send(action, params)
         .then(function (res) {
         if (res.code) {

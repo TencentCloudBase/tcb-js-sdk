@@ -4,14 +4,6 @@ import { AuthProvider, LOGINTYPE } from './base';
 import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
-import { cache } from '../lib/cache';
-import { request } from '../lib/request';
-
-// enum Persistence {
-//   local = 'local',
-//   session = 'session',
-//   none = 'none'
-// }
 
 export interface UserInfo {
   openid: string;
@@ -34,8 +26,15 @@ export class Auth extends AuthProvider {
   constructor(config: Config) {
     super(config);
     this.config = config;
-    this._onAnonymousConverted = this._onAnonymousConverted.bind(this);
     this.customAuthProvider = new AuthProvider(this.config);
+    this._onAnonymousConverted = this._onAnonymousConverted.bind(this);
+    this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
+
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
+  }
+
+  get loginType(): LOGINTYPE {
+    return this._cache.getStore(this._cache.keys.loginTypeKey);
   }
 
   weixinAuthProvider({ appid, scope, loginMode, state }) {
@@ -63,26 +62,30 @@ export class Auth extends AuthProvider {
     if (this.loginType === LOGINTYPE.ANONYMOUS) {
       throw new Error('[tcb-js-sdk] 匿名用户不支持登出操作');
     }
-    const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = cache.keys;
+    const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this._cache.keys;
     const action = 'auth.logout';
 
-    const refresh_token = cache.getStore(refreshTokenKey);
+    const refresh_token = this._cache.getStore(refreshTokenKey);
     if (!refresh_token) {
       return;
     }
-    const res = await request.send(action, { refresh_token });
+    const res = await this._request.send(action, { refresh_token });
 
-    cache.removeStore(refreshTokenKey);
-    cache.removeStore(accessTokenKey);
-    cache.removeStore(accessTokenExpireKey);
+    this._cache.removeStore(refreshTokenKey);
+    this._cache.removeStore(accessTokenKey);
+    this._cache.removeStore(accessTokenExpireKey);
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.NULL, persistence: this.config.persistence });
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, {
+      env: this.config.env,
+      loginType: LOGINTYPE.NULL,
+      persistence: this.config.persistence
+    });
     return res;
   }
 
   async getAccessToken() {
     return {
-      accessToken: (await request.getAccessToken()).accessToken,
+      accessToken: (await this._request.getAccessToken()).accessToken,
       env: this.config.env
     };
   }
@@ -92,11 +95,11 @@ export class Auth extends AuthProvider {
   }
 
   async getLoginState(): Promise<LoginResult> {
-    const { refreshTokenKey, accessTokenKey } = cache.keys;
-    const refreshToken = cache.getStore(refreshTokenKey);
+    const { refreshTokenKey, accessTokenKey } = this._cache.keys;
+    const refreshToken = this._cache.getStore(refreshTokenKey);
     if (refreshToken) {
       try {
-        await request.refreshAccessToken();
+        await this._request.refreshAccessToken();
       } catch (e) {
         return null;
       }
@@ -104,7 +107,7 @@ export class Auth extends AuthProvider {
         isAnonymous: this.loginType === LOGINTYPE.ANONYMOUS,
         credential: {
           refreshToken,
-          accessToken: cache.getStore(accessTokenKey)
+          accessToken: this._cache.getStore(accessTokenKey)
         }
       };
     } else {
@@ -116,16 +119,20 @@ export class Auth extends AuthProvider {
     if (typeof ticket !== 'string') {
       throw new Error('ticket must be a string');
     }
-    const { refreshTokenKey } = cache.keys;
-    const res = await request.send('auth.signInWithTicket', {
+    const { refreshTokenKey } = this._cache.keys;
+    const res = await this._request.send('auth.signInWithTicket', {
       ticket,
-      refresh_token: cache.getStore(refreshTokenKey) || ''
+      refresh_token: this._cache.getStore(refreshTokenKey) || ''
     });
     if (res.refresh_token) {
       this.customAuthProvider.setRefreshToken(res.refresh_token);
-      await request.refreshAccessToken();
+      await this._request.refreshAccessToken();
       activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.CUSTOM, persistence: this.config.persistence });
+      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, {
+        env: this.config.env,
+        loginType: LOGINTYPE.CUSTOM,
+        persistence: this.config.persistence
+      });
       return {
         credential: {
           refreshToken: res.refresh_token
@@ -137,13 +144,13 @@ export class Auth extends AuthProvider {
   }
 
   shouldRefreshAccessToken(hook) {
-    request._shouldRefreshAccessTokenHook = hook.bind(this);
+    this._request._shouldRefreshAccessTokenHook = hook.bind(this);
   }
 
   getUserInfo(): any {
     const action = 'auth.getUserInfo';
 
-    return request.send(action, {}).then(res => {
+    return this._request.send(action, {}).then(res => {
       if (res.code) {
         return res;
       } else {
@@ -155,9 +162,23 @@ export class Auth extends AuthProvider {
     });
   }
 
-  private _onAnonymousConverted() {
+  private _onAnonymousConverted(ev) {
+    const { env } = ev.data;
+    if (env !== this.config.env) {
+      return;
+    }
     // 匿名转正后迁移cache
-    cache.updatePersistence(this.config.persistence);
-    removeEventListener(EVENTS.ANONYMOUS_CONVERTED, this._onAnonymousConverted);
+    this._cache.updatePersistence(this.config.persistence);
+    // removeEventListener(EVENTS.ANONYMOUS_CONVERTED, this._onAnonymousConverted);
+  }
+
+  private _onLoginTypeChanged(ev) {
+    const { loginType, persistence, env } = ev.data;
+    if (env !== this.config.env) {
+      return;
+    }
+    // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
+    this._cache.updatePersistence(persistence);
+    this._cache.setStore(this._cache.keys.loginTypeKey, loginType);
   }
 }

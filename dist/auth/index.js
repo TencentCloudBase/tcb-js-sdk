@@ -64,17 +64,24 @@ var weixinAuthProvider_1 = require("./weixinAuthProvider");
 var anonymousAuthProvider_1 = require("./anonymousAuthProvider");
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
-var cache_1 = require("../lib/cache");
-var request_1 = require("../lib/request");
 var Auth = (function (_super) {
     __extends(Auth, _super);
     function Auth(config) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
-        _this._onAnonymousConverted = _this._onAnonymousConverted.bind(_this);
         _this.customAuthProvider = new base_1.AuthProvider(_this.config);
+        _this._onAnonymousConverted = _this._onAnonymousConverted.bind(_this);
+        _this._onLoginTypeChanged = _this._onLoginTypeChanged.bind(_this);
+        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, _this._onLoginTypeChanged);
         return _this;
     }
+    Object.defineProperty(Auth.prototype, "loginType", {
+        get: function () {
+            return this._cache.getStore(this._cache.keys.loginTypeKey);
+        },
+        enumerable: true,
+        configurable: true
+    });
     Auth.prototype.weixinAuthProvider = function (_a) {
         var appid = _a.appid, scope = _a.scope, loginMode = _a.loginMode, state = _a.state;
         return new weixinAuthProvider_1.WeixinAuthProvider(this.config, appid, scope, loginMode, state);
@@ -123,20 +130,24 @@ var Auth = (function (_super) {
                         if (this.loginType === base_1.LOGINTYPE.ANONYMOUS) {
                             throw new Error('[tcb-js-sdk] 匿名用户不支持登出操作');
                         }
-                        _a = cache_1.cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+                        _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
                         action = 'auth.logout';
-                        refresh_token = cache_1.cache.getStore(refreshTokenKey);
+                        refresh_token = this._cache.getStore(refreshTokenKey);
                         if (!refresh_token) {
                             return [2];
                         }
-                        return [4, request_1.request.send(action, { refresh_token: refresh_token })];
+                        return [4, this._request.send(action, { refresh_token: refresh_token })];
                     case 1:
                         res = _b.sent();
-                        cache_1.cache.removeStore(refreshTokenKey);
-                        cache_1.cache.removeStore(accessTokenKey);
-                        cache_1.cache.removeStore(accessTokenExpireKey);
+                        this._cache.removeStore(refreshTokenKey);
+                        this._cache.removeStore(accessTokenKey);
+                        this._cache.removeStore(accessTokenExpireKey);
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.NULL, persistence: this.config.persistence });
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, {
+                            env: this.config.env,
+                            loginType: base_1.LOGINTYPE.NULL,
+                            persistence: this.config.persistence
+                        });
                         return [2, res];
                 }
             });
@@ -149,7 +160,7 @@ var Auth = (function (_super) {
                 switch (_b.label) {
                     case 0:
                         _a = {};
-                        return [4, request_1.request.getAccessToken()];
+                        return [4, this._request.getAccessToken()];
                     case 1: return [2, (_a.accessToken = (_b.sent()).accessToken,
                             _a.env = this.config.env,
                             _a)];
@@ -166,13 +177,13 @@ var Auth = (function (_super) {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = cache_1.cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
-                        refreshToken = cache_1.cache.getStore(refreshTokenKey);
+                        _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
+                        refreshToken = this._cache.getStore(refreshTokenKey);
                         if (!refreshToken) return [3, 5];
                         _b.label = 1;
                     case 1:
                         _b.trys.push([1, 3, , 4]);
-                        return [4, request_1.request.refreshAccessToken()];
+                        return [4, this._request.refreshAccessToken()];
                     case 2:
                         _b.sent();
                         return [3, 4];
@@ -183,7 +194,7 @@ var Auth = (function (_super) {
                             isAnonymous: this.loginType === base_1.LOGINTYPE.ANONYMOUS,
                             credential: {
                                 refreshToken: refreshToken,
-                                accessToken: cache_1.cache.getStore(accessTokenKey)
+                                accessToken: this._cache.getStore(accessTokenKey)
                             }
                         }];
                     case 5: return [2, null];
@@ -200,20 +211,24 @@ var Auth = (function (_super) {
                         if (typeof ticket !== 'string') {
                             throw new Error('ticket must be a string');
                         }
-                        refreshTokenKey = cache_1.cache.keys.refreshTokenKey;
-                        return [4, request_1.request.send('auth.signInWithTicket', {
+                        refreshTokenKey = this._cache.keys.refreshTokenKey;
+                        return [4, this._request.send('auth.signInWithTicket', {
                                 ticket: ticket,
-                                refresh_token: cache_1.cache.getStore(refreshTokenKey) || ''
+                                refresh_token: this._cache.getStore(refreshTokenKey) || ''
                             })];
                     case 1:
                         res = _a.sent();
                         if (!res.refresh_token) return [3, 3];
                         this.customAuthProvider.setRefreshToken(res.refresh_token);
-                        return [4, request_1.request.refreshAccessToken()];
+                        return [4, this._request.refreshAccessToken()];
                     case 2:
                         _a.sent();
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
-                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.CUSTOM, persistence: this.config.persistence });
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, {
+                            env: this.config.env,
+                            loginType: base_1.LOGINTYPE.CUSTOM,
+                            persistence: this.config.persistence
+                        });
                         return [2, {
                                 credential: {
                                     refreshToken: res.refresh_token
@@ -225,11 +240,11 @@ var Auth = (function (_super) {
         });
     };
     Auth.prototype.shouldRefreshAccessToken = function (hook) {
-        request_1.request._shouldRefreshAccessTokenHook = hook.bind(this);
+        this._request._shouldRefreshAccessTokenHook = hook.bind(this);
     };
     Auth.prototype.getUserInfo = function () {
         var action = 'auth.getUserInfo';
-        return request_1.request.send(action, {}).then(function (res) {
+        return this._request.send(action, {}).then(function (res) {
             if (res.code) {
                 return res;
             }
@@ -238,9 +253,20 @@ var Auth = (function (_super) {
             }
         });
     };
-    Auth.prototype._onAnonymousConverted = function () {
-        cache_1.cache.updatePersistence(this.config.persistence);
-        removeEventListener(events_1.EVENTS.ANONYMOUS_CONVERTED, this._onAnonymousConverted);
+    Auth.prototype._onAnonymousConverted = function (ev) {
+        var env = ev.data.env;
+        if (env !== this.config.env) {
+            return;
+        }
+        this._cache.updatePersistence(this.config.persistence);
+    };
+    Auth.prototype._onLoginTypeChanged = function (ev) {
+        var _a = ev.data, loginType = _a.loginType, persistence = _a.persistence, env = _a.env;
+        if (env !== this.config.env) {
+            return;
+        }
+        this._cache.updatePersistence(persistence);
+        this._cache.setStore(this._cache.keys.loginTypeKey, loginType);
     };
     return Auth;
 }(base_1.AuthProvider));

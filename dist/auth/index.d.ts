@@ -1,6 +1,6 @@
 import { WeixinAuthProvider } from './weixinAuthProvider';
 import { AnonymousAuthProvider } from './anonymousAuthProvider';
-import { AuthProvider } from './base';
+import { AuthProvider, LOGINTYPE } from './base';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 export interface UserInfo {
@@ -20,6 +20,7 @@ export declare class Auth extends AuthProvider {
     _shouldRefreshAccessToken: Function;
     _anonymousAuthProvider: AnonymousAuthProvider;
     constructor(config: Config);
+    get loginType(): LOGINTYPE;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
         scope: any;
@@ -47,4 +48,5 @@ export declare class Auth extends AuthProvider {
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
     private _onAnonymousConverted;
+    private _onLoginTypeChanged;
 }

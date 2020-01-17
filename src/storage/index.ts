@@ -1,4 +1,4 @@
-import { request } from '../lib/request';
+import { getRequestByEnvId } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 import { MetaDataRes } from '../types';
 
@@ -17,6 +17,7 @@ export const uploadFile = function (
 ) {
   callback = callback || createPromiseCallback();
 
+  const request = getRequestByEnvId(this.config.env);
   const metaData = 'storage.getUploadMetadata';
 
   const { cloudPath, filePath, onUploadProgress } = params;
@@ -94,7 +95,7 @@ export const deleteFile = function ({ fileList }, callback?: any) {
   const params = {
     fileid_list: fileList
   };
-
+  const request = getRequestByEnvId(this.config.env);
   request
     .send(action, params)
     .then(res => {
@@ -160,7 +161,7 @@ export const getTempFileURL = function ({ fileList }, callback?: any) {
     file_list
   };
   // console.log(params);
-
+  const request = getRequestByEnvId(this.config.env);
   request
     .send(action, params)
     .then(res => {
@@ -196,7 +197,7 @@ export const downloadFile = async function ({ fileID }, callback?: any) {
   if (res.code !== 'SUCCESS') {
     return callback ? callback(res) : new Promise(resolve => { resolve(res) });
   }
-
+  const request = getRequestByEnvId(this.config.env);
   let tmpUrl = res.download_url;
   tmpUrl = encodeURI(tmpUrl);
   if (callback) {

@@ -1,6 +1,5 @@
-import { request } from '../lib/request';
-import { cache } from '../lib/cache';
-import { EVENTS, addEventListener } from '../lib/events';
+import { IRequest, getRequestByEnvId } from '../lib/request';
+import { ICache, getCache } from '../lib/cache';
 import { Config } from '../types';
 import { RUNTIME, Adapter } from '../adapters';
 
@@ -14,28 +13,27 @@ export enum LOGINTYPE {
 export class AuthProvider {
   config: Config;
 
-  private _loginType: LOGINTYPE = LOGINTYPE.NULL;
+  protected readonly _cache: ICache;
+  protected readonly _request: IRequest;
 
   constructor(config: Config) {
     this.config = config;
-  }
-
-  get loginType(): LOGINTYPE {
-    return this._loginType;
+    this._cache = getCache(config.env);
+    this._request = getRequestByEnvId(config.env);
   }
 
   setRefreshToken(refreshToken) {
-    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = cache.keys;
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
     // refresh token设置前，先清掉 access token
-    cache.removeStore(accessTokenKey);
-    cache.removeStore(accessTokenExpireKey);
-    cache.setStore(refreshTokenKey, refreshToken);
+    this._cache.removeStore(accessTokenKey);
+    this._cache.removeStore(accessTokenExpireKey);
+    this._cache.setStore(refreshTokenKey, refreshToken);
   }
 
   public async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const action = 'auth.getJwt';
     const hybridMiniapp = Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
-    return request.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
+    return this._request.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);
       }
@@ -51,13 +49,3 @@ export class AuthProvider {
     });
   }
 }
-
-
-function onLoginTypeChanged(ev) {
-  const { loginType, persistence } = ev.data;
-  // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
-  cache.updatePersistence(persistence);
-  cache.setStore(cache.keys.loginTypeKey, loginType);
-}
-
-addEventListener(EVENTS.LOGIN_TYPE_CHANGED, onLoginTypeChanged);

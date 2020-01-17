@@ -1,3 +1,6 @@
+import hs256 from 'crypto-js/hmac-sha256';
+import base64 from 'crypto-js/enc-base64';
+import utf8 from 'crypto-js/enc-utf8';
 import { KV } from '../types';
 
 export const getQuery = function (name: string, url?: string) {
@@ -12,6 +15,9 @@ export const getQuery = function (name: string, url?: string) {
 };
 
 export const getHash = function (name: string) {
+  if (typeof window === 'undefined') {
+    return '';
+  }
   const matches = window.location.hash.match(
     new RegExp(`[#\?&\/]${name}=([^&#]*)`)
   );
@@ -135,4 +141,27 @@ export function formatUrl(protocol: string, url: string, query: KV<any> = {}): s
     return url;
   }
   return `${protocol}${url}`;
+}
+
+function base64url(source: KV<any>) {
+  let encodedSource = base64.stringify(source);
+
+  encodedSource = encodedSource.replace(/=+$/, '');
+  encodedSource = encodedSource.replace(/\+/g, '-');
+  encodedSource = encodedSource.replace(/\//g, '_');
+
+  return encodedSource;
+}
+
+export function createSign(payload: KV<any>, secret: string): string {
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT'
+  };
+  const headerStr = base64url(utf8.parse(JSON.stringify(header)));
+  const payloadStr = base64url(utf8.parse(JSON.stringify(payload)));
+
+  const token = `${headerStr}.${payloadStr}`;
+  const sign = base64url(hs256(token, secret));
+  return `${token}.${sign}`;
 }

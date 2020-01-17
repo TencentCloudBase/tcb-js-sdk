@@ -4,16 +4,20 @@ import { Auth } from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';
 import { Request, request } from './lib/request';
-import { addEventListener, removeEventListener } from './lib/events';
-import { useAdapters, Adapter, useDefaultAdapter } from './adapters';
-import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
 import { cache } from './lib/cache';
+import { addEventListener, removeEventListener } from './lib/events';
+import { useAdapters, Adapter, useDefaultAdapter, RUNTIME } from './adapters';
+import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
+import { AppSecret, dataVersion } from './types';
+import { createSign } from './lib/util';
 
 interface ICloudbaseConfig {
   env: string;
   timeout?: number;
   persistence?: string;
   adapter?: SDKAdapterInterface;
+  appSecret?: AppSecret;
+  appSign?: string;
 }
 /**
  * @constant 默认配置
@@ -35,21 +39,34 @@ class TCB {
   }
 
   init(config: ICloudbaseConfig) {
-    this.config = {
-      ...DEFAULT_INIT_CONFIG,
-      ...config
-    };
     // 调用初始化时若未兼容平台，则使用默认adapter
     if (!Adapter.adapter) {
       this._useDefaultAdapter();
     }
-
+    if (Adapter.runtime !== RUNTIME.WEB) {
+      if (!config.appSecret) {
+        throw new Error('[tcb-js-sdk]参数错误：请正确配置appSecret');
+      }
+      // adapter提供获取应用标识的接口
+      const appSign = Adapter.adapter.getAppSign ? Adapter.adapter.getAppSign() : '';
+      if (config.appSign && appSign && config.appSign !== appSign) {
+        // 传入的appSign与sdk获取的不一致
+        throw new Error('[tcb-js-sdk]参数错误：非法的应用标识');
+      }
+      appSign && (config.appSign = appSign);
+      if (!config.appSign) {
+        throw new Error('[tcb-js-sdk]参数错误：请正确配置应用标识');
+      }
+    }
+    this.config = {
+      ...DEFAULT_INIT_CONFIG,
+      ...config
+    };
     return new TCB(this.config);
   }
 
   database(dbConfig?: object) {
     Db.reqClass = Request;
-    // @ts-ignore
     Db.wsClass = Adapter.adapter.wsClass;
 
     if (!this.authObj) {
@@ -57,10 +74,20 @@ class TCB {
       return;
     }
     Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
+    Db.runtime = Adapter.runtime;
+    if (Adapter.runtime !== RUNTIME.WEB) {
+      Db.dataVersion = dataVersion;
+      Db.createSign = createSign;
+
+      Db.appSecretInfo = {
+        appSign: this.config.appSign,
+        ...this.config.appSecret
+      };
+    }
     if (!Db.ws) {
       Db.ws = null;
     }
-    // getAccessToken
+
     return new Db({ ...this.config, ...dbConfig });
   }
 

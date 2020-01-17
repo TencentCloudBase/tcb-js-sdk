@@ -1,11 +1,14 @@
 import { Db } from '@cloudbase/database';
 import { Auth } from './auth';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
+import { AppSecret } from './types';
 interface ICloudbaseConfig {
     env: string;
     timeout?: number;
     persistence?: string;
     adapter?: SDKAdapterInterface;
+    appSecret?: AppSecret;
+    appSign?: string;
 }
 declare type Persistence = 'local' | 'session' | 'none';
 declare class TCB {

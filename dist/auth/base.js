@@ -93,7 +93,6 @@ var AuthProvider = (function () {
 }());
 exports.AuthProvider = AuthProvider;
 function onLoginTypeChanged(ev) {
-    console.log('ev : ' + JSON.stringify(ev, null, 4));
     var _a = ev.data, loginType = _a.loginType, persistence = _a.persistence;
     cache_1.cache.updatePersistence(persistence);
     cache_1.cache.setStore(cache_1.cache.keys.loginTypeKey, loginType);

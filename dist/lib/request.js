@@ -268,18 +268,19 @@ var Request = (function () {
     };
     Request.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, opts, parse, query, search, formatQuery, newUrl, res;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, parse, query, search, formatQuery, newUrl, res;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         contentType = 'application/x-www-form-urlencoded';
-                        tmpObj = __assign({ action: action, env: this.config.env, dataVersion: '2019-08-16' }, params);
+                        tmpObj = __assign({ action: action,
+                            dataVersion: types_1.dataVersion, env: this.config.env }, params);
                         if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
                         _a = tmpObj;
                         return [4, this.getAccessToken()];
                     case 1:
-                        _a.access_token = (_b.sent()).accessToken;
-                        _b.label = 2;
+                        _a.access_token = (_c.sent()).accessToken;
+                        _c.label = 2;
                     case 2:
                         if (action === 'storage.uploadFile') {
                             payload = new FormData();
@@ -292,7 +293,27 @@ var Request = (function () {
                         }
                         else {
                             contentType = 'application/json;charset=UTF-8';
-                            payload = tmpObj;
+                            payload = {};
+                            for (key in tmpObj) {
+                                if (tmpObj[key] !== undefined) {
+                                    payload[key] = tmpObj[key];
+                                }
+                            }
+                        }
+                        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
+                            _b = this.config, appSign = _b.appSign, appSecret = _b.appSecret;
+                            timestamp = Date.now();
+                            appAccessKey = appSecret.appAccessKey, appAccessKeyId = appSecret.appAccessKeyId;
+                            sign = util_1.createSign({
+                                data: payload,
+                                timestamp: timestamp,
+                                appAccessKeyId: appAccessKeyId,
+                                appSign: appSign
+                            }, appAccessKey);
+                            payload = __assign(__assign({}, payload), { timestamp: timestamp,
+                                appAccessKey: appAccessKey,
+                                appSign: appSign,
+                                sign: sign });
                         }
                         opts = {
                             headers: {
@@ -314,7 +335,7 @@ var Request = (function () {
                         }
                         return [4, this.post(__assign({ url: newUrl, data: payload }, opts))];
                     case 3:
-                        res = _b.sent();
+                        res = _c.sent();
                         if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
                             throw new Error('network request error');
                         }

@@ -3,13 +3,14 @@ import {
   BASE_URL,
   SDK_VERISON,
   KV,
-  protocol
+  protocol,
+  dataVersion
 } from '../types';
 import { cache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
-import { genSeqId, isFormData, formatUrl } from './util';
-import { Adapter } from '../adapters';
+import { genSeqId, isFormData, formatUrl, createSign } from './util';
+import { Adapter, RUNTIME } from '../adapters';
 import { LOGINTYPE } from '../auth/base';
 
 // import { getTcbFingerprintId } from '../auth/fingerprint';
@@ -229,8 +230,8 @@ class Request {
     const tmpObj = {
       action,
       // webDeviceId,
+      dataVersion,
       env: this.config.env,
-      dataVersion: '2019-08-16',
       ...params
     };
 
@@ -251,7 +252,32 @@ class Request {
       contentType = 'multipart/form-data';
     } else {
       contentType = 'application/json;charset=UTF-8';
-      payload = tmpObj;
+      payload = {};
+      for (let key in tmpObj) {
+        if (tmpObj[key] !== undefined) {
+          payload[key] = tmpObj[key];
+        }
+      }
+    }
+    // 非web平台使用凭证检验有效性
+    if (Adapter.runtime !== RUNTIME.WEB) {
+      const { appSign, appSecret } = this.config;
+      const timestamp = Date.now();
+      const { appAccessKey, appAccessKeyId } = appSecret;
+      const sign = createSign({
+        data: payload,
+        timestamp,
+        appAccessKeyId,
+        appSign
+      }, appAccessKey);
+
+      payload = {
+        ...payload,
+        timestamp,
+        appAccessKey,
+        appSign,
+        sign
+      };
     }
     let opts: any = {
       headers: {

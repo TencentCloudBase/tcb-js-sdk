@@ -26,11 +26,11 @@ var auth_1 = require("./auth");
 var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
-var cache_1 = require("./lib/cache");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
 var types_1 = require("./types");
 var util_1 = require("./lib/util");
+var cache_1 = require("./lib/cache");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
     persistence: 'session'
@@ -61,7 +61,7 @@ var TCB = (function () {
         return new TCB(this.config);
     };
     TCB.prototype.database = function (dbConfig) {
-        database_1.Db.reqClass = request_1.Request;
+        database_1.Db.reqClass = request_1.IRequest;
         database_1.Db.wsClass = adapters_1.Adapter.adapter.wsClass;
         if (!this.authObj) {
             console.warn('需要app.auth()授权');
@@ -89,8 +89,8 @@ var TCB = (function () {
         if (_persistence !== this.config.persistence) {
             this.config.persistence = _persistence;
         }
-        cache_1.cache.init(this.config);
-        request_1.request.init(this.config);
+        cache_1.initCache(this.config);
+        request_1.initRequest(this.config);
         this.authObj = new auth_1.Auth(this.config);
         return this.authObj;
     };

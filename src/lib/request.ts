@@ -6,7 +6,7 @@ import {
   protocol,
   dataVersion
 } from '../types';
-import { cache } from './cache';
+import { ICache, getCache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 import { genSeqId, isFormData, formatUrl, createSign } from './util';
@@ -88,30 +88,24 @@ function beforeEach(): AppendedRequestInfo {
   };
 }
 /**
- * @class Request
+ * @class IRequest
  */
-class Request {
+class IRequest {
   config: Config;
   _shouldRefreshAccessTokenHook: Function
   _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null
   _reqClass: SDKRequestInterface;
+
+  private _cache: ICache;
   /**
    * 初始化
    * @param config
    */
   constructor(config: Config = {}) {
     this.config = config;
-    // init有两种场景：
-    // 1. adapter初始化后被调用,适用于tcb.init;
-    // 2. new Request被调用,适用于database中new Request
-    try {
-      this.init(config);
-    } catch (e) { }
-  }
-  init(config: Config = {}) {
-    this.config = config;
     // eslint-disable-next-line
     this._reqClass = new Adapter.adapter.reqClass();
+    this._cache = getCache(this.config.env);
     bindHooks(this._reqClass, 'post', [beforeEach]);
     bindHooks(this._reqClass, 'upload', [beforeEach]);
     bindHooks(this._reqClass, 'download', [beforeEach]);
@@ -153,38 +147,36 @@ class Request {
 
   // 调用接口刷新access token，并且返回
   async _refreshAccessToken(): Promise<GetAccessTokenResult> {
-    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey } = cache.keys;
-    cache.removeStore(accessTokenKey);
-    cache.removeStore(accessTokenExpireKey);
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey } = this._cache.keys;
+    this._cache.removeStore(accessTokenKey);
+    this._cache.removeStore(accessTokenExpireKey);
 
-    let refreshToken = cache.getStore(refreshTokenKey);
+    let refreshToken = this._cache.getStore(refreshTokenKey);
     if (!refreshToken) {
       throw new Error('[tcb-js-sdk] 未登录CloudBase');
     }
     const params: KV<string> = {
       refresh_token: refreshToken,
     };
-    const isAnonymous = cache.getStore(loginTypeKey) === LOGINTYPE.ANONYMOUS;
+    const isAnonymous = this._cache.getStore(loginTypeKey) === LOGINTYPE.ANONYMOUS;
     if (isAnonymous) {
       // 匿名登录时传入uuid，若refresh token过期则可根据此uuid进行延期
-      params.anonymous_uuid = cache.getStore(anonymousUuidKey);
+      params.anonymous_uuid = this._cache.getStore(anonymousUuidKey);
     }
     const response = await this.request('auth.getJwt', params);
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
         activateEvent(EVENTS.LOGIN_STATE_EXPIRE);
-        cache.removeStore(refreshTokenKey);
+        this._cache.removeStore(refreshTokenKey);
       }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {
       activateEvent(EVENTS.REFRESH_ACCESS_TOKEN);
-      cache.setStore(accessTokenKey, response.data.access_token);
+      this._cache.setStore(accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
-      cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
-      // 刷新accessToken，不更新登录类型，
-      // activateEvent(EVENTS.LOGIN_TYPE_CHANGED, response.data.login_type);
+      this._cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
       return {
         accessToken: response.data.access_token,
         accessTokenExpire: response.data.access_token_expire
@@ -193,18 +185,18 @@ class Request {
     // 匿名登录refresh_token过期情况下返回refresh_token
     // 此场景下使用新的refresh_token获取access_token
     if (response.data.refresh_token) {
-      cache.removeStore(refreshTokenKey);
-      cache.setStore(refreshTokenKey, response.data.refresh_token);
+      this._cache.removeStore(refreshTokenKey);
+      this._cache.setStore(refreshTokenKey, response.data.refresh_token);
       this._refreshAccessToken();
     }
   }
 
   // 获取access token
   async getAccessToken(): Promise<GetAccessTokenResult> {
-    const { accessTokenKey, accessTokenExpireKey } = cache.keys;
+    const { accessTokenKey, accessTokenExpireKey } = this._cache.keys;
     // 如果没有access token或者过期，那么刷新
-    let accessToken = cache.getStore(accessTokenKey);
-    let accessTokenExpire = cache.getStore(accessTokenExpireKey);
+    let accessToken = this._cache.getStore(accessTokenKey);
+    let accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
 
     // 调用钩子函数
     let shouldRefreshAccessToken = true;
@@ -345,6 +337,14 @@ class Request {
   }
 }
 
-const request = new Request();
+const requestMap: KV<IRequest> = {};
 
-export { request, Request };
+function initRequest(config: Config) {
+  requestMap[config.env] = new IRequest(config);
+}
+
+function getRequestByEnvId(env: string): IRequest {
+  return requestMap[env];
+}
+
+export { getRequestByEnvId, IRequest, initRequest };

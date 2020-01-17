@@ -38,7 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var request_1 = require("../lib/request");
 var cache_1 = require("../lib/cache");
-var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
 var LOGINTYPE;
 (function (LOGINTYPE) {
@@ -49,21 +48,15 @@ var LOGINTYPE;
 })(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
 var AuthProvider = (function () {
     function AuthProvider(config) {
-        this._loginType = LOGINTYPE.NULL;
         this.config = config;
+        this._cache = cache_1.getCache(config.env);
+        this._request = request_1.getRequestByEnvId(config.env);
     }
-    Object.defineProperty(AuthProvider.prototype, "loginType", {
-        get: function () {
-            return this._loginType;
-        },
-        enumerable: true,
-        configurable: true
-    });
     AuthProvider.prototype.setRefreshToken = function (refreshToken) {
-        var _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
-        cache_1.cache.removeStore(accessTokenKey);
-        cache_1.cache.removeStore(accessTokenExpireKey);
-        cache_1.cache.setStore(refreshTokenKey, refreshToken);
+        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+        this._cache.removeStore(accessTokenKey);
+        this._cache.removeStore(accessTokenExpireKey);
+        this._cache.setStore(refreshTokenKey, refreshToken);
     };
     AuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
         return __awaiter(this, void 0, void 0, function () {
@@ -71,7 +64,7 @@ var AuthProvider = (function () {
             return __generator(this, function (_a) {
                 action = 'auth.getJwt';
                 hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
-                return [2, request_1.request.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
+                return [2, this._request.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);
                         }
@@ -92,9 +85,3 @@ var AuthProvider = (function () {
     return AuthProvider;
 }());
 exports.AuthProvider = AuthProvider;
-function onLoginTypeChanged(ev) {
-    var _a = ev.data, loginType = _a.loginType, persistence = _a.persistence;
-    cache_1.cache.updatePersistence(persistence);
-    cache_1.cache.setStore(cache_1.cache.keys.loginTypeKey, loginType);
-}
-events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, onLoginTypeChanged);

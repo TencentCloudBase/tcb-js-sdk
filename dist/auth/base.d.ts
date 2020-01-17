@@ -1,3 +1,5 @@
+import { IRequest } from '../lib/request';
+import { ICache } from '../lib/cache';
 import { Config } from '../types';
 export declare enum LOGINTYPE {
     ANONYMOUS = "ANONYMOUS",
@@ -7,9 +9,9 @@ export declare enum LOGINTYPE {
 }
 export declare class AuthProvider {
     config: Config;
-    private _loginType;
+    protected readonly _cache: ICache;
+    protected readonly _request: IRequest;
     constructor(config: Config);
-    get loginType(): LOGINTYPE;
     setRefreshToken(refreshToken: any): void;
     getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
         refreshToken: string;

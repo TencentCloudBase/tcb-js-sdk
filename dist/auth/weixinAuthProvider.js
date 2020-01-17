@@ -60,7 +60,6 @@ var util = __importStar(require("../lib/util"));
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
-var cache_1 = require("../lib/cache");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
@@ -120,21 +119,21 @@ var WeixinAuthProvider = (function (_super) {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
-                        accessToken = cache_1.cache.getStore(accessTokenKey);
-                        accessTokenExpire = cache_1.cache.getStore(accessTokenExpireKey);
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+                        accessToken = this._cache.getStore(accessTokenKey);
+                        accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
                         if (accessToken) {
                             if (accessTokenExpire && accessTokenExpire > Date.now()) {
                                 return [2, {
                                         credential: {
                                             accessToken: accessToken,
-                                            refreshToken: cache_1.cache.getStore(refreshTokenKey)
+                                            refreshToken: this._cache.getStore(refreshTokenKey)
                                         }
                                     }];
                             }
                             else {
-                                cache_1.cache.removeStore(accessTokenKey);
-                                cache_1.cache.removeStore(accessTokenExpireKey);
+                                this._cache.removeStore(accessTokenKey);
+                                this._cache.removeStore(accessTokenExpireKey);
                             }
                         }
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
@@ -165,12 +164,12 @@ var WeixinAuthProvider = (function (_super) {
                     case 5:
                         refreshTokenRes = _b.sent();
                         refreshToken = refreshTokenRes.refreshToken;
-                        cache_1.cache.setStore(refreshTokenKey, refreshToken);
+                        this._cache.setStore(refreshTokenKey, refreshToken);
                         if (refreshTokenRes.accessToken) {
-                            cache_1.cache.setStore(accessTokenKey, refreshTokenRes.accessToken);
+                            this._cache.setStore(accessTokenKey, refreshTokenRes.accessToken);
                         }
                         if (refreshTokenRes.accessTokenExpire) {
-                            cache_1.cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
+                            this._cache.setStore(accessTokenExpireKey, refreshTokenRes.accessTokenExpire + Date.now());
                         }
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.WECHAT, persistence: this.config.persistence });

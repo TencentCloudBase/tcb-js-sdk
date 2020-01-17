@@ -40,9 +40,10 @@ var request_1 = require("../lib/request");
 var util_1 = require("../lib/util");
 exports.uploadFile = function (params, callback) {
     callback = callback || util_1.createPromiseCallback();
+    var request = request_1.getRequestByEnvId(this.config.env);
     var metaData = 'storage.getUploadMetadata';
     var cloudPath = params.cloudPath, filePath = params.filePath, onUploadProgress = params.onUploadProgress;
-    request_1.request
+    request
         .send(metaData, {
         path: cloudPath
     })
@@ -55,7 +56,7 @@ exports.uploadFile = function (params, callback) {
             'success_action_status': '201',
             'x-cos-security-token': token
         };
-        request_1.request.upload({
+        request.upload({
             url: url,
             data: data,
             file: filePath,
@@ -103,7 +104,8 @@ exports.deleteFile = function (_a, callback) {
     var params = {
         fileid_list: fileList
     };
-    request_1.request
+    var request = request_1.getRequestByEnvId(this.config.env);
+    request
         .send(action, params)
         .then(function (res) {
         if (res.code) {
@@ -161,7 +163,8 @@ exports.getTempFileURL = function (_a, callback) {
     var params = {
         file_list: file_list
     };
-    request_1.request
+    var request = request_1.getRequestByEnvId(this.config.env);
+    request
         .send(action, params)
         .then(function (res) {
         if (res.code) {
@@ -182,7 +185,7 @@ exports.getTempFileURL = function (_a, callback) {
 exports.downloadFile = function (_a, callback) {
     var fileID = _a.fileID;
     return __awaiter(this, void 0, void 0, function () {
-        var tmpUrlRes, res, tmpUrl, result;
+        var tmpUrlRes, res, request, tmpUrl, result;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4, exports.getTempFileURL.call(this, {
@@ -199,15 +202,16 @@ exports.downloadFile = function (_a, callback) {
                     if (res.code !== 'SUCCESS') {
                         return [2, callback ? callback(res) : new Promise(function (resolve) { resolve(res); })];
                     }
+                    request = request_1.getRequestByEnvId(this.config.env);
                     tmpUrl = res.download_url;
                     tmpUrl = encodeURI(tmpUrl);
                     if (!callback) return [3, 3];
-                    return [4, request_1.request.download({ url: tmpUrl })];
+                    return [4, request.download({ url: tmpUrl })];
                 case 2:
                     result = _b.sent();
                     callback(result);
                     return [3, 4];
-                case 3: return [2, request_1.request.download({ url: tmpUrl })];
+                case 3: return [2, request.download({ url: tmpUrl })];
                 case 4: return [2];
             }
         });

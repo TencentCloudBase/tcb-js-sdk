@@ -1,4 +1,4 @@
-import { request } from '../lib/request';
+import { getRequestByEnvId } from '../lib/request';
 import { createPromiseCallback } from '../lib/util';
 
 interface ICallFunctionOptions {
@@ -39,7 +39,7 @@ export const callFunction = function(
     function_name: name,
     request_data: jsonData
   };
-
+  const request = getRequestByEnvId(this.config.env);
   request
     .send(action, params)
     .then((res) => {

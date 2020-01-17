@@ -52,10 +52,8 @@ function createStorage(persistence, adapter) {
     }
 }
 var ICache = (function () {
-    function ICache() {
+    function ICache(config) {
         this.keys = {};
-    }
-    ICache.prototype.init = function (config) {
         if (!this._storage) {
             this._persistence = adapters_1.Adapter.adapter.primaryStorage || config.persistence;
             this._storage = createStorage(this._persistence, adapters_1.Adapter.adapter);
@@ -72,7 +70,7 @@ var ICache = (function () {
                 loginTypeKey: loginTypeKey
             };
         }
-    };
+    }
     ICache.prototype.updatePersistence = function (persistence) {
         if (persistence === this._persistence) {
             return;
@@ -140,5 +138,14 @@ var ICache = (function () {
     };
     return ICache;
 }());
-var cache = new ICache();
-exports.cache = cache;
+exports.ICache = ICache;
+var cacheMap = {};
+function initCache(config) {
+    var env = config.env;
+    cacheMap[env] = new ICache(config);
+}
+exports.initCache = initCache;
+function getCache(env) {
+    return cacheMap[env];
+}
+exports.getCache = getCache;

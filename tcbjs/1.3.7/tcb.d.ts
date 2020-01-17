@@ -5,6 +5,7 @@
 
 import { Db } from '@cloudbase/database';
 import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
+import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 
 interface ICloudbaseConfig {
     env: string;
@@ -68,6 +69,7 @@ export class Auth extends AuthProvider {
     _shouldRefreshAccessToken: Function;
     _anonymousAuthProvider: AnonymousAuthProvider;
     constructor(config: Config);
+    get loginType(): LOGINTYPE;
     weixinAuthProvider({ appid, scope, loginMode, state }: {
         appid: any;
         scope: any;
@@ -164,8 +166,9 @@ export enum LOGINTYPE {
 }
 export class AuthProvider {
     config: Config;
+    protected readonly _cache: ICache;
+    protected readonly _request: IRequest;
     constructor(config: Config);
-    get loginType(): LOGINTYPE;
     setRefreshToken(refreshToken: any): void;
     getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
         refreshToken: string;
@@ -181,4 +184,44 @@ export interface LoginResult {
         accessToken?: string;
     };
 }
+
+interface GetAccessTokenResult {
+    accessToken: string;
+    accessTokenExpire: number;
+}
+export type CommonRequestOptions = {
+    headers?: KV<string>;
+    responseType?: string;
+    onUploadProgress?: Function;
+};
+class IRequest {
+    config: Config;
+    _shouldRefreshAccessTokenHook: Function;
+    _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
+    _reqClass: SDKRequestInterface;
+    constructor(config?: Config);
+    post(options: IRequestOptions): Promise<ResponseObject>;
+    upload(options: IUploadRequestOptions): Promise<ResponseObject>;
+    download(options: IRequestOptions): Promise<ResponseObject>;
+    refreshAccessToken(): Promise<GetAccessTokenResult>;
+    _refreshAccessToken(): Promise<GetAccessTokenResult>;
+    getAccessToken(): Promise<GetAccessTokenResult>;
+    request(action: any, params: any, options?: any): Promise<any>;
+    send(action: string, data?: any): Promise<any>;
+}
+function initRequest(config: Config): void;
+function getRequestByEnvId(env: string): IRequest;
+export { getRequestByEnvId, IRequest, initRequest };
+
+export class ICache {
+    keys: KV<string>;
+    constructor(config: Config);
+    updatePersistence(persistence: string): void;
+    setStore(key: string, value: any, version?: any): void;
+    getStore(key: string, version?: string): any;
+    removeStore(key: any): void;
+}
+function initCache(config: Config): void;
+function getCache(env: string): ICache;
+export { getCache, initCache };
 

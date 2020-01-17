@@ -48,12 +48,13 @@ function createStorage(persistence: string, adapter: any): StorageInterface {
   }
 }
 
-class ICache {
+export class ICache {
   public keys: KV<string> = {};
 
   private _persistence: string;
   private _storage: StorageInterface;
-  public init(config: Config) {
+
+  constructor(config: Config) {
     if (!this._storage) {
       this._persistence = Adapter.adapter.primaryStorage || config.persistence;
       this._storage = createStorage(this._persistence, Adapter.adapter);
@@ -153,6 +154,15 @@ class ICache {
   }
 }
 
-const cache = new ICache();
+const cacheMap: KV<ICache> = {};
 
-export { cache };
+function initCache(config: Config) {
+  const { env } = config;
+  cacheMap[env] = new ICache(config);
+}
+
+function getCache(env: string): ICache {
+  return cacheMap[env];
+}
+
+export { getCache, initCache };

@@ -95,24 +95,17 @@ function beforeEach() {
         headers: __assign(__assign({}, commonHeader), { 'x-seqid': seqId })
     };
 }
-var Request = (function () {
-    function Request(config) {
-        if (config === void 0) { config = {}; }
-        this.config = config;
-        try {
-            this.init(config);
-        }
-        catch (e) { }
-    }
-    Request.prototype.init = function (config) {
+var IRequest = (function () {
+    function IRequest(config) {
         if (config === void 0) { config = {}; }
         this.config = config;
         this._reqClass = new adapters_1.Adapter.adapter.reqClass();
+        this._cache = cache_1.getCache(this.config.env);
         bindHooks(this._reqClass, 'post', [beforeEach]);
         bindHooks(this._reqClass, 'upload', [beforeEach]);
         bindHooks(this._reqClass, 'download', [beforeEach]);
-    };
-    Request.prototype.post = function (options) {
+    }
+    IRequest.prototype.post = function (options) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -125,7 +118,7 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.upload = function (options) {
+    IRequest.prototype.upload = function (options) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -138,7 +131,7 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.download = function (options) {
+    IRequest.prototype.download = function (options) {
         return __awaiter(this, void 0, void 0, function () {
             var res;
             return __generator(this, function (_a) {
@@ -151,7 +144,7 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.refreshAccessToken = function () {
+    IRequest.prototype.refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result, err, e_1;
             return __generator(this, function (_a) {
@@ -182,25 +175,25 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype._refreshAccessToken = function () {
+    IRequest.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey, refreshToken, params, isAnonymous, response, code;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey, loginTypeKey = _a.loginTypeKey, anonymousUuidKey = _a.anonymousUuidKey;
-                        cache_1.cache.removeStore(accessTokenKey);
-                        cache_1.cache.removeStore(accessTokenExpireKey);
-                        refreshToken = cache_1.cache.getStore(refreshTokenKey);
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey, loginTypeKey = _a.loginTypeKey, anonymousUuidKey = _a.anonymousUuidKey;
+                        this._cache.removeStore(accessTokenKey);
+                        this._cache.removeStore(accessTokenExpireKey);
+                        refreshToken = this._cache.getStore(refreshTokenKey);
                         if (!refreshToken) {
                             throw new Error('[tcb-js-sdk] 未登录CloudBase');
                         }
                         params = {
                             refresh_token: refreshToken,
                         };
-                        isAnonymous = cache_1.cache.getStore(loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
+                        isAnonymous = this._cache.getStore(loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
                         if (isAnonymous) {
-                            params.anonymous_uuid = cache_1.cache.getStore(anonymousUuidKey);
+                            params.anonymous_uuid = this._cache.getStore(anonymousUuidKey);
                         }
                         return [4, this.request('auth.getJwt', params)];
                     case 1:
@@ -209,22 +202,22 @@ var Request = (function () {
                             code = response.data.code;
                             if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
                                 events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRE);
-                                cache_1.cache.removeStore(refreshTokenKey);
+                                this._cache.removeStore(refreshTokenKey);
                             }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {
                             events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
-                            cache_1.cache.setStore(accessTokenKey, response.data.access_token);
-                            cache_1.cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
+                            this._cache.setStore(accessTokenKey, response.data.access_token);
+                            this._cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
                             return [2, {
                                     accessToken: response.data.access_token,
                                     accessTokenExpire: response.data.access_token_expire
                                 }];
                         }
                         if (response.data.refresh_token) {
-                            cache_1.cache.removeStore(refreshTokenKey);
-                            cache_1.cache.setStore(refreshTokenKey, response.data.refresh_token);
+                            this._cache.removeStore(refreshTokenKey);
+                            this._cache.setStore(refreshTokenKey, response.data.refresh_token);
                             this._refreshAccessToken();
                         }
                         return [2];
@@ -232,15 +225,15 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.getAccessToken = function () {
+    IRequest.prototype.getAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a, accessTokenKey, accessTokenExpireKey, accessToken, accessTokenExpire, shouldRefreshAccessToken, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _a = cache_1.cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
-                        accessToken = cache_1.cache.getStore(accessTokenKey);
-                        accessTokenExpire = cache_1.cache.getStore(accessTokenExpireKey);
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+                        accessToken = this._cache.getStore(accessTokenKey);
+                        accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
                         shouldRefreshAccessToken = true;
                         _b = this._shouldRefreshAccessTokenHook;
                         if (!_b) return [3, 2];
@@ -266,7 +259,7 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.request = function (action, params, options) {
+    IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
             var contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, parse, query, search, formatQuery, newUrl, res;
             return __generator(this, function (_c) {
@@ -344,7 +337,7 @@ var Request = (function () {
             });
         });
     };
-    Request.prototype.send = function (action, data) {
+    IRequest.prototype.send = function (action, data) {
         if (data === void 0) { data = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var slowQueryWarning, response, response_1;
@@ -378,8 +371,15 @@ var Request = (function () {
             });
         });
     };
-    return Request;
+    return IRequest;
 }());
-exports.Request = Request;
-var request = new Request();
-exports.request = request;
+exports.IRequest = IRequest;
+var requestMap = {};
+function initRequest(config) {
+    requestMap[config.env] = new IRequest(config);
+}
+exports.initRequest = initRequest;
+function getRequestByEnvId(env) {
+    return requestMap[env];
+}
+exports.getRequestByEnvId = getRequestByEnvId;

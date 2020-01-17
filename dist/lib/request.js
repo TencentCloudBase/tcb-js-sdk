@@ -99,7 +99,11 @@ var IRequest = (function () {
     function IRequest(config) {
         if (config === void 0) { config = {}; }
         this.config = config;
-        this._reqClass = new adapters_1.Adapter.adapter.reqClass();
+        this._reqClass = new adapters_1.Adapter.adapter.reqClass({
+            timeout: this.config.timeout,
+            timeoutMsg: "[tcb-js-sdk] \u8BF7\u6C42\u5728" + this.config.timeout / 1000 + "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD",
+            restrictedMethods: ['post']
+        });
         this._cache = cache_1.getCache(this.config.env);
         bindHooks(this._reqClass, 'post', [beforeEach]);
         bindHooks(this._reqClass, 'upload', [beforeEach]);
@@ -340,17 +344,12 @@ var IRequest = (function () {
     IRequest.prototype.send = function (action, data) {
         if (data === void 0) { data = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var slowQueryWarning, response, response_1;
+            var response, response_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        slowQueryWarning = setTimeout(function () {
-                            console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
-                        }, 3000);
-                        return [4, this.request(action, data, { onUploadProgress: data.onUploadProgress })];
+                    case 0: return [4, this.request(action, data, { onUploadProgress: data.onUploadProgress })];
                     case 1:
                         response = _a.sent();
-                        clearTimeout(slowQueryWarning);
                         if (!(response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 4];
                         return [4, this.refreshAccessToken()];
                     case 2:

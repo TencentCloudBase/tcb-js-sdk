@@ -27,6 +27,11 @@ const DEFAULT_INIT_CONFIG = {
   persistence: 'session'
 };
 
+// timeout上限10分钟
+const MAX_TIMEOUT = 1000 * 60 * 10;
+// timeout下限100ms
+const MIN_TIMEOUT = 100;
+
 type Persistence = 'local' | 'session' | 'none';
 
 class TCB {
@@ -62,6 +67,16 @@ class TCB {
       ...DEFAULT_INIT_CONFIG,
       ...config
     };
+    switch (true) {
+      case this.config.timeout > MAX_TIMEOUT:
+        console.warn('[tcb-js-sdk] timeout大于可配置上限[10分钟]，已重置为上限数值');
+        this.config.timeout = MAX_TIMEOUT;
+        break;
+      case this.config.timeout < MIN_TIMEOUT:
+        console.warn('[tcb-js-sdk] timeout小于可配置下限[100ms]，已重置为下限数值');
+        this.config.timeout = MIN_TIMEOUT;
+        break;
+    }
     return new TCB(this.config);
   }
 

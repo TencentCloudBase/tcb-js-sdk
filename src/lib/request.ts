@@ -6,9 +6,15 @@ import {
   protocol,
   dataVersion
 } from '../types';
+import {
+  IRequestOptions,
+  SDKRequestInterface,
+  ResponseObject,
+  IUploadRequestOptions,
+  IRequestConfig
+} from '@cloudbase/adapter-interface';
 import { ICache, getCache } from './cache';
 import { activateEvent, EVENTS } from './events';
-import { IRequestOptions, SDKRequestInterface, ResponseObject, IUploadRequestOptions } from '@cloudbase/adapter-interface';
 import { genSeqId, isFormData, formatUrl, createSign } from './util';
 import { Adapter, RUNTIME } from '../adapters';
 import { LOGINTYPE } from '../auth/base';
@@ -104,7 +110,11 @@ class IRequest {
   constructor(config: Config = {}) {
     this.config = config;
     // eslint-disable-next-line
-    this._reqClass = new Adapter.adapter.reqClass();
+    this._reqClass = new Adapter.adapter.reqClass(<IRequestConfig>{
+      timeout: this.config.timeout,
+      timeoutMsg: `[tcb-js-sdk] 请求在${this.config.timeout / 1000}s内未完成，已中断`,
+      restrictedMethods: ['post']
+    });
     this._cache = getCache(this.config.env);
     bindHooks(this._reqClass, 'post', [beforeEach]);
     bindHooks(this._reqClass, 'upload', [beforeEach]);
@@ -314,11 +324,7 @@ class IRequest {
   }
 
   async send(action: string, data: any = {}): Promise<any> {
-    const slowQueryWarning = setTimeout(() => {
-      console.warn('Database operation is longer than 3s. Please check query performance and your network environment.');
-    }, 3000);
     const response = await this.request(action, data, { onUploadProgress: data.onUploadProgress });
-    clearTimeout(slowQueryWarning);
     if (response.data.code === 'ACCESS_TOKEN_EXPIRED' && actionsWithoutAccessToken.indexOf(action) === -1) {
       // access_token过期，重新获取
       await this.refreshAccessToken();

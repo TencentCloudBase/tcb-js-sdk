@@ -65,14 +65,19 @@ var types_1 = require("../../types");
 var util_1 = require("../../lib/util");
 var WebRequest = (function (_super) {
     __extends(WebRequest, _super);
-    function WebRequest() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function WebRequest(config) {
+        var _this = _super.call(this) || this;
+        var timeout = config.timeout, timeoutMsg = config.timeoutMsg, restrictedMethods = config.restrictedMethods;
+        _this._timeout = timeout || 0;
+        _this._timeoutMsg = timeoutMsg || '请求超时';
+        _this._restrictedMethods = restrictedMethods || ['get', 'post', 'upload', 'download'];
+        return _this;
     }
     WebRequest.prototype.get = function (options) {
-        return this._request(__assign(__assign({}, options), { method: 'get' }));
+        return this._request(__assign(__assign({}, options), { method: 'get' }), this._restrictedMethods.includes('get'));
     };
     WebRequest.prototype.post = function (options) {
-        return this._request(__assign(__assign({}, options), { method: 'post' }));
+        return this._request(__assign(__assign({}, options), { method: 'post' }), this._restrictedMethods.includes('post'));
     };
     WebRequest.prototype.upload = function (options) {
         var data = options.data, file = options.file, name = options.name;
@@ -82,7 +87,7 @@ var WebRequest = (function (_super) {
         }
         formData.append('key', name);
         formData.append('file', file);
-        return this._request(__assign(__assign({}, options), { data: formData, method: 'post' }));
+        return this._request(__assign(__assign({}, options), { data: formData, method: 'post' }), this._restrictedMethods.includes('upload'));
     };
     WebRequest.prototype.download = function (options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -104,7 +109,9 @@ var WebRequest = (function (_super) {
             });
         });
     };
-    WebRequest.prototype._request = function (options) {
+    WebRequest.prototype._request = function (options, enableAbort) {
+        var _this = this;
+        if (enableAbort === void 0) { enableAbort = false; }
         var method = (String(options.method)).toLowerCase() || 'get';
         return new Promise(function (resolve) {
             var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType;
@@ -115,6 +122,7 @@ var WebRequest = (function (_super) {
             for (var key in headers) {
                 ajax.setRequestHeader(key, headers[key]);
             }
+            var timer;
             ajax.onreadystatechange = function () {
                 if (ajax.readyState === 4) {
                     var result = {
@@ -124,9 +132,16 @@ var WebRequest = (function (_super) {
                         result.data = JSON.parse(ajax.responseText);
                     }
                     catch (e) { }
+                    clearTimeout(timer);
                     resolve(result);
                 }
             };
+            if (enableAbort && _this._timeout) {
+                timer = setTimeout(function () {
+                    console.warn(_this._timeoutMsg);
+                    ajax.abort();
+                }, _this._timeout);
+            }
             ajax.send(method === 'post' && util_1.isFormData(data) ? data : JSON.stringify(data || {}));
         });
     };

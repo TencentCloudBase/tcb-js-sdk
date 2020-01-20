@@ -3,7 +3,9 @@ import {
   AbstractSDKRequest,
   IRequestOptions,
   ResponseObject,
-  IUploadRequestOptions
+  IUploadRequestOptions,
+  IRequestConfig,
+  IRequestMethod
 } from '@cloudbase/adapter-interface';
 import { protocol } from '../../types';
 import { isFormData, formatUrl } from '../../lib/util';
@@ -12,17 +14,30 @@ import { isFormData, formatUrl } from '../../lib/util';
  * @class WebRequest
  */
 class WebRequest extends AbstractSDKRequest {
+  // 默认不限超时
+  private readonly _timeout: number;
+  // 超时提示文案
+  private readonly _timeoutMsg: string;
+  // 超时受限请求类型，默认所有请求均受限
+  private readonly _restrictedMethods: Array<IRequestMethod>;
+  constructor(config: IRequestConfig) {
+    super();
+    const { timeout, timeoutMsg, restrictedMethods } = config;
+    this._timeout = timeout || 0;
+    this._timeoutMsg = timeoutMsg || '请求超时';
+    this._restrictedMethods = restrictedMethods || ['get', 'post', 'upload', 'download'];
+  }
   public get(options: IRequestOptions): Promise<ResponseObject> {
     return this._request({
       ...options,
       method: 'get'
-    });
+    }, this._restrictedMethods.includes('get'));
   }
   public post(options: IRequestOptions): Promise<ResponseObject> {
     return this._request({
       ...options,
       method: 'post'
-    });
+    }, this._restrictedMethods.includes('post'));
   }
   public upload(options: IUploadRequestOptions): Promise<ResponseObject> {
     const { data, file, name } = options;
@@ -37,7 +52,7 @@ class WebRequest extends AbstractSDKRequest {
       ...options,
       data: formData,
       method: 'post'
-    });
+    }, this._restrictedMethods.includes('upload'));
   }
   public async download(options: IRequestOptions): Promise<any> {
     /**
@@ -64,7 +79,11 @@ class WebRequest extends AbstractSDKRequest {
       });
     });
   }
-  protected _request(options: IRequestOptions): Promise<ResponseObject> {
+  /**
+   * @param {IRequestOptions} options
+   * @param {boolean} enableAbort 是否超时中断请求
+   */
+  protected _request(options: IRequestOptions, enableAbort: boolean = false): Promise<ResponseObject> {
     const method = (String(options.method)).toLowerCase() || 'get';
     return new Promise(resolve => {
       const { url, headers = {}, data, responseType } = options;
@@ -75,6 +94,7 @@ class WebRequest extends AbstractSDKRequest {
       for (const key in headers) {
         ajax.setRequestHeader(key, headers[key]);
       }
+      let timer;
       ajax.onreadystatechange = () => {
         if (ajax.readyState === 4) {
           const result: ResponseObject = {
@@ -84,10 +104,16 @@ class WebRequest extends AbstractSDKRequest {
             // 上传post请求返回数据格式为xml，此处容错
             result.data = JSON.parse(ajax.responseText);
           } catch (e) {}
-
+          clearTimeout(timer);
           resolve(result);
         }
       };
+      if (enableAbort && this._timeout) {
+        timer = setTimeout(() => {
+          console.warn(this._timeoutMsg);
+          ajax.abort();
+        }, this._timeout);
+      }
       ajax.send(method === 'post' && isFormData(data) ? (data as FormData) : JSON.stringify(data || {}));
     });
   }

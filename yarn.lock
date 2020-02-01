@@ -728,7 +728,7 @@
   dependencies:
     "@cloudbase/adapter-interface" "^0.3.0"
 
-"@cloudbase/database@^0.9.11-rc.0":
+"@cloudbase/database@0.9.11-rc.0":
   version "0.9.11-rc.0"
   resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.11-rc.0.tgz#7afd73388ce9ce672dd5b6d94e6e5708d99143bd"
   integrity sha512-7OK9ae6ZYc1eVX7dPXiyuH9i8bMcXqGeYEIxztiIyH3W2DVW/b9v7wmztY14Xpj+Vau9SLFBPKxnKCRxVqz+Hg==

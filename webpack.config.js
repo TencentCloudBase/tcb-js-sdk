@@ -52,6 +52,14 @@ module.exports = {
         options: {
           presets: ['@babel/preset-env']
         }
+      },
+      {
+        test: /\.js?$/,
+        include: /node_modules\/@cloudbase\/database/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env']
+        }
       }
     ]
   },

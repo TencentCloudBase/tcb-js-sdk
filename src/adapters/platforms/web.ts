@@ -86,7 +86,7 @@ class WebRequest extends AbstractSDKRequest {
   protected _request(options: IRequestOptions, enableAbort: boolean = false): Promise<ResponseObject> {
     const method = (String(options.method)).toLowerCase() || 'get';
     return new Promise(resolve => {
-      const { url, headers = {}, data, responseType, withCredentials } = options;
+      const { url, headers = {}, data, responseType, withCredentials, body } = options;
       const realUrl = formatUrl(protocol, url, method === 'get' ? data : {});
       const ajax = new XMLHttpRequest();
       ajax.open(method, realUrl);
@@ -96,10 +96,22 @@ class WebRequest extends AbstractSDKRequest {
       }
       let timer;
       ajax.onreadystatechange = () => {
+        const result: ResponseObject = {};
+        if (ajax.readyState === ajax.HEADERS_RECEIVED) {
+          let headers = ajax.getAllResponseHeaders();
+          let arr = headers.trim().split(/[\r\n]+/);
+          // Create a map of header names to values
+          let headerMap = {};
+          arr.forEach(function (line) {
+            let parts = line.split(': ');
+            let header = parts.shift();
+            let value = parts.join(': ');
+            headerMap[header] = value;
+          });
+          result.headers = headerMap;
+        }
         if (ajax.readyState === 4) {
-          const result: ResponseObject = {
-            statusCode: ajax.status
-          };
+          result.statusCode = ajax.status;
           try {
             // 上传post请求返回数据格式为xml，此处容错
             result.data = JSON.parse(ajax.responseText);
@@ -114,7 +126,6 @@ class WebRequest extends AbstractSDKRequest {
           ajax.abort();
         }, this._timeout);
       }
-
       // 处理 payload
       let payload;
       if (isFormData(data)) {
@@ -122,6 +133,8 @@ class WebRequest extends AbstractSDKRequest {
         payload = data;
       } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
         payload = toQueryString(data);
+      } else if(body){
+        payload = body
       } else {
         // 其它情况
         payload = data ? JSON.stringify(data) : undefined;

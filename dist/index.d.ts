@@ -42,6 +42,8 @@ declare class TCB {
         filePath: File;
         onUploadProgress?: Function;
     }, callback?: Function): any;
+    registerExtension(ext: any): void;
+    invokeExtension(name: any, opts: any): Promise<any>;
     useAdapters(adapters: CloudbaseAdapter | CloudbaseAdapter[]): void;
     private _useDefaultAdapter;
 }

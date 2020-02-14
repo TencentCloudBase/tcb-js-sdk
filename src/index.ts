@@ -10,6 +10,7 @@ import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interf
 import { AppSecret, dataVersion } from './types';
 import { createSign } from './lib/util';
 import { initCache } from './lib/cache';
+import { ExtRequest } from './lib/extRequest';
 
 interface ICloudbaseConfig {
   env: string;
@@ -33,6 +34,8 @@ const MAX_TIMEOUT = 1000 * 60 * 10;
 const MIN_TIMEOUT = 100;
 
 type Persistence = 'local' | 'session' | 'none';
+
+const extensionMap = {};
 
 class TCB {
   config: ICloudbaseConfig;
@@ -158,6 +161,20 @@ class TCB {
     callback?: Function
   ) {
     return Storage.uploadFile.apply(this, [params, callback]);
+  }
+
+  registerExtension(ext) {
+    extensionMap[ext.name] = ext;
+  }
+
+  async invokeExtension(name, opts) {
+    const ext = extensionMap[name];
+    if (!ext) {
+      throw Error(`扩展${name} 必须先注册`);
+    }
+
+    let res = await ext.invoke(opts, this, new ExtRequest(this.config));
+    return res;
   }
 
   useAdapters(adapters: CloudbaseAdapter|CloudbaseAdapter[]) {

@@ -52,6 +52,7 @@ export const BASE_URL =
     : '//tcb-api.tencentcloudapi.com/web';
 // debug
 // export const BASE_URL = '//localhost:8002/web';
+// export const BASE_URL = '//9.88.239.245/web';
 // export const BASE_URL = '//tcb-api.tencentcloudapi.com:8002/web';
 
 // export const BASE_URL = '//212.129.229.68/web';

@@ -114,7 +114,7 @@ var WebRequest = (function (_super) {
         if (enableAbort === void 0) { enableAbort = false; }
         var method = (String(options.method)).toLowerCase() || 'get';
         return new Promise(function (resolve) {
-            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType, withCredentials = options.withCredentials;
+            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType, withCredentials = options.withCredentials, body = options.body;
             var realUrl = util_1.formatUrl(types_1.protocol, url, method === 'get' ? data : {});
             var ajax = new XMLHttpRequest();
             ajax.open(method, realUrl);
@@ -124,10 +124,21 @@ var WebRequest = (function (_super) {
             }
             var timer;
             ajax.onreadystatechange = function () {
+                var result = {};
+                if (ajax.readyState === ajax.HEADERS_RECEIVED) {
+                    var headers_1 = ajax.getAllResponseHeaders();
+                    var arr = headers_1.trim().split(/[\r\n]+/);
+                    var headerMap_1 = {};
+                    arr.forEach(function (line) {
+                        var parts = line.split(': ');
+                        var header = parts.shift();
+                        var value = parts.join(': ');
+                        headerMap_1[header] = value;
+                    });
+                    result.headers = headerMap_1;
+                }
                 if (ajax.readyState === 4) {
-                    var result = {
-                        statusCode: ajax.status
-                    };
+                    result.statusCode = ajax.status;
                     try {
                         result.data = JSON.parse(ajax.responseText);
                     }
@@ -148,6 +159,9 @@ var WebRequest = (function (_super) {
             }
             else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
                 payload = util_1.toQueryString(data);
+            }
+            else if (body) {
+                payload = body;
             }
             else {
                 payload = data ? JSON.stringify(data) : undefined;

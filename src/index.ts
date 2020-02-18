@@ -6,11 +6,10 @@ import * as Functions from './functions';
 import { IRequest, initRequest } from './lib/request';
 import { addEventListener, removeEventListener } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter, RUNTIME } from './adapters';
-import { SDKAdapterInterface, CloudbaseAdapter } from '@cloudbase/adapter-interface';
+import { SDKAdapterInterface, CloudbaseAdapter, IRequestConfig } from '@cloudbase/adapter-interface';
 import { AppSecret, dataVersion } from './types';
 import { createSign } from './lib/util';
 import { initCache } from './lib/cache';
-import { ExtRequest } from './lib/extRequest';
 
 interface ICloudbaseConfig {
   env: string;
@@ -40,16 +39,30 @@ const extensionMap = {};
 class TCB {
   config: ICloudbaseConfig;
   authObj: Auth;
+  requestClient: any;
 
   constructor(config?: ICloudbaseConfig) {
     this.config = config ? config : this.config;
     this.authObj = undefined;
+
+    if (Adapter.adapter) {
+      // eslint-disable-next-line
+      this.requestClient = new Adapter.adapter.reqClass(<IRequestConfig>{
+        timeout: this.config.timeout,
+        timeoutMsg: `[tcb-js-sdk] 请求在${this.config.timeout / 1000}s内未完成，已中断`
+      });
+    }
   }
 
   init(config: ICloudbaseConfig) {
     // 调用初始化时若未兼容平台，则使用默认adapter
     if (!Adapter.adapter) {
       this._useDefaultAdapter();
+      // eslint-disable-next-line
+      this.requestClient = new Adapter.adapter.reqClass(<IRequestConfig>{
+        timeout: config.timeout || 5000,
+        timeoutMsg: `[tcb-js-sdk] 请求在${(config.timeout || 5000) / 1000}s内未完成，已中断`
+      });
     }
     if (Adapter.runtime !== RUNTIME.WEB) {
       if (!config.appSecret) {
@@ -163,6 +176,13 @@ class TCB {
     return Storage.uploadFile.apply(this, [params, callback]);
   }
 
+  getUploadMetadata(
+    params: { cloudPath: string; ci?: Object },
+    callback?: Function
+  ) {
+    return Storage.getUploadMetadata.apply(this, [params, callback]);
+  }
+
   registerExtension(ext) {
     extensionMap[ext.name] = ext;
   }
@@ -173,7 +193,7 @@ class TCB {
       throw Error(`扩展${name} 必须先注册`);
     }
 
-    let res = await ext.invoke(opts, this, new ExtRequest(this.config));
+    let res = await ext.invoke(opts, this);
     return res;
   }
 

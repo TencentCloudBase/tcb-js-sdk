@@ -68,6 +68,35 @@ export const uploadFile = function (
   return callback.promise;
 };
 
+
+export const getUploadMetadata = function (
+  params: {
+    cloudPath;
+    ci?;
+  },
+  callback?: any
+) {
+  callback = callback || createPromiseCallback();
+
+  const request = getRequestByEnvId(this.config.env);
+  const metaData = 'storage.getUploadMetadata';
+
+  const { cloudPath, ci } = params;
+  request
+    .send(metaData, {
+      path: cloudPath,
+      ci
+    })
+    .then(metaData => {
+      callback(null, metaData);
+    })
+    .catch(err => {
+      callback(err);
+    });
+
+  return callback.promise;
+};
+
 /**
  * 删除文件
  * @param {Array.<string>} fileList 文件id数组

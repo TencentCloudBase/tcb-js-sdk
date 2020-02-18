@@ -39,6 +39,12 @@ class WebRequest extends AbstractSDKRequest {
       method: 'post'
     }, this._restrictedMethods.includes('post'));
   }
+  public put(options: IRequestOptions): Promise<ResponseObject> {
+    return this._request({
+      ...options,
+      method: 'put'
+    });
+  }
   public upload(options: IUploadRequestOptions): Promise<ResponseObject> {
     const { data, file, name } = options;
     // upload调用data为object类型，在此处转为FormData
@@ -104,18 +110,20 @@ class WebRequest extends AbstractSDKRequest {
           let headerMap = {};
           arr.forEach(function (line) {
             let parts = line.split(': ');
-            let header = parts.shift();
+            let header = parts.shift().toLowerCase();
             let value = parts.join(': ');
             headerMap[header] = value;
           });
-          result.headers = headerMap;
+          result.header = headerMap;
         }
         if (ajax.readyState === 4) {
           result.statusCode = ajax.status;
           try {
             // 上传post请求返回数据格式为xml，此处容错
             result.data = JSON.parse(ajax.responseText);
-          } catch (e) {}
+          } catch (e) {
+            result.data = ajax.responseText;
+          }
           clearTimeout(timer);
           resolve(result);
         }
@@ -133,8 +141,8 @@ class WebRequest extends AbstractSDKRequest {
         payload = data;
       } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
         payload = toQueryString(data);
-      } else if(body){
-        payload = body
+      } else if (body) {
+        payload = body;
       } else {
         // 其它情况
         payload = data ? JSON.stringify(data) : undefined;

@@ -6,6 +6,7 @@ declare class WebRequest extends AbstractSDKRequest {
     constructor(config: IRequestConfig);
     get(options: IRequestOptions): Promise<ResponseObject>;
     post(options: IRequestOptions): Promise<ResponseObject>;
+    put(options: IRequestOptions): Promise<ResponseObject>;
     upload(options: IUploadRequestOptions): Promise<ResponseObject>;
     download(options: IRequestOptions): Promise<any>;
     protected _request(options: IRequestOptions, enableAbort?: boolean): Promise<ResponseObject>;

@@ -19,10 +19,18 @@ const readFile = async function(file) {
 
 export function test_ext_ci(app) {
 
-  register('ci put', async () => {
+  register('ci WaterMark', async () => {
     const ops = {
       rules: [{
-        rule: 'QRcode/cover/0'
+        fileid: 'qr443.jpg',
+        // rule: 'QRcode/cover/0',
+        // rule: 'style/test_style'
+        rule: {
+          mode: 3,
+          type: 3,
+          text: '12345',
+          // image:'ab.png'
+        }
       }]
     };
 
@@ -31,26 +39,48 @@ export function test_ext_ci(app) {
     let fileContent = await readFile(file);
 
     const res = await app.invokeExtension('CloudInfinite', {
-      cloudPath: 'qr6.jpg',
+      action: 'WaterMark',
+      cloudPath: 'nv_big_fe2.jpg',
       fileContent,
-      headers: {
-        'Pic-Operations': JSON.stringify(ops)
-      },
-      method: 'PUT'
+      operations: ops
     });
 
     console.log(JSON.stringify(res, null, 4));
   });
 
-  register('ci get', async () => {
+  register('ci ImageProcess', async () => {
+
+    const ops = {
+      rules: [{
+        // rule: 'QRcode/cover/0'
+        fileid: 'qr40.jpg',
+        rule: 'style/test_style'
+      }]
+    };
+
     const res = await app.invokeExtension('CloudInfinite', {
-      cloudPath: 'nv.jpg',
-      // fileContent: fs.readFileSync('C:\\Users\\张国彬\\Desktop\\bb.png'),
-      query: {
-        'ci-process': 'sensitive-content-recognition',
-        'detect-type': 'porn,ads'
-      },
-      method: 'GET'
+      cloudPath: 'nv_big.jpg',
+      action: 'ImageProcess',
+      operations: ops
+    });
+
+    console.log(JSON.stringify(res, null, 4));
+  });
+
+  register('ci DetectLabel', async () => {
+    const res = await app.invokeExtension('CloudInfinite', {
+      action: 'DetectLabel',
+      cloudPath: 'ab.png'
+    });
+
+    console.log(JSON.stringify(res, null, 4));
+  });
+
+  register('ci DetectType', async () => {
+    const res = await app.invokeExtension('CloudInfinite', {
+      action: 'DetectType',
+      operations: { type: 'ads' },
+      cloudPath: 'ab.png'
     });
 
     console.log(JSON.stringify(res, null, 4));

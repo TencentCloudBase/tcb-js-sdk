@@ -9,14 +9,14 @@ import {
 import { test_database } from './database';
 import { runAllTestCases, runSelectedTestCase } from './util';
 import tcb from '../dist/index';
-import { test_ext_ci } from './ext_ci';
+// import { test_ext_ci } from './ext_ci';
 // 默认情况下不测试登录
 // import { test_auth } from './auth';
 
 import * as extCi from '@cloudbase/extension-ci';
 
 let app;
-// const appid = 'wxacfb81f2ced64e70';
+const appid = 'wxacfb81f2ced64e70';
 
 let init = async function() {
   console.log('web test starting init');
@@ -37,19 +37,19 @@ let init = async function() {
 
   // await test_auth(app, appid);
 
-  // let auth = app.auth({
-  //   persistence: 'local'
-  // });
+  let auth = app.auth({
+    persistence: 'local'
+  });
 
-  // await auth
-  //   .weixinAuthProvider({
-  //     appid: appid,
-  //     scope: 'snsapi_base'
-  //   })
-  //   .signIn(function() {});
+  await auth
+    .weixinAuthProvider({
+      appid: appid,
+      scope: 'snsapi_base'
+    })
+    .signIn(function() {});
 
 
-  await test_ext_ci(app);
+  // await test_ext_ci(app);
 
   // storage 有需要手动上传文件的测试用例，无法自动跑完
   await test_storage(app);

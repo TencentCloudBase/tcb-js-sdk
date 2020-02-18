@@ -67,7 +67,6 @@ var adapters_1 = require("./adapters");
 var types_1 = require("./types");
 var util_1 = require("./lib/util");
 var cache_1 = require("./lib/cache");
-var extRequest_1 = require("./lib/extRequest");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
     persistence: 'session'
@@ -79,10 +78,20 @@ var TCB = (function () {
     function TCB(config) {
         this.config = config ? config : this.config;
         this.authObj = undefined;
+        if (adapters_1.Adapter.adapter) {
+            this.requestClient = new adapters_1.Adapter.adapter.reqClass({
+                timeout: this.config.timeout,
+                timeoutMsg: "[tcb-js-sdk] \u8BF7\u6C42\u5728" + this.config.timeout / 1000 + "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD"
+            });
+        }
     }
     TCB.prototype.init = function (config) {
         if (!adapters_1.Adapter.adapter) {
             this._useDefaultAdapter();
+            this.requestClient = new adapters_1.Adapter.adapter.reqClass({
+                timeout: config.timeout || 5000,
+                timeoutMsg: "[tcb-js-sdk] \u8BF7\u6C42\u5728" + (config.timeout || 5000) / 1000 + "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD"
+            });
         }
         if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
             if (!config.appSecret) {
@@ -165,6 +174,9 @@ var TCB = (function () {
     TCB.prototype.uploadFile = function (params, callback) {
         return Storage.uploadFile.apply(this, [params, callback]);
     };
+    TCB.prototype.getUploadMetadata = function (params, callback) {
+        return Storage.getUploadMetadata.apply(this, [params, callback]);
+    };
     TCB.prototype.registerExtension = function (ext) {
         extensionMap[ext.name] = ext;
     };
@@ -178,7 +190,7 @@ var TCB = (function () {
                         if (!ext) {
                             throw Error("\u6269\u5C55" + name + " \u5FC5\u987B\u5148\u6CE8\u518C");
                         }
-                        return [4, ext.invoke(opts, this, new extRequest_1.ExtRequest(this.config))];
+                        return [4, ext.invoke(opts, this)];
                     case 1:
                         res = _a.sent();
                         return [2, res];

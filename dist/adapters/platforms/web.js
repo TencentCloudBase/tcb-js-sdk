@@ -79,6 +79,9 @@ var WebRequest = (function (_super) {
     WebRequest.prototype.post = function (options) {
         return this._request(__assign(__assign({}, options), { method: 'post' }), this._restrictedMethods.includes('post'));
     };
+    WebRequest.prototype.put = function (options) {
+        return this._request(__assign(__assign({}, options), { method: 'put' }));
+    };
     WebRequest.prototype.upload = function (options) {
         var data = options.data, file = options.file, name = options.name;
         var formData = new FormData();
@@ -131,18 +134,20 @@ var WebRequest = (function (_super) {
                     var headerMap_1 = {};
                     arr.forEach(function (line) {
                         var parts = line.split(': ');
-                        var header = parts.shift();
+                        var header = parts.shift().toLowerCase();
                         var value = parts.join(': ');
                         headerMap_1[header] = value;
                     });
-                    result.headers = headerMap_1;
+                    result.header = headerMap_1;
                 }
                 if (ajax.readyState === 4) {
                     result.statusCode = ajax.status;
                     try {
                         result.data = JSON.parse(ajax.responseText);
                     }
-                    catch (e) { }
+                    catch (e) {
+                        result.data = ajax.responseText;
+                    }
                     clearTimeout(timer);
                     resolve(result);
                 }

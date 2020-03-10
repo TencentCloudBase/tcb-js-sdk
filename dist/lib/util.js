@@ -126,6 +126,15 @@ function formatUrl(protocol, url, query) {
     return "" + protocol + url;
 }
 exports.formatUrl = formatUrl;
+function toQueryString(query) {
+    if (query === void 0) { query = {}; }
+    var queryString = [];
+    for (var key in query) {
+        queryString.push(key + "=" + encodeURIComponent(query[key]));
+    }
+    return queryString.join('&');
+}
+exports.toQueryString = toQueryString;
 function base64url(source) {
     var encodedSource = enc_base64_1.default.stringify(source);
     encodedSource = encodedSource.replace(/=+$/, '');

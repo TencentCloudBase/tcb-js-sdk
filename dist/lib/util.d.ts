@@ -13,4 +13,5 @@ export declare function isFormData(val: any): boolean;
 export declare function genSeqId(): string;
 export declare function getArgNames(fn: Function): RegExpMatchArray;
 export declare function formatUrl(protocol: string, url: string, query?: KV<any>): string;
+export declare function toQueryString(query?: KV<any>): string;
 export declare function createSign(payload: KV<any>, secret: string): string;

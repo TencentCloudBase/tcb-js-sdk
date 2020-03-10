@@ -47,6 +47,9 @@ export declare class Auth extends AuthProvider {
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
+    getAuthHeader(): {
+        'x-cloudbase-credentials': string;
+    };
     private _onAnonymousConverted;
     private _onLoginTypeChanged;
 }

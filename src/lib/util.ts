@@ -143,6 +143,14 @@ export function formatUrl(protocol: string, url: string, query: KV<any> = {}): s
   return `${protocol}${url}`;
 }
 
+export function toQueryString(query: KV<any> = {}) {
+  let queryString = [];
+  for (let key in query) {
+    queryString.push(`${key}=${encodeURIComponent(query[key])}`);
+  }
+  return queryString.join('&');
+}
+
 function base64url(source: KV<any>) {
   let encodedSource = base64.stringify(source);
 

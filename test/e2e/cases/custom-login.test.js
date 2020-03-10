@@ -8,6 +8,12 @@ describe('鉴权', () => {
 
     expect(result).toBeDefined();
   });
+  it('获取Auth Header', async () => {
+    const result = await page.evaluate(() => {
+      return app.auth().getAuthHeader();
+    });
+    expect(result['x-cloudbase-credentials']).toBeDefined();
+  });
   it('getLoginState', async () => {
     const page = global.page;
     let result = await page.evaluate(() => {

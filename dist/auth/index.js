@@ -253,6 +253,14 @@ var Auth = (function (_super) {
             }
         });
     };
+    Auth.prototype.getAuthHeader = function () {
+        var _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey;
+        var refreshToken = this._cache.getStore(refreshTokenKey);
+        var accessToken = this._cache.getStore(accessTokenKey);
+        return {
+            'x-cloudbase-credentials': accessToken + '/@@/' + refreshToken
+        };
+    };
     Auth.prototype._onAnonymousConverted = function (ev) {
         var env = ev.data.env;
         if (env !== this.config.env) {

@@ -235,6 +235,26 @@ auth.linkAndRetrieveDataWithTicket(ticket).then(res => {
 });
 ```
 
+## 云接入鉴权相关 API
+
+云接入开启鉴权之后，开发者可以使用 Web SDK 获取云接入的鉴权头部，来达到鉴权的目的。
+
+### auth.getAuthHeader()
+
+获取云接入鉴权头部
+
+```js
+const axios = require('axios')
+
+// 获取鉴权头部
+const authHeader = auth.getAuthHeader()
+
+// 在 AJAX 请求里加入鉴权头部
+axios.get('https://env-id.service.tcloudbase.com/xxxx', {
+  headers: authHeader
+})
+```
+
 ## 登录授权相关事件及钩子函数
 
 ### Event: 'loginStateExpire'

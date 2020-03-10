@@ -114,7 +114,7 @@ var WebRequest = (function (_super) {
         if (enableAbort === void 0) { enableAbort = false; }
         var method = (String(options.method)).toLowerCase() || 'get';
         return new Promise(function (resolve) {
-            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType;
+            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType, withCredentials = options.withCredentials;
             var realUrl = util_1.formatUrl(types_1.protocol, url, method === 'get' ? data : {});
             var ajax = new XMLHttpRequest();
             ajax.open(method, realUrl);
@@ -142,7 +142,20 @@ var WebRequest = (function (_super) {
                     ajax.abort();
                 }, _this._timeout);
             }
-            ajax.send(method === 'post' && util_1.isFormData(data) ? data : JSON.stringify(data || {}));
+            var payload;
+            if (util_1.isFormData(data)) {
+                payload = data;
+            }
+            else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
+                payload = util_1.toQueryString(data);
+            }
+            else {
+                payload = data ? JSON.stringify(data) : undefined;
+            }
+            if (withCredentials) {
+                ajax.withCredentials = true;
+            }
+            ajax.send(payload);
         });
     };
     return WebRequest;

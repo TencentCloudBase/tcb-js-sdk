@@ -8,7 +8,7 @@ import {
   IRequestMethod
 } from '@cloudbase/adapter-interface';
 import { protocol } from '../../types';
-import { isFormData, formatUrl } from '../../lib/util';
+import { isFormData, formatUrl, toQueryString } from '../../lib/util';
 
 /**
  * @class WebRequest
@@ -86,7 +86,7 @@ class WebRequest extends AbstractSDKRequest {
   protected _request(options: IRequestOptions, enableAbort: boolean = false): Promise<ResponseObject> {
     const method = (String(options.method)).toLowerCase() || 'get';
     return new Promise(resolve => {
-      const { url, headers = {}, data, responseType } = options;
+      const { url, headers = {}, data, responseType, withCredentials } = options;
       const realUrl = formatUrl(protocol, url, method === 'get' ? data : {});
       const ajax = new XMLHttpRequest();
       ajax.open(method, realUrl);
@@ -114,7 +114,23 @@ class WebRequest extends AbstractSDKRequest {
           ajax.abort();
         }, this._timeout);
       }
-      ajax.send(method === 'post' && isFormData(data) ? (data as FormData) : JSON.stringify(data || {}));
+
+      // 处理 payload
+      let payload;
+      if (isFormData(data)) {
+        // FormData，不处理
+        payload = data;
+      } else if (headers['content-type'] === 'application/x-www-form-urlencoded') {
+        payload = toQueryString(data);
+      } else {
+        // 其它情况
+        payload = data ? JSON.stringify(data) : undefined;
+      }
+
+      if (withCredentials) {
+        ajax.withCredentials = true;
+      }
+      ajax.send(payload);
     });
   }
 }

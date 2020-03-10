@@ -162,6 +162,32 @@ export class Auth extends AuthProvider {
     });
   }
 
+  getAuthHeader() {
+    const { refreshTokenKey, accessTokenKey } = this._cache.keys;
+    const refreshToken = this._cache.getStore(refreshTokenKey);
+    const accessToken = this._cache.getStore(accessTokenKey);
+    return {
+      'x-cloudbase-credentials': accessToken + '/@@/' + refreshToken
+    };
+  }
+
+  // setAuthCookie() {
+  //   const { env } = this.config;
+  //   const { refreshTokenKey, accessTokenKey } = this._cache.keys;
+  //   const refreshToken = this._cache.getStore(refreshTokenKey);
+  //   const accessToken = this._cache.getStore(accessTokenKey);
+  //   return this._request.post({
+  //     url: `https://cookie.${env}.service.tcloudbase.com`,
+  //     headers: {
+  //       'content-type': 'application/x-www-form-urlencoded'
+  //     },
+  //     withCredentials: true,
+  //     data: {
+  //       credentials: accessToken + '/@@/' + refreshToken
+  //     }
+  //   });
+  // }
+
   private _onAnonymousConverted(ev) {
     const { env } = ev.data;
     if (env !== this.config.env) {

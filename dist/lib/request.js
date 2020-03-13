@@ -265,7 +265,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, parse, query, search, formatQuery, newUrl, res;
+            var contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, query, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -320,6 +320,10 @@ var IRequest = (function () {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
+                        traceHeader = this._cache.getStore('x-tcb-trace');
+                        if (traceHeader) {
+                            opts.headers['X-TCB-Trace'] = traceHeader;
+                        }
                         parse = params.parse, query = params.query, search = params.search;
                         formatQuery = {
                             env: this.config.env
@@ -333,6 +337,10 @@ var IRequest = (function () {
                         return [4, this.post(__assign({ url: newUrl, data: payload }, opts))];
                     case 3:
                         res = _c.sent();
+                        resTraceHeader = res.header && res.header['x-tcb-trace'];
+                        if (resTraceHeader) {
+                            this._cache.setStore('x-tcb-trace', resTraceHeader);
+                        }
                         if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
                             throw new Error('network request error');
                         }

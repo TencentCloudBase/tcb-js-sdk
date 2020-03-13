@@ -226,6 +226,7 @@ class IRequest {
     }
   }
 
+  /* eslint-disable complexity */
   async request(action, params, options?) {
     let contentType = 'application/x-www-form-urlencoded';
     // const webDeviceId = await getTcbFingerprintId();
@@ -290,6 +291,11 @@ class IRequest {
       opts.onUploadProgress = options['onUploadProgress'];
     }
 
+    const traceHeader = this._cache.getStore('x-tcb-trace');
+    if (traceHeader) {
+      opts.headers['X-TCB-Trace'] = traceHeader;
+    }
+
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
     // 请求链接支持添加动态 query 参数，方便用户调试定位请求
@@ -315,6 +321,12 @@ class IRequest {
       data: payload,
       ...opts
     });
+
+    // 保存 trace header
+    const resTraceHeader = res.header && res.header['x-tcb-trace'];
+    if (resTraceHeader) {
+      this._cache.setStore('x-tcb-trace', resTraceHeader);
+    }
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
       throw new Error('network request error');

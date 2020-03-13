@@ -26,9 +26,11 @@ let init = async function() {
     // env: 'base-dev-c9ff99'
     // env: 'webtestjimmy-5328c3'
     // env: 'dev-97eb6c'
+    // env: 'postpay-a870cf'
+    env: 'hosting-a13d0a',
     // env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
-    env: 'dev-withnate-604e29',
+    // env: 'dev-withnate-604e29',
     timeout: 150000
     // env: 'luke-3de127'
   });

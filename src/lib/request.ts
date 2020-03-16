@@ -299,14 +299,14 @@ class IRequest {
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
     // 请求链接支持添加动态 query 参数，方便用户调试定位请求
-    const { parse, query, search } = params;
+    const { parse, inQuery, search } = params;
     let formatQuery: Record<string, any> = {
       env: this.config.env
     };
     // 尝试解析响应数据为 JSON
     parse && (formatQuery.parse = true);
-    query && (formatQuery = {
-      ...query,
+    inQuery && (formatQuery = {
+      ...inQuery,
       ...formatQuery
     });
     // 生成请求 url

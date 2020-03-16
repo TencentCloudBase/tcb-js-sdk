@@ -33,7 +33,7 @@ export const callFunction = function(
 
   const action = 'functions.invokeFunction';
   const params = {
-    query,
+    inQuery: query,
     parse,
     search,
     function_name: name,

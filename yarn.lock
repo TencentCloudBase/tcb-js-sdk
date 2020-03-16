@@ -711,22 +711,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@cloudbase/adapter-interface@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/@cloudbase/adapter-interface/-/adapter-interface-0.3.0.tgz#f8e5478ad152b888994dbeb9012db7966a9b087b"
-  integrity sha512-JuowPs+B4ymbNQaQ4af8P6w47Jd5r7DyVPlTQjJCnOtdnDPqNWcqhokDdhyVWZ92ivsr+8E6LUHffWmUEzv2Pg==
-
 "@cloudbase/adapter-interface@^0.4.0":
   version "0.4.0"
   resolved "https://registry.npmjs.org/@cloudbase/adapter-interface/-/adapter-interface-0.4.0.tgz#c57935b503e7bface4b151df63a87dc564ae9907"
   integrity sha512-vbNQlr4NK5mdsMr3elk4/OdE/opLpZB+8JPTXAQM4/ldcTZtmb1Dnt3T2g9u5LSHDlRjdzyeM5ARvVqUq+2bmw==
-
-"@cloudbase/adapter-wx_mp@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/@cloudbase/adapter-wx_mp/-/adapter-wx_mp-0.3.0.tgz#d41b1ae40f9cf99c08617a8d5bad64db7a2b276c"
-  integrity sha512-EJRXu5bq/mutM8lUqFe09Stv7hBceW8x9ONQ7nBTXhprJOK8jebq3Ey2+0CiDX+csDeH5SGg01BwCAvsM2fhiA==
-  dependencies:
-    "@cloudbase/adapter-interface" "^0.3.0"
 
 "@cloudbase/database@0.9.11-rc.0":
   version "0.9.11-rc.0"
@@ -2137,6 +2125,13 @@ clone-deep@^0.2.4:
     kind-of "^3.0.2"
     lazy-cache "^1.0.3"
     shallow-clone "^0.1.2"
+
+cloudbase-adapter-wx_mp@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/cloudbase-adapter-wx_mp/-/cloudbase-adapter-wx_mp-0.1.0.tgz#4f405c602403c9dd5e8f46df8c0a4f36aacfbced"
+  integrity sha512-TSgOuoadO9876rId6zvf9sLNJjmAoSbuNm7z3gXv7hF3vCRzYqcYxSExmQOXoLXkduztfMM3lu9ENhNqkAIUzg==
+  dependencies:
+    "@cloudbase/adapter-interface" "^0.4.0"
 
 co@^4.6.0:
   version "4.6.0"

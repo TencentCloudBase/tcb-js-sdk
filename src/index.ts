@@ -1,5 +1,5 @@
 import { Db } from '@cloudbase/database';
-import adapterForWxMp from '@cloudbase/adapter-wx_mp';
+import adapterForWxMp from 'cloudbase-adapter-wx_mp';
 import { Auth } from './auth';
 import * as Storage from './storage';
 import * as Functions from './functions';

@@ -27,8 +27,10 @@ import * as tcb from 'tcb-js-sdk';
 或者使用官方的代码包
 
 ```
-<script src="//imgcache.qq.com/qcloud/tcbjs/1.3.1/tcb.js">
+<script src="//imgcache.qq.com/qcloud/tcbjs/${version}/tcb.js">
 ```
+
+> 最新版本与npm保持一致，可在https://www.npmjs.com/package/tcb-js-sdk中的Version一栏中查看。
 
 ## 快速上手
 
@@ -84,7 +86,6 @@ const res = await app.callFunction({
 - [存储](docs/storage.md)
 - [数据库](docs/database.md)
 - [云函数](docs/functions.md)
-- [多平台适配](docs/adapters.md)
 
 ## 更新日志
 

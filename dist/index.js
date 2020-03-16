@@ -57,7 +57,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 var database_1 = require("@cloudbase/database");
-var adapter_wx_mp_1 = __importDefault(require("@cloudbase/adapter-wx_mp"));
+var cloudbase_adapter_wx_mp_1 = __importDefault(require("cloudbase-adapter-wx_mp"));
 var auth_1 = require("./auth");
 var Storage = __importStar(require("./storage"));
 var Functions = __importStar(require("./functions"));
@@ -211,7 +211,7 @@ var TCB = (function () {
     return TCB;
 }());
 var tcb = new TCB();
-tcb.useAdapters(adapter_wx_mp_1.default);
+tcb.useAdapters(cloudbase_adapter_wx_mp_1.default);
 try {
     window['tcb'] = tcb;
 }

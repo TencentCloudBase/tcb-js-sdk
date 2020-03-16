@@ -13,6 +13,13 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.4.0] 2020-03-16
+
+### Added
+
+- 新增 `tcb.registerExtension()`，注册扩展
+- 新增 `tcb.invokeExtension()`，使用扩展
+
 ## [1.2.0] 2019-08-14
 
 ### Added

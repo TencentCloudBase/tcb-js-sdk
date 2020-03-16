@@ -5,7 +5,6 @@ export declare const uploadFile: (params: {
 }, callback?: any) => any;
 export declare const getUploadMetadata: (params: {
     cloudPath: any;
-    ci?: any;
 }, callback?: any) => any;
 export declare const deleteFile: ({ fileList }: {
     fileList: any;

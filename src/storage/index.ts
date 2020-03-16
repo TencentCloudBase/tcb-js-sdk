@@ -72,7 +72,6 @@ export const uploadFile = function (
 export const getUploadMetadata = function (
   params: {
     cloudPath;
-    ci?;
   },
   callback?: any
 ) {
@@ -81,11 +80,10 @@ export const getUploadMetadata = function (
   const request = getRequestByEnvId(this.config.env);
   const metaData = 'storage.getUploadMetadata';
 
-  const { cloudPath, ci } = params;
+  const { cloudPath } = params;
   request
     .send(metaData, {
-      path: cloudPath,
-      ci
+      path: cloudPath
     })
     .then(metaData => {
       callback(null, metaData);

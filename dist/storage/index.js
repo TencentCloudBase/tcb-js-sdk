@@ -86,11 +86,10 @@ exports.getUploadMetadata = function (params, callback) {
     callback = callback || util_1.createPromiseCallback();
     var request = request_1.getRequestByEnvId(this.config.env);
     var metaData = 'storage.getUploadMetadata';
-    var cloudPath = params.cloudPath, ci = params.ci;
+    var cloudPath = params.cloudPath;
     request
         .send(metaData, {
-        path: cloudPath,
-        ci: ci
+        path: cloudPath
     })
         .then(function (metaData) {
         callback(null, metaData);

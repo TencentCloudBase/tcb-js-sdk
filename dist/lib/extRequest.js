@@ -36,52 +36,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var request_1 = require("../lib/request");
-var cache_1 = require("../lib/cache");
-var adapters_1 = require("../adapters");
-var LOGINTYPE;
-(function (LOGINTYPE) {
-    LOGINTYPE["ANONYMOUS"] = "ANONYMOUS";
-    LOGINTYPE["WECHAT"] = "WECHAT";
-    LOGINTYPE["CUSTOM"] = "CUSTOM";
-    LOGINTYPE["NULL"] = "NULL";
-})(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
-var AuthProvider = (function () {
-    function AuthProvider(config) {
-        this.config = config;
-        this._cache = cache_1.getCache(config.env);
-        this._request = request_1.getRequestByEnvId(config.env);
+var request_1 = require("./request");
+var ExtRequest = (function () {
+    function ExtRequest(config) {
+        this._tcbRequest = request_1.getRequestByEnvId(config.env);
     }
-    AuthProvider.prototype.setRefreshToken = function (refreshToken) {
-        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
-        this._cache.removeStore(accessTokenKey);
-        this._cache.removeStore(accessTokenExpireKey);
-        this._cache.setStore(refreshTokenKey, refreshToken);
-    };
-    AuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
+    ExtRequest.prototype.tcbRequest = function (api, data) {
         return __awaiter(this, void 0, void 0, function () {
-            var action, hybridMiniapp;
+            var res;
             return __generator(this, function (_a) {
-                action = 'auth.getJwt';
-                hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
-                return [2, this._request.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
-                        if (res.code) {
-                            throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);
-                        }
-                        if (res.refresh_token) {
-                            return {
-                                refreshToken: res.refresh_token,
-                                accessToken: res.access_token,
-                                accessTokenExpire: res.access_token_expire
-                            };
-                        }
-                        else {
-                            throw new Error("[tcb-js-sdk] getJwt\u672A\u8FD4\u56DErefreshToken");
-                        }
-                    })];
+                switch (_a.label) {
+                    case 0: return [4, this._tcbRequest.send(api, data)];
+                    case 1:
+                        res = _a.sent();
+                        return [2, res];
+                }
             });
         });
     };
-    return AuthProvider;
+    ExtRequest.prototype.rawRequest = function (opts) {
+        return __awaiter(this, void 0, void 0, function () {
+            var res;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this._tcbRequest._reqClass._request(opts)];
+                    case 1:
+                        res = _a.sent();
+                        return [2, res];
+                }
+            });
+        });
+    };
+    return ExtRequest;
 }());
-exports.AuthProvider = AuthProvider;
+exports.ExtRequest = ExtRequest;

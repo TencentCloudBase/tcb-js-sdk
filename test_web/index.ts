@@ -9,8 +9,11 @@ import {
 import { test_database } from './database';
 import { runAllTestCases, runSelectedTestCase } from './util';
 import tcb from '../dist/index';
+// import { test_ext_ci } from './ext_ci';
 // 默认情况下不测试登录
 // import { test_auth } from './auth';
+
+import * as extCi from '@cloudbase/extension-ci';
 
 let app;
 const appid = 'wxacfb81f2ced64e70';
@@ -23,11 +26,14 @@ let init = async function() {
     // env: 'base-dev-c9ff99'
     // env: 'webtestjimmy-5328c3'
     // env: 'dev-97eb6c'
-    env: 'test-2a63aa'
+    // env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
-    // env: 'dev-withnate-604e29'
+    env: 'dev-withnate-604e29',
+    timeout: 150000
     // env: 'luke-3de127'
   });
+
+  app.registerExtension(extCi);
 
   // await test_auth(app, appid);
 
@@ -41,6 +47,9 @@ let init = async function() {
       scope: 'snsapi_base'
     })
     .signIn(function() {});
+
+
+  // await test_ext_ci(app);
 
   // storage 有需要手动上传文件的测试用例，无法自动跑完
   await test_storage(app);

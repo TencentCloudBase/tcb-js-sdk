@@ -82,6 +82,23 @@ exports.uploadFile = function (params, callback) {
     });
     return callback.promise;
 };
+exports.getUploadMetadata = function (params, callback) {
+    callback = callback || util_1.createPromiseCallback();
+    var request = request_1.getRequestByEnvId(this.config.env);
+    var metaData = 'storage.getUploadMetadata';
+    var cloudPath = params.cloudPath;
+    request
+        .send(metaData, {
+        path: cloudPath
+    })
+        .then(function (metaData) {
+        callback(null, metaData);
+    })
+        .catch(function (err) {
+        callback(err);
+    });
+    return callback.promise;
+};
 exports.deleteFile = function (_a, callback) {
     var fileList = _a.fileList;
     callback = callback || util_1.createPromiseCallback();

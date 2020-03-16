@@ -14,6 +14,7 @@ declare type Persistence = 'local' | 'session' | 'none';
 declare class TCB {
     config: ICloudbaseConfig;
     authObj: Auth;
+    requestClient: any;
     constructor(config?: ICloudbaseConfig);
     init(config: ICloudbaseConfig): TCB;
     database(dbConfig?: object): Db;
@@ -42,6 +43,12 @@ declare class TCB {
         filePath: File;
         onUploadProgress?: Function;
     }, callback?: Function): any;
+    getUploadMetadata(params: {
+        cloudPath: string;
+        ci?: Object;
+    }, callback?: Function): any;
+    registerExtension(ext: any): void;
+    invokeExtension(name: any, opts: any): Promise<any>;
     useAdapters(adapters: CloudbaseAdapter | CloudbaseAdapter[]): void;
     private _useDefaultAdapter;
 }

@@ -3,6 +3,9 @@ export declare const uploadFile: (params: {
     filePath: any;
     onUploadProgress?: any;
 }, callback?: any) => any;
+export declare const getUploadMetadata: (params: {
+    cloudPath: any;
+}, callback?: any) => any;
 export declare const deleteFile: ({ fileList }: {
     fileList: any;
 }, callback?: any) => any;

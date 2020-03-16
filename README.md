@@ -30,7 +30,7 @@ import * as tcb from 'tcb-js-sdk';
 <script src="//imgcache.qq.com/qcloud/tcbjs/${version}/tcb.js">
 ```
 
-> 最新版本与npm保持一致，可在https://www.npmjs.com/package/tcb-js-sdk中的Version一栏中查看。
+> 最新版本与npm保持一致，可在[tcb-js-sdk](https://www.npmjs.com/package/tcb-js-sdk)中的Version一栏中查看。
 
 ## 快速上手
 
@@ -124,13 +124,6 @@ npm run e2e
 ```
 
 #### 构建
-tcb-js-sdk构建分三个场景：
-- npm package；
-- 通用版全量js文件，适用于常规web、webview和小程序；
-- cocos版全量js文件，仅适用于cocos。与通用版有以下区别区别：
-  1. 使用superagent取代axios（axios不兼容cocos模拟器环境）；
-  2. 不支持`session`登录保留期（cocos模拟器不支持`sessionStorage`）
-
 执行以下命令：
 ```bash
 npm run build
@@ -138,9 +131,3 @@ npm run build
 会同时构建npm package和通用版全量js文件，如下：
 - `dist`目录为npm package文件；
 - `tcb.js/${version}/tcb.js`为通用版js文件。
-
-执行以下命令：
-```bash
-npm run build:cocos
-```
-会构建cocos版全量js文件，输出路径为`tcb.js/${version}-cocos/tcb.js`。

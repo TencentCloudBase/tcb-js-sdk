@@ -66,23 +66,36 @@ var AllowedScopes;
     AllowedScopes["snsapi_userinfo"] = "snsapi_userinfo";
     AllowedScopes["snsapi_login"] = "snsapi_login";
 })(AllowedScopes || (AllowedScopes = {}));
-var LoginModes;
-(function (LoginModes) {
-    LoginModes["redirect"] = "redirect";
-    LoginModes["prompt"] = "prompt";
-})(LoginModes || (LoginModes = {}));
 var SignInPromiseMap = {};
 var WeixinAuthProvider = (function (_super) {
     __extends(WeixinAuthProvider, _super);
-    function WeixinAuthProvider(config, appid, scope, loginMode, state) {
+    function WeixinAuthProvider(config, appid, scope, state) {
         var _this = _super.call(this, config) || this;
         _this.config = config;
         _this.appid = appid;
         _this.scope = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? 'snsapi_base' : scope;
         _this.state = state || 'weixin';
-        _this.loginMode = loginMode || 'redirect';
         return _this;
     }
+    WeixinAuthProvider.prototype.signInWithRedirect = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, this.redirect()];
+            });
+        });
+    };
+    WeixinAuthProvider.prototype.getRedirectResult = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var code;
+            return __generator(this, function (_a) {
+                code = util.getWeixinCode();
+                if (!code) {
+                    return [2, null];
+                }
+                return [2, this._signInWithCode(code)];
+            });
+        });
+    };
     WeixinAuthProvider.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             var result, err, e_1;
@@ -115,43 +128,46 @@ var WeixinAuthProvider = (function (_super) {
     };
     WeixinAuthProvider.prototype._signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, accessToken, accessTokenExpire, code, loginType, refreshTokenRes, refreshToken;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var code;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
-                        accessToken = this._cache.getStore(accessTokenKey);
-                        accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
-                        if (accessToken) {
-                            if (accessTokenExpire && accessTokenExpire > Date.now()) {
-                                return [2, {
-                                        credential: {
-                                            accessToken: accessToken,
-                                            refreshToken: this._cache.getStore(refreshTokenKey)
-                                        }
-                                    }];
-                            }
-                            else {
-                                this._cache.removeStore(accessTokenKey);
-                                this._cache.removeStore(accessTokenExpireKey);
-                            }
-                        }
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
                             throw new Error('错误的scope类型');
                         }
                         if (!(adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP)) return [3, 2];
                         return [4, util.getMiniAppCode()];
                     case 1:
-                        code = _b.sent();
-                        return [3, 4];
-                    case 2: return [4, util.getWeixinCode()];
-                    case 3:
-                        code = _b.sent();
+                        code = _a.sent();
+                        return [3, 3];
+                    case 2:
+                        code = util.getWeixinCode();
                         if (!code) {
                             return [2, this.redirect()];
                         }
-                        _b.label = 4;
-                    case 4:
+                        _a.label = 3;
+                    case 3: return [2, this._signInWithCode(code)];
+                }
+            });
+        });
+    };
+    WeixinAuthProvider.prototype.redirect = function () {
+        var currUrl = util.removeParam('code', location.href);
+        currUrl = util.removeParam('state', currUrl);
+        currUrl = encodeURIComponent(currUrl);
+        var host = '//open.weixin.qq.com/connect/oauth2/authorize';
+        if (this.scope === 'snsapi_login') {
+            host = '//open.weixin.qq.com/connect/qrconnect';
+        }
+        location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
+    };
+    WeixinAuthProvider.prototype._signInWithCode = function (code) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginType, refreshTokenRes, refreshToken;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
                         loginType = (function (scope) {
                             switch (scope) {
                                 case AllowedScopes.snsapi_login:
@@ -161,7 +177,7 @@ var WeixinAuthProvider = (function (_super) {
                             }
                         })(this.scope);
                         return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
-                    case 5:
+                    case 1:
                         refreshTokenRes = _b.sent();
                         refreshToken = refreshTokenRes.refreshToken;
                         this._cache.setStore(refreshTokenKey, refreshToken);
@@ -182,17 +198,29 @@ var WeixinAuthProvider = (function (_super) {
             });
         });
     };
-    WeixinAuthProvider.prototype.redirect = function () {
-        var currUrl = util.removeParam('code', location.href);
-        currUrl = util.removeParam('state', currUrl);
-        currUrl = encodeURIComponent(currUrl);
-        var host = '//open.weixin.qq.com/connect/oauth2/authorize';
-        if (this.scope === 'snsapi_login') {
-            host = '//open.weixin.qq.com/connect/qrconnect';
-        }
-        if (LoginModes[this.loginMode] === 'redirect') {
-            location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
-        }
+    WeixinAuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
+        return __awaiter(this, void 0, void 0, function () {
+            var action, hybridMiniapp;
+            return __generator(this, function (_a) {
+                action = 'auth.getJwt';
+                hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
+                return [2, this._request.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
+                        if (res.code) {
+                            throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);
+                        }
+                        if (res.refresh_token) {
+                            return {
+                                refreshToken: res.refresh_token,
+                                accessToken: res.access_token,
+                                accessTokenExpire: res.access_token_expire
+                            };
+                        }
+                        else {
+                            throw new Error("[tcb-js-sdk] getJwt\u672A\u8FD4\u56DErefreshToken");
+                        }
+                    })];
+            });
+        });
     };
     return WeixinAuthProvider;
 }(base_1.AuthProvider));

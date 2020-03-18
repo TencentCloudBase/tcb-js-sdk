@@ -1,8 +1,9 @@
 import { WeixinAuthProvider } from './weixinAuthProvider';
 import { AnonymousAuthProvider } from './anonymousAuthProvider';
-import { AuthProvider, LOGINTYPE } from './base';
+import { LOGINTYPE } from './base';
 import { LoginResult } from './interface';
 import { Config } from '../types';
+import { CustomAuthProvider } from './customAuthProvider';
 export interface UserInfo {
     openid: string;
     nickname?: string;
@@ -14,37 +15,36 @@ export interface UserInfo {
     privilege?: [string];
     unionid?: string;
 }
-export declare class Auth extends AuthProvider {
-    config: Config;
-    customAuthProvider: AuthProvider;
-    _shouldRefreshAccessToken: Function;
-    _anonymousAuthProvider: AnonymousAuthProvider;
+export declare class Auth {
+    private config;
+    private _cache;
+    private _request;
+    private _anonymousAuthProvider;
     constructor(config: Config);
     get loginType(): LOGINTYPE;
-    weixinAuthProvider({ appid, scope, loginMode, state }: {
+    weixinAuthProvider({ appid, scope, state }: {
         appid: any;
         scope: any;
-        loginMode: any;
         state: any;
     }): WeixinAuthProvider;
-    signInAnonymously(): Promise<{
-        credential: {
-            refreshToken: any;
-        };
-    }>;
+    anonymousAuthProvider(): AnonymousAuthProvider;
+    customAuthProvider(): CustomAuthProvider;
     linkAndRetrieveDataWithTicket(ticket: string): Promise<{
         credential: {
             refreshToken: any;
         };
     }>;
     signOut(): Promise<any>;
+    onLoginStateChanged(callback: any): void;
+    onLoginStateExpired(callback: any): void;
+    onAccessTokenRefreshed(callback: any): void;
+    onAnonymousConverted(callback: any): void;
+    onLoginTypeChanged(callback: any): void;
     getAccessToken(): Promise<{
         accessToken: string;
         env: string;
     }>;
-    onLoginStateExpire(callback: Function): void;
-    getLoginState(): Promise<LoginResult>;
-    signInWithTicket(ticket: string): Promise<LoginResult>;
+    getLoginState(): LoginResult;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
     getAuthHeader(): {

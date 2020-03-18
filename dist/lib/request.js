@@ -205,13 +205,13 @@ var IRequest = (function () {
                         if (response.data.code) {
                             code = response.data.code;
                             if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
-                                events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRE);
+                                events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRED);
                                 this._cache.removeStore(refreshTokenKey);
                             }
                             throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
                         }
                         if (response.data.access_token) {
-                            events_1.activateEvent(events_1.EVENTS.REFRESH_ACCESS_TOKEN);
+                            events_1.activateEvent(events_1.EVENTS.ACCESS_TOKEN_REFRESHD);
                             this._cache.setStore(accessTokenKey, response.data.access_token);
                             this._cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());
                             return [2, {

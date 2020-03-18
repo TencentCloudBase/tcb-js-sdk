@@ -177,13 +177,13 @@ class IRequest {
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
-        activateEvent(EVENTS.LOGIN_STATE_EXPIRE);
+        activateEvent(EVENTS.LOGIN_STATE_EXPIRED);
         this._cache.removeStore(refreshTokenKey);
       }
       throw new Error(`[tcb-js-sdk] 刷新access token失败：${response.data.code}`);
     }
     if (response.data.access_token) {
-      activateEvent(EVENTS.REFRESH_ACCESS_TOKEN);
+      activateEvent(EVENTS.ACCESS_TOKEN_REFRESHD);
       this._cache.setStore(accessTokenKey, response.data.access_token);
       // 本地时间可能没有同步
       this._cache.setStore(accessTokenExpireKey, response.data.access_token_expire + Date.now());

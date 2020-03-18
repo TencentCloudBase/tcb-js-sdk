@@ -20,8 +20,8 @@ export declare function activateEvent(event: string, data?: any): void;
 export declare function removeEventListener(event: string, callback: Function): void;
 export declare const EVENTS: {
     LOGIN_STATE_CHANGED: string;
-    LOGIN_STATE_EXPIRE: string;
+    LOGIN_STATE_EXPIRED: string;
     LOGIN_TYPE_CHANGED: string;
     ANONYMOUS_CONVERTED: string;
-    REFRESH_ACCESS_TOKEN: string;
+    ACCESS_TOKEN_REFRESHD: string;
 };

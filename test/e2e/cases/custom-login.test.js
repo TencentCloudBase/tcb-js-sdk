@@ -1,5 +1,20 @@
 /* eslint-disable max-nested-callbacks */
 const axios = require('axios');
+beforeEach(async () => {
+  const { data: { ticket }} = await axios.get('http://service-m1w79cyz-1257776809.ap-shanghai.apigateway.myqcloud.com/release/');
+  // await sleep(3600 * 1000);
+  const refreshToken = await page.evaluate((ticket) => {
+    app = window.tcb.init({
+      env: 'starkwang-e850e3'
+    });
+
+    return app.auth({ persistence: 'local' }).customAuthProvider().signIn(ticket).then(() => {
+      return window.localStorage['refresh_token_starkwang-e850e3'];
+    });
+  }, ticket);
+
+  expect(refreshToken).toBeDefined();
+});
 describe('鉴权', () => {
   it('自定义登录后应该有access token', async () => {
     const result = await page.evaluate(() => {
@@ -52,7 +67,7 @@ describe('鉴权', () => {
         env: 'starkwang-e850e3'
       });
 
-      return app.auth({ persistence: 'local' }).signInWithTicket(ticket).then(() => {
+      return app.auth({ persistence: 'local' }).customAuthProvider().signIn(ticket).then(() => {
         return window.localStorage['refresh_token_starkwang-e850e3'];
       });
     }, ticket);

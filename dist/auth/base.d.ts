@@ -12,10 +12,5 @@ export declare class AuthProvider {
     protected readonly _cache: ICache;
     protected readonly _request: IRequest;
     constructor(config: Config);
-    setRefreshToken(refreshToken: any): void;
-    getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{
-        refreshToken: string;
-        accessToken: string;
-        accessTokenExpire: number;
-    }>;
+    protected setRefreshToken(refreshToken: any): void;
 }

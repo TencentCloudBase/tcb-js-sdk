@@ -1,9 +1,12 @@
 import { WeixinAuthProvider } from './weixinAuthProvider';
 import { AnonymousAuthProvider } from './anonymousAuthProvider';
-import { AuthProvider, LOGINTYPE } from './base';
+import { LOGINTYPE } from './base';
+import { ICache, getCache } from '../lib/cache';
+import { IRequest, getRequestByEnvId } from '../lib/request';
 import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
+import { CustomAuthProvider } from './customAuthProvider';
 
 export interface UserInfo {
   openid: string;
@@ -17,16 +20,16 @@ export interface UserInfo {
   unionid?: string;
 }
 
-export class Auth extends AuthProvider {
-  config: Config;
-  customAuthProvider: AuthProvider
-  _shouldRefreshAccessToken: Function
-  _anonymousAuthProvider: AnonymousAuthProvider
+export class Auth {
+  private config: Config;
+  private _cache: ICache
+  private _request: IRequest;
+  private _anonymousAuthProvider: AnonymousAuthProvider
 
   constructor(config: Config) {
-    super(config);
     this.config = config;
-    this.customAuthProvider = new AuthProvider(this.config);
+    this._cache = getCache(config.env);
+    this._request = getRequestByEnvId(config.env);
     this._onAnonymousConverted = this._onAnonymousConverted.bind(this);
     this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
 
@@ -37,16 +40,20 @@ export class Auth extends AuthProvider {
     return this._cache.getStore(this._cache.keys.loginTypeKey);
   }
 
-  weixinAuthProvider({ appid, scope, loginMode, state }) {
-    return new WeixinAuthProvider(this.config, appid, scope, loginMode, state);
+  weixinAuthProvider({ appid, scope, state }) {
+    return new WeixinAuthProvider(this.config, appid, scope, state);
+  }
+
+  anonymousAuthProvider() {
+    return new AnonymousAuthProvider(this.config);
+  }
+
+  customAuthProvider() {
+    return new CustomAuthProvider(this.config);
   }
 
   async signInAnonymously() {
-    if (!this._anonymousAuthProvider) {
-      this._anonymousAuthProvider = new AnonymousAuthProvider(this.config);
-    }
-    const result = await this._anonymousAuthProvider.signIn();
-    return result;
+    return new AnonymousAuthProvider(this.config).signIn();
   }
 
   async linkAndRetrieveDataWithTicket(ticket: string) {
@@ -83,6 +90,22 @@ export class Auth extends AuthProvider {
     return res;
   }
 
+  onLoginStateChanged(callback) {
+    addEventListener(EVENTS.LOGIN_STATE_CHANGED, callback);
+  }
+  onLoginStateExpired(callback) {
+    addEventListener(EVENTS.LOGIN_STATE_EXPIRED, callback);
+  }
+  onAccessTokenRefreshed(callback) {
+    addEventListener(EVENTS.ACCESS_TOKEN_REFRESHD, callback);
+  }
+  onAnonymousConverted(callback) {
+    addEventListener(EVENTS.ANONYMOUS_CONVERTED, callback);
+  }
+  onLoginTypeChanged(callback) {
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, callback);
+  }
+
   async getAccessToken() {
     return {
       accessToken: (await this._request.getAccessToken()).accessToken,
@@ -90,19 +113,12 @@ export class Auth extends AuthProvider {
     };
   }
 
-  onLoginStateExpire(callback: Function) {
-    addEventListener('loginStateExpire', callback);
-  }
-
-  async getLoginState(): Promise<LoginResult> {
-    const { refreshTokenKey, accessTokenKey } = this._cache.keys;
+  getLoginState(): LoginResult {
+    const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this._cache.keys;
     const refreshToken = this._cache.getStore(refreshTokenKey);
-    if (refreshToken) {
-      try {
-        await this._request.refreshAccessToken();
-      } catch (e) {
-        return null;
-      }
+    const accessToken = this._cache.getStore(accessTokenKey);
+    const accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+    if (accessToken && accessTokenExpire > new Date().getTime()) {
       return {
         isAnonymous: this.loginType === LOGINTYPE.ANONYMOUS,
         credential: {
@@ -116,31 +132,7 @@ export class Auth extends AuthProvider {
   }
 
   async signInWithTicket(ticket: string): Promise<LoginResult> {
-    if (typeof ticket !== 'string') {
-      throw new Error('ticket must be a string');
-    }
-    const { refreshTokenKey } = this._cache.keys;
-    const res = await this._request.send('auth.signInWithTicket', {
-      ticket,
-      refresh_token: this._cache.getStore(refreshTokenKey) || ''
-    });
-    if (res.refresh_token) {
-      this.customAuthProvider.setRefreshToken(res.refresh_token);
-      await this._request.refreshAccessToken();
-      activateEvent(EVENTS.LOGIN_STATE_CHANGED);
-      activateEvent(EVENTS.LOGIN_TYPE_CHANGED, {
-        env: this.config.env,
-        loginType: LOGINTYPE.CUSTOM,
-        persistence: this.config.persistence
-      });
-      return {
-        credential: {
-          refreshToken: res.refresh_token
-        }
-      };
-    } else {
-      throw new Error('[tcb-js-sdk] 自定义登录失败');
-    }
+    return new CustomAuthProvider(this.config).signIn(ticket);
   }
 
   shouldRefreshAccessToken(hook) {
@@ -170,23 +162,6 @@ export class Auth extends AuthProvider {
       'x-cloudbase-credentials': accessToken + '/@@/' + refreshToken
     };
   }
-
-  // setAuthCookie() {
-  //   const { env } = this.config;
-  //   const { refreshTokenKey, accessTokenKey } = this._cache.keys;
-  //   const refreshToken = this._cache.getStore(refreshTokenKey);
-  //   const accessToken = this._cache.getStore(accessTokenKey);
-  //   return this._request.post({
-  //     url: `https://cookie.${env}.service.tcloudbase.com`,
-  //     headers: {
-  //       'content-type': 'application/x-www-form-urlencoded'
-  //     },
-  //     withCredentials: true,
-  //     data: {
-  //       credentials: accessToken + '/@@/' + refreshToken
-  //     }
-  //   });
-  // }
 
   private _onAnonymousConverted(ev) {
     const { env } = ev.data;

@@ -102,8 +102,8 @@ function removeEventListener(event, callback) {
 exports.removeEventListener = removeEventListener;
 exports.EVENTS = {
     LOGIN_STATE_CHANGED: 'loginStateChanged',
-    LOGIN_STATE_EXPIRE: 'loginStateExpire',
+    LOGIN_STATE_EXPIRED: 'loginStateExpired',
     LOGIN_TYPE_CHANGED: 'loginTypeChanged',
     ANONYMOUS_CONVERTED: 'anonymousConverted',
-    REFRESH_ACCESS_TOKEN: 'refreshAccessToken'
+    ACCESS_TOKEN_REFRESHD: 'accessTokenRefreshed'
 };

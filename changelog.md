@@ -13,6 +13,25 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.5.0] 2020-03-19
+
+### Added
+
+- 新增 `Auth.customAuthProvider()`，提供自定义登录功能
+- 新增 `Auth.anonymousAuthProvider()`，提供匿名登录功能
+- 新增 `Auth.getAuthHeader()`，用于获取云接入 HTTP 鉴权头部
+- 新增 `Auth.onLoginStateChanged()`，用于订阅登录状态改变
+- 新增 `Auth.onLoginStateExpired()`，用于订阅登录状态过期
+- 新增 `Auth.onAccessTokenRefreshed()`，用于订阅短期令牌刷新
+- 新增 `Auth.onAnonymousConverted()`，用于订阅匿名登录状态转换
+- 新增 `Auth.onLoginTypeChanged()`，用于订阅登录类型变化
+
+### Deprecated
+
+- 废弃 `Auth.on()`，将会在下一个版本被移除
+- 废弃 `Auth.signInAnonymously()`，将会在下一个版本被移除
+- 废弃 `Auth.signInWithTicket()`，将会在下一个版本被移除
+
 ## [1.4.0] 2020-03-16
 
 ### Added

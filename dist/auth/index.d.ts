@@ -29,6 +29,11 @@ export declare class Auth {
     }): WeixinAuthProvider;
     anonymousAuthProvider(): AnonymousAuthProvider;
     customAuthProvider(): CustomAuthProvider;
+    signInAnonymously(): Promise<{
+        credential: {
+            refreshToken: any;
+        };
+    }>;
     linkAndRetrieveDataWithTicket(ticket: string): Promise<{
         credential: {
             refreshToken: any;
@@ -45,6 +50,7 @@ export declare class Auth {
         env: string;
     }>;
     getLoginState(): LoginResult;
+    signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
     getAuthHeader(): {

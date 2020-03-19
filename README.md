@@ -30,7 +30,7 @@ import * as tcb from 'tcb-js-sdk';
 <script src="//imgcache.qq.com/qcloud/tcbjs/${version}/tcb.js">
 ```
 
-> 最新版本与npm保持一致，可在[tcb-js-sdk](https://www.npmjs.com/package/tcb-js-sdk)中的Version一栏中查看。
+> 最新版本与npm保持一致，可在[tcb-js-sdk](https://www.npmjs.com/package/tcb-js-sdk)中的Versions一栏中查看。
 
 ## 快速上手
 

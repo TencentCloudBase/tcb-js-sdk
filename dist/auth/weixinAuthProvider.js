@@ -128,24 +128,41 @@ var WeixinAuthProvider = (function (_super) {
     };
     WeixinAuthProvider.prototype._signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var code;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, accessToken, accessTokenExpire, code;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+                        accessToken = this._cache.getStore(accessTokenKey);
+                        accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+                        if (accessToken) {
+                            if (accessTokenExpire && accessTokenExpire > Date.now()) {
+                                return [2, {
+                                        credential: {
+                                            accessToken: accessToken,
+                                            refreshToken: this._cache.getStore(refreshTokenKey)
+                                        }
+                                    }];
+                            }
+                            else {
+                                this._cache.removeStore(accessTokenKey);
+                                this._cache.removeStore(accessTokenExpireKey);
+                            }
+                        }
                         if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
                             throw new Error('错误的scope类型');
                         }
                         if (!(adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP)) return [3, 2];
                         return [4, util.getMiniAppCode()];
                     case 1:
-                        code = _a.sent();
+                        code = _b.sent();
                         return [3, 3];
                     case 2:
                         code = util.getWeixinCode();
                         if (!code) {
                             return [2, this.redirect()];
                         }
-                        _a.label = 3;
+                        _b.label = 3;
                     case 3: return [2, this._signInWithCode(code)];
                 }
             });

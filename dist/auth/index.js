@@ -80,6 +80,13 @@ var Auth = (function () {
     Auth.prototype.customAuthProvider = function () {
         return new customAuthProvider_1.CustomAuthProvider(this.config);
     };
+    Auth.prototype.signInAnonymously = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, new anonymousAuthProvider_1.AnonymousAuthProvider(this.config).signIn()];
+            });
+        });
+    };
     Auth.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
@@ -177,6 +184,13 @@ var Auth = (function () {
         else {
             return null;
         }
+    };
+    Auth.prototype.signInWithTicket = function (ticket) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, new customAuthProvider_1.CustomAuthProvider(this.config).signIn(ticket)];
+            });
+        });
     };
     Auth.prototype.shouldRefreshAccessToken = function (hook) {
         this._request._shouldRefreshAccessTokenHook = hook.bind(this);

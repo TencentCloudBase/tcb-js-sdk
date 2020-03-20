@@ -49,7 +49,8 @@ export declare class Auth {
         accessToken: string;
         env: string;
     }>;
-    getLoginState(): LoginResult;
+    hasLoginState(): LoginResult;
+    getLoginState(): Promise<LoginResult>;
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;

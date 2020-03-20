@@ -113,7 +113,7 @@ export class Auth {
     };
   }
 
-  getLoginState(): LoginResult {
+  hasLoginState(): LoginResult {
     const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this._cache.keys;
     const refreshToken = this._cache.getStore(refreshTokenKey);
     const accessToken = this._cache.getStore(accessTokenKey);
@@ -129,6 +129,10 @@ export class Auth {
     } else {
       return null;
     }
+  }
+
+  getLoginState() {
+    return Promise.resolve(this.hasLoginState());
   }
 
   async signInWithTicket(ticket: string): Promise<LoginResult> {

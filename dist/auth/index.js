@@ -167,7 +167,7 @@ var Auth = (function () {
             });
         });
     };
-    Auth.prototype.getLoginState = function () {
+    Auth.prototype.hasLoginState = function () {
         var _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
         var refreshToken = this._cache.getStore(refreshTokenKey);
         var accessToken = this._cache.getStore(accessTokenKey);
@@ -184,6 +184,9 @@ var Auth = (function () {
         else {
             return null;
         }
+    };
+    Auth.prototype.getLoginState = function () {
+        return Promise.resolve(this.hasLoginState());
     };
     Auth.prototype.signInWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {

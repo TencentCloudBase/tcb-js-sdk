@@ -17,7 +17,7 @@ exports.callFunction = function (_a, callback) {
     }
     var action = 'functions.invokeFunction';
     var params = {
-        query: query,
+        inQuery: query,
         parse: parse,
         search: search,
         function_name: name,

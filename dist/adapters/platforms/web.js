@@ -128,7 +128,7 @@ var WebRequest = (function (_super) {
             var timer;
             ajax.onreadystatechange = function () {
                 var result = {};
-                if (ajax.readyState === ajax.HEADERS_RECEIVED) {
+                if (ajax.readyState === 4) {
                     var headers_1 = ajax.getAllResponseHeaders();
                     var arr = headers_1.trim().split(/[\r\n]+/);
                     var headerMap_1 = {};
@@ -139,8 +139,6 @@ var WebRequest = (function (_super) {
                         headerMap_1[header] = value;
                     });
                     result.header = headerMap_1;
-                }
-                if (ajax.readyState === 4) {
                     result.statusCode = ajax.status;
                     try {
                         result.data = JSON.parse(ajax.responseText);

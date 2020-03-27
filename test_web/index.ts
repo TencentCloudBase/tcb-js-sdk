@@ -8,12 +8,13 @@ import {
 } from './storage';
 import { test_database } from './database';
 import { runAllTestCases, runSelectedTestCase } from './util';
-import tcb from '../dist/index';
+// import tcb from '../dist/index';
+import tcb from '../src';
 // import { test_ext_ci } from './ext_ci';
 // 默认情况下不测试登录
 // import { test_auth } from './auth';
 
-import * as extCi from '@cloudbase/extension-ci';
+// import * as extCi from '@cloudbase/extension-ci';
 
 let app;
 const appid = 'wxacfb81f2ced64e70';
@@ -35,7 +36,7 @@ let init = async function() {
     // env: 'luke-3de127'
   });
 
-  app.registerExtension(extCi);
+  // app.registerExtension(extCi);
 
   // await test_auth(app, appid);
 

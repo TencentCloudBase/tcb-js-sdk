@@ -13,7 +13,7 @@ import {
   IUploadRequestOptions,
   IRequestConfig
 } from '@cloudbase/adapter-interface';
-import { ICache, getCache } from './cache';
+import { ICache, getCache, getLocalCache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { genSeqId, isFormData, formatUrl, createSign } from './util';
 import { Adapter, RUNTIME } from '../adapters';
@@ -103,6 +103,8 @@ class IRequest {
   _reqClass: SDKRequestInterface;
 
   private _cache: ICache;
+  // 持久化本地存储
+  private _localCache: ICache;
   /**
    * 初始化
    * @param config
@@ -116,6 +118,7 @@ class IRequest {
       restrictedMethods: ['post']
     });
     this._cache = getCache(this.config.env);
+    this._localCache = getLocalCache(this.config.env);
     bindHooks(this._reqClass, 'post', [beforeEach]);
     bindHooks(this._reqClass, 'upload', [beforeEach]);
     bindHooks(this._reqClass, 'download', [beforeEach]);
@@ -226,7 +229,9 @@ class IRequest {
     }
   }
 
+  /* eslint-disable complexity */
   async request(action, params, options?) {
+    const tcbTraceKey = `x-tcb-trace_${this.config.env}`;
     let contentType = 'application/x-www-form-urlencoded';
     // const webDeviceId = await getTcbFingerprintId();
     const tmpObj = {
@@ -290,17 +295,22 @@ class IRequest {
       opts.onUploadProgress = options['onUploadProgress'];
     }
 
+    const traceHeader = this._localCache.getStore(tcbTraceKey);
+    if (traceHeader) {
+      opts.headers['X-TCB-Trace'] = traceHeader;
+    }
+
     // 发出请求
     // 新的 url 需要携带 env 参数进行 CORS 校验
     // 请求链接支持添加动态 query 参数，方便用户调试定位请求
-    const { parse, query, search } = params;
+    const { parse, inQuery, search } = params;
     let formatQuery: Record<string, any> = {
       env: this.config.env
     };
     // 尝试解析响应数据为 JSON
     parse && (formatQuery.parse = true);
-    query && (formatQuery = {
-      ...query,
+    inQuery && (formatQuery = {
+      ...inQuery,
       ...formatQuery
     });
     // 生成请求 url
@@ -315,6 +325,12 @@ class IRequest {
       data: payload,
       ...opts
     });
+
+    // 保存 trace header
+    const resTraceHeader = res.header && res.header['x-tcb-trace'];
+    if (resTraceHeader) {
+      this._localCache.setStore(tcbTraceKey, resTraceHeader);
+    }
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
       throw new Error('network request error');

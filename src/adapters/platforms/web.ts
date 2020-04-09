@@ -103,7 +103,7 @@ class WebRequest extends AbstractSDKRequest {
       let timer;
       ajax.onreadystatechange = () => {
         const result: ResponseObject = {};
-        if (ajax.readyState === ajax.HEADERS_RECEIVED) {
+        if (ajax.readyState === 4) {
           let headers = ajax.getAllResponseHeaders();
           let arr = headers.trim().split(/[\r\n]+/);
           // Create a map of header names to values
@@ -115,8 +115,6 @@ class WebRequest extends AbstractSDKRequest {
             headerMap[header] = value;
           });
           result.header = headerMap;
-        }
-        if (ajax.readyState === 4) {
           result.statusCode = ajax.status;
           try {
             // 上传post请求返回数据格式为xml，此处容错

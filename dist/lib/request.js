@@ -105,6 +105,7 @@ var IRequest = (function () {
             restrictedMethods: ['post']
         });
         this._cache = cache_1.getCache(this.config.env);
+        this._localCache = cache_1.getLocalCache(this.config.env);
         bindHooks(this._reqClass, 'post', [beforeEach]);
         bindHooks(this._reqClass, 'upload', [beforeEach]);
         bindHooks(this._reqClass, 'download', [beforeEach]);
@@ -265,10 +266,11 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, parse, query, search, formatQuery, newUrl, res;
+            var tcbTraceKey, contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
+                        tcbTraceKey = "x-tcb-trace_" + this.config.env;
                         contentType = 'application/x-www-form-urlencoded';
                         tmpObj = __assign({ action: action,
                             dataVersion: types_1.dataVersion, env: this.config.env }, params);
@@ -320,12 +322,16 @@ var IRequest = (function () {
                         if (options && options['onUploadProgress']) {
                             opts.onUploadProgress = options['onUploadProgress'];
                         }
-                        parse = params.parse, query = params.query, search = params.search;
+                        traceHeader = this._localCache.getStore(tcbTraceKey);
+                        if (traceHeader) {
+                            opts.headers['X-TCB-Trace'] = traceHeader;
+                        }
+                        parse = params.parse, inQuery = params.inQuery, search = params.search;
                         formatQuery = {
                             env: this.config.env
                         };
                         parse && (formatQuery.parse = true);
-                        query && (formatQuery = __assign(__assign({}, query), formatQuery));
+                        inQuery && (formatQuery = __assign(__assign({}, inQuery), formatQuery));
                         newUrl = util_1.formatUrl(types_1.protocol, types_1.BASE_URL, formatQuery);
                         if (search) {
                             newUrl += search;
@@ -333,6 +339,10 @@ var IRequest = (function () {
                         return [4, this.post(__assign({ url: newUrl, data: payload }, opts))];
                     case 3:
                         res = _c.sent();
+                        resTraceHeader = res.header && res.header['x-tcb-trace'];
+                        if (resTraceHeader) {
+                            this._localCache.setStore(tcbTraceKey, resTraceHeader);
+                        }
                         if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {
                             throw new Error('network request error');
                         }

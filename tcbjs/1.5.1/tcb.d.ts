@@ -238,5 +238,6 @@ export class ICache {
 }
 function initCache(config: Config): void;
 function getCache(env: string): ICache;
-export { getCache, initCache };
+function getLocalCache(env: string): ICache;
+export { getCache, initCache, getLocalCache };
 

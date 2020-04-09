@@ -13,7 +13,7 @@ import {
   IUploadRequestOptions,
   IRequestConfig
 } from '@cloudbase/adapter-interface';
-import { ICache, getCache } from './cache';
+import { ICache, getCache, getLocalCache } from './cache';
 import { activateEvent, EVENTS } from './events';
 import { genSeqId, isFormData, formatUrl, createSign } from './util';
 import { Adapter, RUNTIME } from '../adapters';
@@ -103,6 +103,8 @@ class IRequest {
   _reqClass: SDKRequestInterface;
 
   private _cache: ICache;
+  // 持久化本地存储
+  private _localCache: ICache;
   /**
    * 初始化
    * @param config
@@ -116,6 +118,7 @@ class IRequest {
       restrictedMethods: ['post']
     });
     this._cache = getCache(this.config.env);
+    this._localCache = getLocalCache(this.config.env);
     bindHooks(this._reqClass, 'post', [beforeEach]);
     bindHooks(this._reqClass, 'upload', [beforeEach]);
     bindHooks(this._reqClass, 'download', [beforeEach]);
@@ -228,6 +231,7 @@ class IRequest {
 
   /* eslint-disable complexity */
   async request(action, params, options?) {
+    const tcbTraceKey = `x-tcb-trace_${this.config.env}`;
     let contentType = 'application/x-www-form-urlencoded';
     // const webDeviceId = await getTcbFingerprintId();
     const tmpObj = {
@@ -291,7 +295,7 @@ class IRequest {
       opts.onUploadProgress = options['onUploadProgress'];
     }
 
-    const traceHeader = this._cache.getStore('x-tcb-trace');
+    const traceHeader = this._localCache.getStore(tcbTraceKey);
     if (traceHeader) {
       opts.headers['X-TCB-Trace'] = traceHeader;
     }
@@ -325,7 +329,7 @@ class IRequest {
     // 保存 trace header
     const resTraceHeader = res.header && res.header['x-tcb-trace'];
     if (resTraceHeader) {
-      this._cache.setStore('x-tcb-trace', resTraceHeader);
+      this._localCache.setStore(tcbTraceKey, resTraceHeader);
     }
 
     if ((Number(res.status) !== 200 && Number(res.statusCode) !== 200) || !res.data) {

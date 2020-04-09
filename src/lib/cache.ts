@@ -1,6 +1,14 @@
 import { StorageInterface, AbstractStorage } from '@cloudbase/adapter-interface';
 import { Adapter } from '../adapters';
-import { Config, ACCESS_TOKEN, ACCESS_TOKEN_Expire, REFRESH_TOKEN, ANONYMOUS_UUID, LOGIN_TYPE_KEY, KV } from '../types';
+import {
+  Config,
+  ACCESS_TOKEN,
+  ACCESS_TOKEN_Expire,
+  REFRESH_TOKEN,
+  ANONYMOUS_UUID,
+  LOGIN_TYPE_KEY,
+  KV
+} from '../types';
 import { isUndefined } from 'util';
 
 /**
@@ -64,6 +72,7 @@ export class ICache {
       const refreshTokenKey = `${REFRESH_TOKEN}_${config.env}`;
       const anonymousUuidKey = `${ANONYMOUS_UUID}_${config.env}`;
       const loginTypeKey = `${LOGIN_TYPE_KEY}_${config.env}`;
+
       this.keys = {
         accessTokenKey,
         accessTokenExpireKey,
@@ -115,9 +124,10 @@ export class ICache {
   }
 
   /*
-  *获取缓存
-  */
-  getStore(key: string, version?: string): any { // forceLocal强制取localstory
+   *获取缓存
+   */
+  getStore(key: string, version?: string): any {
+    // forceLocal强制取localstory
     try {
       //测试用例使用
       if (process && process.env && process.env.tcb_token) {
@@ -147,22 +157,32 @@ export class ICache {
   }
 
   /*
-  *删除缓存
-  */
+   *删除缓存
+   */
   removeStore(key) {
     this._storage.removeItem(key);
   }
 }
 
 const cacheMap: KV<ICache> = {};
+// 本地存储
+const localCacheMap: KV<ICache> = {};
 
 function initCache(config: Config) {
   const { env } = config;
   cacheMap[env] = new ICache(config);
+  localCacheMap[env] = new ICache({
+    ...config,
+    persistence: 'local'
+  });
 }
 
 function getCache(env: string): ICache {
   return cacheMap[env];
 }
 
-export { getCache, initCache };
+function getLocalCache(env: string): ICache {
+  return localCacheMap[env];
+}
+
+export { getCache, initCache, getLocalCache };

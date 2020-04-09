@@ -11,4 +11,5 @@ export declare class ICache {
 }
 declare function initCache(config: Config): void;
 declare function getCache(env: string): ICache;
-export { getCache, initCache };
+declare function getLocalCache(env: string): ICache;
+export { getCache, initCache, getLocalCache };

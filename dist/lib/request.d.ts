@@ -15,6 +15,7 @@ declare class IRequest {
     _refreshAccessTokenPromise: Promise<GetAccessTokenResult> | null;
     _reqClass: SDKRequestInterface;
     private _cache;
+    private _localCache;
     constructor(config?: Config);
     post(options: IRequestOptions): Promise<ResponseObject>;
     upload(options: IUploadRequestOptions): Promise<ResponseObject>;

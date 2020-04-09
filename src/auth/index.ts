@@ -90,20 +90,29 @@ export class Auth {
     return res;
   }
 
-  onLoginStateChanged(callback) {
-    addEventListener(EVENTS.LOGIN_STATE_CHANGED, callback);
+  onLoginStateChanged(callback: Function) {
+    addEventListener(EVENTS.LOGIN_STATE_CHANGED, () => {
+      const loginState = this.hasLoginState();
+      callback.call(this, loginState);
+    });
+    // 立刻执行一次回调
+    const loginState = this.hasLoginState();
+    callback.call(this, loginState);
   }
-  onLoginStateExpired(callback) {
-    addEventListener(EVENTS.LOGIN_STATE_EXPIRED, callback);
+  onLoginStateExpired(callback: Function) {
+    addEventListener(EVENTS.LOGIN_STATE_EXPIRED, callback.bind(this));
   }
-  onAccessTokenRefreshed(callback) {
-    addEventListener(EVENTS.ACCESS_TOKEN_REFRESHD, callback);
+  onAccessTokenRefreshed(callback: Function) {
+    addEventListener(EVENTS.ACCESS_TOKEN_REFRESHD, callback.bind(this));
   }
-  onAnonymousConverted(callback) {
-    addEventListener(EVENTS.ANONYMOUS_CONVERTED, callback);
+  onAnonymousConverted(callback: Function) {
+    addEventListener(EVENTS.ANONYMOUS_CONVERTED, callback.bind(this));
   }
-  onLoginTypeChanged(callback) {
-    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, callback);
+  onLoginTypeChanged(callback: Function) {
+    addEventListener(EVENTS.LOGIN_TYPE_CHANGED, () => {
+      const loginState = this.hasLoginState();
+      callback.call(this, loginState);
+    });
   }
 
   async getAccessToken() {

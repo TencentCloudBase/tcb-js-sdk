@@ -138,19 +138,29 @@ var Auth = (function () {
         });
     };
     Auth.prototype.onLoginStateChanged = function (callback) {
-        events_1.addEventListener(events_1.EVENTS.LOGIN_STATE_CHANGED, callback);
+        var _this = this;
+        events_1.addEventListener(events_1.EVENTS.LOGIN_STATE_CHANGED, function () {
+            var loginState = _this.hasLoginState();
+            callback.call(_this, loginState);
+        });
+        var loginState = this.hasLoginState();
+        callback.call(this, loginState);
     };
     Auth.prototype.onLoginStateExpired = function (callback) {
-        events_1.addEventListener(events_1.EVENTS.LOGIN_STATE_EXPIRED, callback);
+        events_1.addEventListener(events_1.EVENTS.LOGIN_STATE_EXPIRED, callback.bind(this));
     };
     Auth.prototype.onAccessTokenRefreshed = function (callback) {
-        events_1.addEventListener(events_1.EVENTS.ACCESS_TOKEN_REFRESHD, callback);
+        events_1.addEventListener(events_1.EVENTS.ACCESS_TOKEN_REFRESHD, callback.bind(this));
     };
     Auth.prototype.onAnonymousConverted = function (callback) {
-        events_1.addEventListener(events_1.EVENTS.ANONYMOUS_CONVERTED, callback);
+        events_1.addEventListener(events_1.EVENTS.ANONYMOUS_CONVERTED, callback.bind(this));
     };
     Auth.prototype.onLoginTypeChanged = function (callback) {
-        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, callback);
+        var _this = this;
+        events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, function () {
+            var loginState = _this.hasLoginState();
+            callback.call(_this, loginState);
+        });
     };
     Auth.prototype.getAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {

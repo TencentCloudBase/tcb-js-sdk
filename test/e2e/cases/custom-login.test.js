@@ -53,6 +53,19 @@ describe('鉴权', () => {
     expect(result).toBeDefined();
     expect(result.code).toBeUndefined();
   });
+  it('onLoginStateChanged在绑定事件时立即触发', async () => {
+    const page = global.page;
+    let result = await page.evaluate(() => {
+      return new Promise(resolve => {
+        app.auth().onLoginStateChanged(loginState => {
+          resolve(loginState);
+        });
+      });
+    });
+    expect(result).toBeDefined();
+    expect(result.isAnonymous).toBeFalsy();
+    expect(result.credential).toBeDefined();
+  });
   it('重复登录，之前的refresh token应该失效', async () => {
     const page = global.page;
     const oldRefreshToken = await page.evaluate(() => {

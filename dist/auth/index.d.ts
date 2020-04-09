@@ -40,11 +40,11 @@ export declare class Auth {
         };
     }>;
     signOut(): Promise<any>;
-    onLoginStateChanged(callback: any): void;
-    onLoginStateExpired(callback: any): void;
-    onAccessTokenRefreshed(callback: any): void;
-    onAnonymousConverted(callback: any): void;
-    onLoginTypeChanged(callback: any): void;
+    onLoginStateChanged(callback: Function): void;
+    onLoginStateExpired(callback: Function): void;
+    onAccessTokenRefreshed(callback: Function): void;
+    onAnonymousConverted(callback: Function): void;
+    onLoginTypeChanged(callback: Function): void;
     getAccessToken(): Promise<{
         accessToken: string;
         env: string;

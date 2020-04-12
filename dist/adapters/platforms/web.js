@@ -117,7 +117,7 @@ var WebRequest = (function (_super) {
         if (enableAbort === void 0) { enableAbort = false; }
         var method = (String(options.method)).toLowerCase() || 'get';
         return new Promise(function (resolve) {
-            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType, withCredentials = options.withCredentials, body = options.body;
+            var url = options.url, _a = options.headers, headers = _a === void 0 ? {} : _a, data = options.data, responseType = options.responseType, withCredentials = options.withCredentials, body = options.body, onUploadProgress = options.onUploadProgress;
             var realUrl = util_1.formatUrl(types_1.protocol, url, method === 'get' ? data : {});
             var ajax = new XMLHttpRequest();
             ajax.open(method, realUrl);
@@ -126,6 +126,9 @@ var WebRequest = (function (_super) {
                 ajax.setRequestHeader(key, headers[key]);
             }
             var timer;
+            if (onUploadProgress) {
+                ajax.addEventListener('progress', onUploadProgress);
+            }
             ajax.onreadystatechange = function () {
                 var result = {};
                 if (ajax.readyState === 4) {

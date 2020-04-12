@@ -92,7 +92,7 @@ class WebRequest extends AbstractSDKRequest {
   protected _request(options: IRequestOptions, enableAbort: boolean = false): Promise<ResponseObject> {
     const method = (String(options.method)).toLowerCase() || 'get';
     return new Promise(resolve => {
-      const { url, headers = {}, data, responseType, withCredentials, body } = options;
+      const { url, headers = {}, data, responseType, withCredentials, body, onUploadProgress } = options;
       const realUrl = formatUrl(protocol, url, method === 'get' ? data : {});
       const ajax = new XMLHttpRequest();
       ajax.open(method, realUrl);
@@ -101,6 +101,9 @@ class WebRequest extends AbstractSDKRequest {
         ajax.setRequestHeader(key, headers[key]);
       }
       let timer;
+      if (onUploadProgress) {
+        ajax.addEventListener('progress', onUploadProgress);
+      }
       ajax.onreadystatechange = () => {
         const result: ResponseObject = {};
         if (ajax.readyState === 4) {

@@ -9,7 +9,7 @@ import {
   LOGIN_TYPE_KEY,
   KV
 } from '../types';
-import { isUndefined } from 'util';
+import { isUndefined, isNull } from './util';
 
 /**
  * @constant 始终存储在localstorage中的key集合
@@ -97,7 +97,7 @@ export class ICache {
         continue;
       }
       const val = this._storage.getItem(name);
-      if (!isUndefined(val)) {
+      if (!isUndefined(val) && !isNull(val)) {
         storage.setItem(name, val);
         this._storage.removeItem(name);
       }

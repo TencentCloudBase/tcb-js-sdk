@@ -8,6 +8,7 @@ export declare const getMiniAppCode: () => Promise<string>;
 export declare function isArray(val: any): boolean;
 export declare function isString(val: any): boolean;
 export declare function isUndefined(val: any): boolean;
+export declare function isNull(val: any): boolean;
 export declare function isInstanceOf(instance: any, construct: any): boolean;
 export declare function isFormData(val: any): boolean;
 export declare function genSeqId(): string;

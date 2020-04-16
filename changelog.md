@@ -13,6 +13,11 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.6.0] 2020-04-16
+- [Changed] `Auth.onLoginStateChanged()` 的回调中，会传入 `LoginState`，并且会在订阅时自动触发一次
+- [Changed] `Auth.onLoginTypeChanged()` 的回调中，会传入 `LoginState`
+- [Fixed] 修复 `uploadFile()` 无法监听进度bug
+
 ## [1.5.0] 2020-03-19
 
 ### Added

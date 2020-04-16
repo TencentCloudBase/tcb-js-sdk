@@ -108,6 +108,10 @@ export function isUndefined(val: any): boolean {
   return typeof val === 'undefined';
 }
 
+export function isNull(val: any): boolean {
+  return Object.prototype.toString.call(val) === '[object Null]';
+}
+
 export function isInstanceOf(instance, construct): boolean {
   return instance instanceof construct;
 }

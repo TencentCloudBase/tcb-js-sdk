@@ -27,7 +27,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var adapter_interface_1 = require("@cloudbase/adapter-interface");
 var adapters_1 = require("../adapters");
 var types_1 = require("../types");
-var util_1 = require("util");
+var util_1 = require("./util");
 var alwaysLocalKeys = ['anonymousUuidKey'];
 var TcbObject = (function (_super) {
     __extends(TcbObject, _super);
@@ -95,7 +95,7 @@ var ICache = (function () {
                 continue;
             }
             var val = this._storage.getItem(name_1);
-            if (!util_1.isUndefined(val)) {
+            if (!util_1.isUndefined(val) && !util_1.isNull(val)) {
                 storage.setItem(name_1, val);
                 this._storage.removeItem(name_1);
             }

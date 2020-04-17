@@ -13,6 +13,9 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.6.1] 2020-04-17
+- [Fixed] 修复 `persistence`取值`'session'` 导致重复匿名登录无法继承本地状态
+
 ## [1.6.0] 2020-04-16
 - [Changed] `Auth.onLoginStateChanged()` 的回调中，会传入 `LoginState`，并且会在订阅时自动触发一次
 - [Changed] `Auth.onLoginTypeChanged()` 的回调中，会传入 `LoginState`

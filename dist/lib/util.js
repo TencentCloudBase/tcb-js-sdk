@@ -91,7 +91,6 @@ function isUndefined(val) {
 exports.isUndefined = isUndefined;
 function isNull(val) {
     return Object.prototype.toString.call(val) === '[object Null]';
-    ;
 }
 exports.isNull = isNull;
 function isInstanceOf(instance, construct) {

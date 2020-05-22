@@ -10,3 +10,4 @@ jest.config.js
 webpack.test.js
 tsconfig.json
 tsconfig.tsbuildinfo
+package-lock.json

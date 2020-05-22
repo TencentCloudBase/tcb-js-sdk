@@ -5,3 +5,4 @@ tcbjs/statistics.html
 .history/
 tcbjs/e2e
 tsconfig.tsbuildinfo
+package-lock.json

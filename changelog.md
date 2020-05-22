@@ -13,6 +13,9 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.6.2] 2020-05-22
+- [Fixed] 兼容chrome 53内核运行环境
+
 ## [1.6.1] 2020-04-17
 - [Fixed] 修复 `persistence`取值`'session'` 导致重复匿名登录无法继承本地状态
 

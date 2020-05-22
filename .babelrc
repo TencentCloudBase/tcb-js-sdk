@@ -4,7 +4,14 @@
         "@babel/plugin-proposal-class-properties"
     ],
     "presets": [
-        "@babel/preset-env",
+        [
+            "@babel/preset-env",
+            {
+                "modules": "commonjs",
+                "useBuiltIns": "usage",
+                "corejs": 3
+            }
+        ],
         "@babel/preset-typescript"
     ]
 }

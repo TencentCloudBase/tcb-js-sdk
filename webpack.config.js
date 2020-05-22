@@ -6,9 +6,9 @@ const Visualizer = require('webpack-visualizer-plugin');
 const modName = 'tcb';
 
 // 合并声明文件plugin
-function DtsBundlePlugin() {}
+function DtsBundlePlugin() { }
 DtsBundlePlugin.prototype.apply = function (compiler) {
-  compiler.plugin('done', function() {
+  compiler.plugin('done', function () {
     if (process.env.NODE_ENV === 'e2e') {
       return;
     }
@@ -46,19 +46,23 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts?$/,
-        exclude: /node_modules/,
-        loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env']
-        }
-      },
-      {
         test: /\.js?$/,
-        include: /node_modules\/@cloudbase\/database/,
+        include: [
+          path.resolve(__dirname, 'dist'),
+          /node_modules\/@cloudbase\/database/
+        ],
         loader: 'babel-loader',
         options: {
-          presets: ['@babel/preset-env']
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                modules: 'commonjs',
+                useBuiltIns: 'usage',
+                corejs: 3
+              }
+            ]
+          ]
         }
       }
     ]

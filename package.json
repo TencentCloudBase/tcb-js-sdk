@@ -47,6 +47,7 @@
     "@types/node": "^10.14.4",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.6",
+    "core-js": "3",
     "dts-bundle": "^0.7.3",
     "eslint": "^5.16.0",
     "eslint-config-alloy": "^1.4.2",
@@ -81,5 +82,11 @@
       "eslint --fix",
       "git add"
     ]
-  }
+  },
+  "browserslist": [
+    "last 2 version",
+    "> 1%",
+    "not dead",
+    "chrome 53"
+  ]
 }

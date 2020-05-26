@@ -84,7 +84,7 @@ export class WeixinAuthProvider extends AuthProvider {
         this._cache.removeStore(accessTokenExpireKey);
       }
     }
-    if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
+    if (!AllowedScopes[this.scope]) {
       throw new Error('错误的scope类型');
     }
 

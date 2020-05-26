@@ -716,10 +716,10 @@
   resolved "https://registry.npmjs.org/@cloudbase/adapter-interface/-/adapter-interface-0.4.0.tgz#c57935b503e7bface4b151df63a87dc564ae9907"
   integrity sha512-vbNQlr4NK5mdsMr3elk4/OdE/opLpZB+8JPTXAQM4/ldcTZtmb1Dnt3T2g9u5LSHDlRjdzyeM5ARvVqUq+2bmw==
 
-"@cloudbase/database@0.9.11-rc.0":
-  version "0.9.11-rc.0"
-  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.11-rc.0.tgz#7afd73388ce9ce672dd5b6d94e6e5708d99143bd"
-  integrity sha512-7OK9ae6ZYc1eVX7dPXiyuH9i8bMcXqGeYEIxztiIyH3W2DVW/b9v7wmztY14Xpj+Vau9SLFBPKxnKCRxVqz+Hg==
+"@cloudbase/database@^0.9.16-beta":
+  version "0.9.16-beta"
+  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.16-beta.tgz#e972b447704df4ff45bdd8a80482a39cd8abaf59"
+  integrity sha512-NDwaRWW/rJC8aF9BkFoK6dBXruHJwSh01NnJeeRHgCaofWuu8uC8mDjEJC6oCtBfJQwX01zizaDnZ4CpjbXVJA==
   dependencies:
     bson "^4.0.2"
     lodash.clonedeep "4.5.0"

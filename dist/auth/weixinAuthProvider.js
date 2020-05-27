@@ -149,7 +149,7 @@ var WeixinAuthProvider = (function (_super) {
                                 this._cache.removeStore(accessTokenExpireKey);
                             }
                         }
-                        if (Object.values(AllowedScopes).includes(AllowedScopes[this.scope]) === false) {
+                        if (!AllowedScopes[this.scope]) {
                             throw new Error('错误的scope类型');
                         }
                         if (!(adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP)) return [3, 2];

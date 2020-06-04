@@ -40,6 +40,7 @@ export const ACCESS_TOKEN_Expire = 'access_token_expire';
 export const REFRESH_TOKEN = 'refresh_token';
 export const ANONYMOUS_UUID = 'anonymous_uuid';
 export const LOGIN_TYPE_KEY = 'login_type';
+export const USER_INFO_KEY = 'user_info';
 
 export const protocol = typeof location !== 'undefined' && location.protocol === 'http:' ? 'http:' : 'https:';
 // debug

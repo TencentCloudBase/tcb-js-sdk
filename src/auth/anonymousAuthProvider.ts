@@ -1,5 +1,6 @@
 import { AuthProvider, LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
+import { LoginState } from './index';
 
 export class AnonymousAuthProvider extends AuthProvider {
   public async signIn() {
@@ -24,11 +25,9 @@ export class AnonymousAuthProvider extends AuthProvider {
         loginType: LOGINTYPE.ANONYMOUS,
         persistence: 'local'
       });
-      return {
-        credential: {
-          refreshToken: res.refresh_token
-        }
-      };
+      const loginState = new LoginState(this.config.env);
+      await loginState.user.refresh();
+      return loginState;
     } else {
       throw new Error('[tcb-js-sdk] 匿名登录失败');
     }

@@ -64,7 +64,6 @@ function createStorage(persistence, adapter) {
 }
 var ICache = (function () {
     function ICache(config) {
-        this.keys = {};
         if (!this._storage) {
             this._persistence = adapters_1.Adapter.adapter.primaryStorage || config.persistence;
             this._storage = createStorage(this._persistence, adapters_1.Adapter.adapter);
@@ -73,12 +72,14 @@ var ICache = (function () {
             var refreshTokenKey = types_1.REFRESH_TOKEN + "_" + config.env;
             var anonymousUuidKey = types_1.ANONYMOUS_UUID + "_" + config.env;
             var loginTypeKey = types_1.LOGIN_TYPE_KEY + "_" + config.env;
+            var userInfoKey = types_1.USER_INFO_KEY + "_" + config.env;
             this.keys = {
                 accessTokenKey: accessTokenKey,
                 accessTokenExpireKey: accessTokenExpireKey,
                 refreshTokenKey: refreshTokenKey,
                 anonymousUuidKey: anonymousUuidKey,
-                loginTypeKey: loginTypeKey
+                loginTypeKey: loginTypeKey,
+                userInfoKey: userInfoKey
             };
         }
     }

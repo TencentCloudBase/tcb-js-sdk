@@ -27,9 +27,9 @@ module.exports = {
       {
         test: /\.ts?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
+        loader: 'ts-loader',
         options: {
-          presets: ['@babel/preset-env']
+          configFile: 'tsconfig.test_web.json'
         }
       }
     ]

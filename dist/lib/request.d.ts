@@ -25,6 +25,7 @@ declare class IRequest {
     getAccessToken(): Promise<GetAccessTokenResult>;
     request(action: any, params: any, options?: any): Promise<any>;
     send(action: string, data?: any): Promise<any>;
+    private setRefreshToken;
 }
 declare function initRequest(config: Config): void;
 declare function getRequestByEnvId(env: string): IRequest;

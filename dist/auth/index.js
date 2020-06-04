@@ -63,6 +63,13 @@ var Auth = (function () {
         this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
         events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
     }
+    Object.defineProperty(Auth.prototype, "currentUser", {
+        get: function () {
+            return this.hasLoginState().user;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Auth.prototype, "loginType", {
         get: function () {
             return this._cache.getStore(this._cache.keys.loginTypeKey);
@@ -159,6 +166,7 @@ var Auth = (function () {
         var _this = this;
         events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, function () {
             var loginState = _this.hasLoginState();
+            console.log('this.hasLoginState()', _this.hasLoginState());
             callback.call(_this, loginState);
         });
     };
@@ -178,18 +186,11 @@ var Auth = (function () {
         });
     };
     Auth.prototype.hasLoginState = function () {
-        var _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
-        var refreshToken = this._cache.getStore(refreshTokenKey);
+        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
         var accessToken = this._cache.getStore(accessTokenKey);
         var accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
         if (accessToken && accessTokenExpire > new Date().getTime()) {
-            return {
-                isAnonymous: this.loginType === base_1.LOGINTYPE.ANONYMOUS,
-                credential: {
-                    refreshToken: refreshToken,
-                    accessToken: this._cache.getStore(accessTokenKey)
-                }
-            };
+            return new LoginState(this.config.env);
         }
         else {
             return null;
@@ -245,3 +246,204 @@ var Auth = (function () {
     return Auth;
 }());
 exports.Auth = Auth;
+var User = (function () {
+    function User(envId) {
+        if (!envId) {
+            throw new Error('envId is not defined');
+        }
+        this._envId = envId;
+        this._cache = cache_1.getCache(this._envId);
+        this._request = request_1.getRequestByEnvId(this._envId);
+    }
+    Object.defineProperty(User.prototype, "uid", {
+        get: function () {
+            return this.getLocalUserInfo('uid');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "loginType", {
+        get: function () {
+            return this.getLocalUserInfo('loginType');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "openid", {
+        get: function () {
+            return this.getLocalUserInfo('openid');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "unionId", {
+        get: function () {
+            return this.getLocalUserInfo('unionId');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "qqMiniOpenId", {
+        get: function () {
+            return this.getLocalUserInfo('qqMiniOpenId');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "nickName", {
+        get: function () {
+            return this.getLocalUserInfo('nickName');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "gender", {
+        get: function () {
+            return this.getLocalUserInfo('gender');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "avatarUrl", {
+        get: function () {
+            return this.getLocalUserInfo('avatarUrl');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "location", {
+        get: function () {
+            var location = {
+                country: this.getLocalUserInfo('country'),
+                province: this.getLocalUserInfo('province'),
+                city: this.getLocalUserInfo('city')
+            };
+            return location;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    User.prototype.linkWithTicket = function (ticket) {
+        if (typeof ticket !== 'string') {
+            throw new Error('ticket must be string');
+        }
+        return this._request.send('auth.linkWithTicket', { ticket: ticket });
+    };
+    User.prototype.linkWithRedirect = function (provider) {
+        provider.signInWithRedirect();
+    };
+    User.prototype.getLinkedUidList = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, hasPrimaryUid, users;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this._request.send('auth.getLinkedUidList', {})];
+                    case 1:
+                        data = (_a.sent()).data;
+                        hasPrimaryUid = false;
+                        users = data.users;
+                        users.forEach(function (user) {
+                            if (user.wxOpenId && user.wxPublicId) {
+                                hasPrimaryUid = true;
+                            }
+                        });
+                        return [2, {
+                                users: users,
+                                hasPrimaryUid: hasPrimaryUid
+                            }];
+                }
+            });
+        });
+    };
+    User.prototype.setPrimaryUid = function (uid) {
+        return this._request.send('auth.setPrimaryUid', { uid: uid });
+    };
+    User.prototype.unlink = function (platform) {
+        return this._request.send('auth.unlink', { platform: platform });
+    };
+    User.prototype.update = function (userInfo) {
+        return __awaiter(this, void 0, void 0, function () {
+            var nickName, gender, avatarUrl, province, country, city, newUserInfo;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        nickName = userInfo.nickName, gender = userInfo.gender, avatarUrl = userInfo.avatarUrl, province = userInfo.province, country = userInfo.country, city = userInfo.city;
+                        return [4, this._request.send('auth.updateUserInfo', { nickName: nickName, gender: gender, avatarUrl: avatarUrl, province: province, country: country, city: city })];
+                    case 1:
+                        newUserInfo = (_a.sent()).data;
+                        this.setLocalUserInfo(newUserInfo);
+                        return [2];
+                }
+            });
+        });
+    };
+    User.prototype.refresh = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var action, userInfo;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        action = 'auth.getUserInfo';
+                        return [4, this._request.send(action, {})];
+                    case 1:
+                        userInfo = (_a.sent()).data;
+                        this.setLocalUserInfo(userInfo);
+                        return [2, userInfo];
+                }
+            });
+        });
+    };
+    User.prototype.setLocalUserInfo = function (userInfo) {
+        var userInfoKey = this._cache.keys.userInfoKey;
+        this._cache.setStore(userInfoKey, userInfo);
+    };
+    User.prototype.getLocalUserInfo = function (key) {
+        var userInfoKey = this._cache.keys.userInfoKey;
+        var userInfo = this._cache.getStore(userInfoKey);
+        return userInfo[key];
+    };
+    return User;
+}());
+exports.User = User;
+var LoginState = (function () {
+    function LoginState(envId) {
+        if (!envId) {
+            throw new Error('envId is not defined');
+        }
+        this._cache = cache_1.getCache(envId);
+        var _a = this._cache.keys, refreshTokenKey = _a.refreshTokenKey, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+        var refreshToken = this._cache.getStore(refreshTokenKey);
+        var accessToken = this._cache.getStore(accessTokenKey);
+        var accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+        this.credential = {
+            refreshToken: refreshToken,
+            accessToken: accessToken,
+            accessTokenExpire: accessTokenExpire
+        };
+        this.loginType = this._cache.getStore(this._cache.keys.loginTypeKey);
+        this.user = new User(envId);
+    }
+    Object.defineProperty(LoginState.prototype, "isAnonymousAuth", {
+        get: function () {
+            return this.loginType === base_1.LOGINTYPE.ANONYMOUS;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LoginState.prototype, "isCustomAuth", {
+        get: function () {
+            return this.loginType === base_1.LOGINTYPE.CUSTOM;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LoginState.prototype, "isWeixinAuth", {
+        get: function () {
+            return this.loginType === base_1.LOGINTYPE.WECHAT;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return LoginState;
+}());
+exports.LoginState = LoginState;

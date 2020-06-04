@@ -4,23 +4,13 @@ import { LOGINTYPE } from './base';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
-export interface UserInfo {
-    openid: string;
-    nickname?: string;
-    sex?: number;
-    province?: string;
-    city?: string;
-    country?: string;
-    headimgurl?: string;
-    privilege?: [string];
-    unionid?: string;
-}
 export declare class Auth {
     private config;
     private _cache;
     private _request;
     private _anonymousAuthProvider;
     constructor(config: Config);
+    get currentUser(): any;
     get loginType(): LOGINTYPE;
     weixinAuthProvider({ appid, scope, state }: {
         appid: any;
@@ -29,11 +19,7 @@ export declare class Auth {
     }): WeixinAuthProvider;
     anonymousAuthProvider(): AnonymousAuthProvider;
     customAuthProvider(): CustomAuthProvider;
-    signInAnonymously(): Promise<{
-        credential: {
-            refreshToken: any;
-        };
-    }>;
+    signInAnonymously(): Promise<LoginState>;
     linkAndRetrieveDataWithTicket(ticket: string): Promise<{
         credential: {
             refreshToken: any;
@@ -49,8 +35,8 @@ export declare class Auth {
         accessToken: string;
         env: string;
     }>;
-    hasLoginState(): LoginResult;
-    getLoginState(): Promise<LoginResult>;
+    hasLoginState(): LoginState;
+    getLoginState(): Promise<LoginState>;
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
     getUserInfo(): any;
@@ -59,4 +45,45 @@ export declare class Auth {
     };
     private _onAnonymousConverted;
     private _onLoginTypeChanged;
+}
+export declare class User {
+    private _cache;
+    private _request;
+    private _envId;
+    constructor(envId: string);
+    get uid(): string;
+    get loginType(): string;
+    get openid(): string;
+    get unionId(): string;
+    get qqMiniOpenId(): string;
+    get nickName(): string;
+    get gender(): string;
+    get avatarUrl(): string;
+    get location(): {
+        country: any;
+        province: any;
+        city: any;
+    };
+    linkWithTicket(ticket: string): Promise<any>;
+    linkWithRedirect(provider: any): void;
+    getLinkedUidList(): Promise<{
+        users: any;
+        hasPrimaryUid: boolean;
+    }>;
+    setPrimaryUid(uid: any): Promise<any>;
+    unlink(platform: any): Promise<any>;
+    update(userInfo: any): Promise<void>;
+    refresh(): Promise<any>;
+    private setLocalUserInfo;
+    private getLocalUserInfo;
+}
+export declare class LoginState {
+    credential: any;
+    loginType: any;
+    user: any;
+    private _cache;
+    constructor(envId: any);
+    get isAnonymousAuth(): boolean;
+    get isCustomAuth(): boolean;
+    get isWeixinAuth(): boolean;
 }

@@ -13,4 +13,6 @@ export declare class AuthProvider {
     protected readonly _request: IRequest;
     constructor(config: Config);
     protected setRefreshToken(refreshToken: any): void;
+    protected refreshUserInfo(): Promise<any>;
+    protected setLocalUserInfo(userInfo: any): void;
 }

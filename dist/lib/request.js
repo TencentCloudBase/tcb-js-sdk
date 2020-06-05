@@ -57,7 +57,9 @@ var actionsWithoutAccessToken = [
     'auth.getJwt',
     'auth.logout',
     'auth.signInWithTicket',
-    'auth.signInAnonymously'
+    'auth.signInAnonymously',
+    'auth.signIn',
+    'auth.fetchAccessTokenWithRefreshToken'
 ];
 var commonHeader = {
     'X-SDK-Version': types_1.SDK_VERISON
@@ -182,7 +184,7 @@ var IRequest = (function () {
     };
     IRequest.prototype._refreshAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey, refreshToken, params, isAnonymous, response, code;
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey, refreshToken, params, response, code, isAnonymous, anonymous_uuid, refresh_token, res;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -196,21 +198,30 @@ var IRequest = (function () {
                         params = {
                             refresh_token: refreshToken,
                         };
-                        isAnonymous = this._cache.getStore(loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
-                        if (isAnonymous) {
-                            params.anonymous_uuid = this._cache.getStore(anonymousUuidKey);
-                        }
-                        return [4, this.request('auth.getJwt', params)];
+                        return [4, this.request('auth.fetchAccessTokenWithRefreshToken', params)];
                     case 1:
                         response = _b.sent();
-                        if (response.data.code) {
-                            code = response.data.code;
-                            if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
-                                events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRED);
-                                this._cache.removeStore(refreshTokenKey);
-                            }
-                            throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
-                        }
+                        if (!response.data.code) return [3, 5];
+                        code = response.data.code;
+                        if (!(code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN')) return [3, 4];
+                        isAnonymous = this._cache.getStore(loginTypeKey) === base_1.LOGINTYPE.ANONYMOUS;
+                        if (!(isAnonymous && code === 'INVALID_REFRESH_TOKEN')) return [3, 3];
+                        anonymous_uuid = this._cache.getStore(anonymousUuidKey);
+                        refresh_token = this._cache.getStore(refreshTokenKey);
+                        return [4, this.send('auth.signInAnonymously', {
+                                anonymous_uuid: anonymous_uuid,
+                                refresh_token: refresh_token
+                            })];
+                    case 2:
+                        res = _b.sent();
+                        this.setRefreshToken(res.refresh_token);
+                        return [2, this._refreshAccessToken()];
+                    case 3:
+                        events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRED);
+                        this._cache.removeStore(refreshTokenKey);
+                        _b.label = 4;
+                    case 4: throw new Error("[tcb-js-sdk] \u5237\u65B0access token\u5931\u8D25\uFF1A" + response.data.code);
+                    case 5:
                         if (response.data.access_token) {
                             events_1.activateEvent(events_1.EVENTS.ACCESS_TOKEN_REFRESHD);
                             this._cache.setStore(accessTokenKey, response.data.access_token);
@@ -379,6 +390,12 @@ var IRequest = (function () {
                 }
             });
         });
+    };
+    IRequest.prototype.setRefreshToken = function (refreshToken) {
+        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+        this._cache.removeStore(accessTokenKey);
+        this._cache.removeStore(accessTokenExpireKey);
+        this._cache.setStore(refreshTokenKey, refreshToken);
     };
     return IRequest;
 }());

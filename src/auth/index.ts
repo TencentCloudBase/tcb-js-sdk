@@ -8,17 +8,17 @@ import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
 
-export interface UserInfo {
-  openid: string;
-  nickname?: string;
-  sex?: number;
-  province?: string;
-  city?: string;
-  country?: string;
-  headimgurl?: string;
-  privilege?: [string];
-  unionid?: string;
-}
+// export interface UserInfo {
+//   openid: string;
+//   nickname?: string;
+//   sex?: number;
+//   province?: string;
+//   city?: string;
+//   country?: string;
+//   headimgurl?: string;
+//   privilege?: [string];
+//   unionid?: string;
+// }
 
 export class Auth {
   private config: Config;
@@ -34,6 +34,10 @@ export class Auth {
     this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this);
 
     addEventListener(EVENTS.LOGIN_TYPE_CHANGED, this._onLoginTypeChanged);
+  }
+
+  get currentUser() {
+    return this.hasLoginState().user;
   }
 
   get loginType(): LOGINTYPE {
@@ -122,19 +126,13 @@ export class Auth {
     };
   }
 
-  hasLoginState(): LoginResult {
-    const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this._cache.keys;
-    const refreshToken = this._cache.getStore(refreshTokenKey);
+  hasLoginState(): LoginState {
+    const { accessTokenKey, accessTokenExpireKey, } = this._cache.keys;
     const accessToken = this._cache.getStore(accessTokenKey);
     const accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+    // todo: 使用refresh token来判断
     if (accessToken && accessTokenExpire > new Date().getTime()) {
-      return {
-        isAnonymous: this.loginType === LOGINTYPE.ANONYMOUS,
-        credential: {
-          refreshToken,
-          accessToken: this._cache.getStore(accessTokenKey)
-        }
-      };
+      return new LoginState(this.config.env);
     } else {
       return null;
     }
@@ -194,5 +192,162 @@ export class Auth {
     // 登录态转变后迁移cache，防止在匿名登录状态下cache混用
     this._cache.updatePersistence(persistence);
     this._cache.setStore(this._cache.keys.loginTypeKey, loginType);
+  }
+}
+
+
+export class User {
+  private _cache: ICache;
+  private _request: IRequest;
+  private _envId: string;
+
+  constructor(envId: string) {
+    if (!envId) {
+      throw new Error('envId is not defined');
+    }
+    this._envId = envId;
+    this._cache = getCache(this._envId);
+    this._request = getRequestByEnvId(this._envId);
+  }
+
+  get uid(): string {
+    return this.getLocalUserInfo('uid');
+  }
+
+  get loginType(): string {
+    return this.getLocalUserInfo('loginType');
+  }
+
+  get openid(): string {
+    return this.getLocalUserInfo('openid');
+  }
+
+  get unionId(): string {
+    return this.getLocalUserInfo('unionId');
+  }
+
+  get qqMiniOpenId(): string {
+    return this.getLocalUserInfo('qqMiniOpenId');
+  }
+
+  get nickName(): string {
+    return this.getLocalUserInfo('nickName');
+  }
+
+  get gender(): string {
+    return this.getLocalUserInfo('gender');
+  }
+
+  get avatarUrl(): string {
+    return this.getLocalUserInfo('avatarUrl');
+  }
+
+  get location() {
+    const location = {
+      country: this.getLocalUserInfo('country'),
+      province: this.getLocalUserInfo('province'),
+      city: this.getLocalUserInfo('city')
+    };
+    return location;
+  }
+
+  linkWithTicket(ticket: string) {
+    if (typeof ticket !== 'string') {
+      throw new Error('ticket must be string');
+    }
+    return this._request.send('auth.linkWithTicket', { ticket });
+  }
+
+  linkWithRedirect(provider) {
+    provider.signInWithRedirect();
+  }
+
+
+  async getLinkedUidList() {
+    const { data } = await this._request.send('auth.getLinkedUidList', {});
+    let hasPrimaryUid = false;
+    const { users } = data;
+    users.forEach(user => {
+      if (user.wxOpenId && user.wxPublicId) {
+        hasPrimaryUid = true;
+      }
+    });
+    return {
+      users,
+      hasPrimaryUid
+    };
+  }
+
+  setPrimaryUid(uid) {
+    return this._request.send('auth.setPrimaryUid', { uid });
+  }
+
+  unlink(platform) {
+    return this._request.send('auth.unlink', { platform });
+  }
+
+  async update(userInfo) {
+    const { nickName, gender, avatarUrl, province, country, city } = userInfo;
+    const { data: newUserInfo } = await this._request.send('auth.updateUserInfo', { nickName, gender, avatarUrl, province, country, city });
+    this.setLocalUserInfo(newUserInfo);
+  }
+
+  async refresh() {
+    const action = 'auth.getUserInfo';
+    const { data: userInfo } = await this._request.send(action, {});
+    this.setLocalUserInfo(userInfo);
+    return userInfo;
+  }
+
+  private setLocalUserInfo(userInfo) {
+    const { userInfoKey } = this._cache.keys;
+    this._cache.setStore(userInfoKey, userInfo);
+  }
+
+  private getLocalUserInfo(key) {
+    const { userInfoKey } = this._cache.keys;
+    const userInfo = this._cache.getStore(userInfoKey);
+    return userInfo[key];
+  }
+}
+
+export class LoginState {
+  public credential;
+  public loginType;
+  public user;
+  private _cache: ICache;
+  // private _request: IRequest;
+  constructor(envId) {
+    if (!envId) {
+      throw new Error('envId is not defined');
+    }
+    this._cache = getCache(envId);
+    // this._request = getRequestByEnvId(envId);
+
+    const { refreshTokenKey, accessTokenKey, accessTokenExpireKey } = this._cache.keys;
+    const refreshToken = this._cache.getStore(refreshTokenKey);
+    const accessToken = this._cache.getStore(accessTokenKey);
+    const accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+    this.credential = {
+      refreshToken,
+      accessToken,
+      accessTokenExpire
+    };
+
+    this.loginType = this._cache.getStore(this._cache.keys.loginTypeKey);
+
+    this.user = new User(envId);
+  }
+
+  get isAnonymousAuth() {
+    return this.loginType === LOGINTYPE.ANONYMOUS;
+  }
+
+  get isCustomAuth() {
+    return this.loginType === LOGINTYPE.CUSTOM;
+  }
+
+  get isWeixinAuth() {
+    return this.loginType === LOGINTYPE.WECHAT;
   }
 }

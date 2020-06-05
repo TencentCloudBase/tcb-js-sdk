@@ -1,7 +1,7 @@
 import { AuthProvider, LOGINTYPE } from './base';
 import { LoginResult } from './interface';
 import { activateEvent, EVENTS } from '../lib/events';
-
+import { LoginState } from './index';
 
 export class CustomAuthProvider extends AuthProvider {
   async signIn(ticket: string): Promise<LoginResult> {
@@ -22,11 +22,9 @@ export class CustomAuthProvider extends AuthProvider {
         loginType: LOGINTYPE.CUSTOM,
         persistence: this.config.persistence
       });
-      return {
-        credential: {
-          refreshToken: res.refresh_token
-        }
-      };
+      // set user info
+      await this.refreshUserInfo();
+      return new LoginState(this.config.env);
     } else {
       throw new Error('[tcb-js-sdk] 自定义登录失败');
     }

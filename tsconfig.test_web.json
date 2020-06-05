@@ -1,0 +1,34 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+      "allowSyntheticDefaultImports": true,
+      "declaration": true,
+      "esModuleInterop": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "module": "commonjs",
+      "noFallthroughCasesInSwitch": true,
+      // "noUnusedLocals": true,
+      // "noUnusedParameters": true,
+      "outDir": "dist",
+      // "rootDir": "src",
+      "pretty": true,
+      "removeComments": true,
+      "skipLibCheck": true,
+      "strictBindCallApply": true,
+      "target": "es5",
+      "moduleResolution": "node",
+      "types": ["node", "jest"],
+      "lib": ["es2015", "dom"]
+    },
+    "include": [
+      "src/**/*",
+      "test/**/*",
+      "package.json"
+    ],
+    "exclude": [
+      "node_modules",
+      "test"
+    ]
+  }
+  

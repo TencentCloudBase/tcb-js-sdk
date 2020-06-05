@@ -32,6 +32,7 @@ export declare const ACCESS_TOKEN_Expire = "access_token_expire";
 export declare const REFRESH_TOKEN = "refresh_token";
 export declare const ANONYMOUS_UUID = "anonymous_uuid";
 export declare const LOGIN_TYPE_KEY = "login_type";
+export declare const USER_INFO_KEY = "user_info";
 export declare const protocol: string;
 export declare const BASE_URL: string;
 export declare const dataVersion = "2020-01-10";

@@ -4,6 +4,7 @@ import * as util from '../lib/util';
 import { AuthProvider, LOGINTYPE } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Adapter, RUNTIME } from '../adapters';
+import { LoginState } from './index';
 
 
 /* eslint-disable no-unused-vars */
@@ -38,17 +39,41 @@ export class WeixinAuthProvider extends AuthProvider {
     return this.redirect();
   }
 
-  async getRedirectResult() {
+  async getRedirectResult(options = { withUnionId: false }) {
     const code = util.getWeixinCode();
     if (!code) {
       return null;
     }
-    return this._signInWithCode(code);
+    return this._signInWithCode(code, options);
   }
 
-  async signIn(): Promise<LoginResult> {
+  async getLinkRedirectResult(options: { withUnionId?: boolean } = {}) {
+    const { withUnionId = false } = options;
+    const code = util.getWeixinCode();
+    if (!code) {
+      return null;
+    }
+    const { appid } = this;
+    const loginType = (scope => {
+      switch (scope) {
+        case AllowedScopes.snsapi_login:
+          return 'WECHAT-OPEN';
+        default:
+          return 'WECHAT-PUBLIC';
+      }
+    })(this.scope);
+    const hybridMiniapp = Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
+    return this._request.send('auth.linkWithWeixinCode', { payload: { appid, loginType, code, hybridMiniapp, withUnionId }});
+  }
+
+  async signIn(options: { withUnionId?: boolean; createUser?: boolean } = {}): Promise<LoginState> {
+    const { withUnionId = false, createUser = true } = options;
+    const loginState = this.checkLocalLoginState();
+    if (loginState) {
+      return loginState;
+    }
     if (!SignInPromiseMap[this.config.env]) {
-      SignInPromiseMap[this.config.env] = this._signIn();
+      SignInPromiseMap[this.config.env] = this._signIn({ withUnionId, createUser });
     }
     let result;
     let err;
@@ -64,26 +89,25 @@ export class WeixinAuthProvider extends AuthProvider {
     return result;
   }
 
-  private async _signIn(): Promise<LoginResult> {
-    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
+  // 判断本地是否已经有登录态，如果有且没过期，则返回true，否则清理本地登录态
+  private checkLocalLoginState() {
+    const { accessTokenKey, accessTokenExpireKey } = this._cache.keys;
     let accessToken = this._cache.getStore(accessTokenKey);
     let accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
 
     if (accessToken) {
       if (accessTokenExpire && accessTokenExpire > Date.now()) {
         // access存在且没有过期，那么直接返回
-        return {
-          credential: {
-            accessToken,
-            refreshToken: this._cache.getStore(refreshTokenKey)
-          }
-        };
+        return new LoginState(this.config.env);
       } else {
         // access token存在但是过期了，那么删除掉重新拉
         this._cache.removeStore(accessTokenKey);
         this._cache.removeStore(accessTokenExpireKey);
       }
     }
+  }
+
+  private async _signIn(options = { withUnionId: false, createUser: true }): Promise<LoginResult> {
     if (!AllowedScopes[this.scope]) {
       throw new Error('错误的scope类型');
     }
@@ -99,8 +123,7 @@ export class WeixinAuthProvider extends AuthProvider {
       }
     }
 
-    return this._signInWithCode(code);
-
+    return this._signInWithCode(code, options);
   }
 
   private redirect(): any {
@@ -115,7 +138,7 @@ export class WeixinAuthProvider extends AuthProvider {
     location.href = `${host}?appid=${this.appid}&redirect_uri=${currUrl}&response_type=code&scope=${this.scope}&state=${this.state}#wechat_redirect`;
   }
 
-  private async _signInWithCode(code) {
+  private async _signInWithCode(code, options) {
     const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
     // 有code，用code换refresh token
     const loginType = (scope => {
@@ -127,7 +150,7 @@ export class WeixinAuthProvider extends AuthProvider {
       }
     })(this.scope);
 
-    const refreshTokenRes = await this.getRefreshTokenByWXCode(this.appid, loginType, code);
+    const refreshTokenRes = await this.getRefreshTokenByWXCode(this.appid, loginType, code, options);
     const { refreshToken } = refreshTokenRes;
 
     // 本地存下
@@ -141,17 +164,23 @@ export class WeixinAuthProvider extends AuthProvider {
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     // 抛出登录类型更改事件
     activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.WECHAT, persistence: this.config.persistence });
-    return {
-      credential: {
-        refreshToken
-      }
-    };
+
+    await this.refreshUserInfo();
+    return new LoginState(this.config.env);
   }
 
-  private async getRefreshTokenByWXCode(appid: string, loginType: string, code: string): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
-    const action = 'auth.getJwt';
+  private async getRefreshTokenByWXCode(appid: string, loginType: string, code: string, options: any = {}): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
+    const { withUnionId = false, createUser = true } = options;
+    const action = 'auth.signIn';
     const hybridMiniapp = Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
-    return this._request.send(action, { appid, loginType, code, hybridMiniapp }).then(res => {
+    return this._request.send(action, {
+      appid,
+      loginType,
+      loginCredential: code,
+      hybridMiniapp,
+      withUnionId,
+      createUser
+    }).then(res => {
       if (res.code) {
         throw new Error(`[tcb-js-sdk] 微信登录失败: ${res.code}`);
       }

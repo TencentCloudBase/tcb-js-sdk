@@ -28,4 +28,16 @@ export class AuthProvider {
     this._cache.removeStore(accessTokenExpireKey);
     this._cache.setStore(refreshTokenKey, refreshToken);
   }
+
+  protected async refreshUserInfo() {
+    const action = 'auth.getUserInfo';
+    const { data: userInfo } = await this._request.send(action, {});
+    this.setLocalUserInfo(userInfo);
+    return userInfo;
+  }
+
+  protected setLocalUserInfo(userInfo) {
+    const { userInfoKey } = this._cache.keys;
+    this._cache.setStore(userInfoKey, userInfo);
+  }
 }

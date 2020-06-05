@@ -51,6 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
+var index_1 = require("./index");
 var AnonymousAuthProvider = (function (_super) {
     __extends(AnonymousAuthProvider, _super);
     function AnonymousAuthProvider() {
@@ -58,7 +59,7 @@ var AnonymousAuthProvider = (function (_super) {
     }
     AnonymousAuthProvider.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, anonymousUuidKey, refreshTokenKey, anonymous_uuid, refresh_token, res;
+            var _a, anonymousUuidKey, refreshTokenKey, anonymous_uuid, refresh_token, res, loginState;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -72,7 +73,7 @@ var AnonymousAuthProvider = (function (_super) {
                             })];
                     case 1:
                         res = _b.sent();
-                        if (!(res.uuid && res.refresh_token)) return [3, 3];
+                        if (!(res.uuid && res.refresh_token)) return [3, 4];
                         this._setAnonymousUUID(res.uuid);
                         this.setRefreshToken(res.refresh_token);
                         return [4, this._request.refreshAccessToken()];
@@ -84,12 +85,12 @@ var AnonymousAuthProvider = (function (_super) {
                             loginType: base_1.LOGINTYPE.ANONYMOUS,
                             persistence: 'local'
                         });
-                        return [2, {
-                                credential: {
-                                    refreshToken: res.refresh_token
-                                }
-                            }];
-                    case 3: throw new Error('[tcb-js-sdk] 匿名登录失败');
+                        loginState = new index_1.LoginState(this.config.env);
+                        return [4, loginState.user.refresh()];
+                    case 3:
+                        _b.sent();
+                        return [2, loginState];
+                    case 4: throw new Error('[tcb-js-sdk] 匿名登录失败');
                 }
             });
         });

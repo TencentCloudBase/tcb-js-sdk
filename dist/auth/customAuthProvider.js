@@ -51,6 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
+var index_1 = require("./index");
 var CustomAuthProvider = (function (_super) {
     __extends(CustomAuthProvider, _super);
     function CustomAuthProvider() {
@@ -72,7 +73,7 @@ var CustomAuthProvider = (function (_super) {
                             })];
                     case 1:
                         res = _a.sent();
-                        if (!res.refresh_token) return [3, 3];
+                        if (!res.refresh_token) return [3, 4];
                         this.setRefreshToken(res.refresh_token);
                         return [4, this._request.refreshAccessToken()];
                     case 2:
@@ -83,12 +84,11 @@ var CustomAuthProvider = (function (_super) {
                             loginType: base_1.LOGINTYPE.CUSTOM,
                             persistence: this.config.persistence
                         });
-                        return [2, {
-                                credential: {
-                                    refreshToken: res.refresh_token
-                                }
-                            }];
-                    case 3: throw new Error('[tcb-js-sdk] 自定义登录失败');
+                        return [4, this.refreshUserInfo()];
+                    case 3:
+                        _a.sent();
+                        return [2, new index_1.LoginState(this.config.env)];
+                    case 4: throw new Error('[tcb-js-sdk] 自定义登录失败');
                 }
             });
         });

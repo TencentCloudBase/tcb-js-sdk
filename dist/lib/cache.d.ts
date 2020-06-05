@@ -1,6 +1,13 @@
-import { Config, KV } from '../types';
+import { Config } from '../types';
 export declare class ICache {
-    keys: KV<string>;
+    keys: {
+        accessTokenKey: string;
+        accessTokenExpireKey: string;
+        refreshTokenKey: string;
+        anonymousUuidKey: string;
+        loginTypeKey: string;
+        userInfoKey: string;
+    };
     private _persistence;
     private _storage;
     constructor(config: Config);

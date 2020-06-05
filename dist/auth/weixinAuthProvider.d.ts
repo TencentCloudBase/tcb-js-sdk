@@ -1,6 +1,6 @@
 import { Config } from '../types';
-import { LoginResult } from './interface';
 import { AuthProvider } from './base';
+import { LoginState } from './index';
 export declare class WeixinAuthProvider extends AuthProvider {
     config: Config;
     private scope;
@@ -8,12 +8,17 @@ export declare class WeixinAuthProvider extends AuthProvider {
     private appid;
     constructor(config: Config, appid: string, scope: string, state?: string);
     signInWithRedirect(): Promise<any>;
-    getRedirectResult(): Promise<{
-        credential: {
-            refreshToken: string;
-        };
-    }>;
-    signIn(): Promise<LoginResult>;
+    getRedirectResult(options?: {
+        withUnionId: boolean;
+    }): Promise<LoginState>;
+    getLinkRedirectResult(options?: {
+        withUnionId?: boolean;
+    }): Promise<any>;
+    signIn(options?: {
+        withUnionId?: boolean;
+        createUser?: boolean;
+    }): Promise<LoginState>;
+    private checkLocalLoginState;
     private _signIn;
     private redirect;
     private _signInWithCode;

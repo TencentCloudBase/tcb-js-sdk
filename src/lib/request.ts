@@ -44,7 +44,9 @@ const actionsWithoutAccessToken = [
   'auth.getJwt',
   'auth.logout',
   'auth.signInWithTicket',
-  'auth.signInAnonymously'
+  'auth.signInAnonymously',
+  'auth.signIn',
+  'auth.fetchAccessTokenWithRefreshToken'
 ];
 
 const commonHeader = {
@@ -171,15 +173,27 @@ class IRequest {
     const params: KV<string> = {
       refresh_token: refreshToken,
     };
-    const isAnonymous = this._cache.getStore(loginTypeKey) === LOGINTYPE.ANONYMOUS;
-    if (isAnonymous) {
-      // 匿名登录时传入uuid，若refresh token过期则可根据此uuid进行延期
-      params.anonymous_uuid = this._cache.getStore(anonymousUuidKey);
-    }
-    const response = await this.request('auth.getJwt', params);
+    const response = await this.request('auth.fetchAccessTokenWithRefreshToken', params);
     if (response.data.code) {
       const { code } = response.data;
       if (code === 'SIGN_PARAM_INVALID' || code === 'REFRESH_TOKEN_EXPIRED' || code === 'INVALID_REFRESH_TOKEN') {
+        // 这里处理以下逻辑：
+        // 匿名登录时，如果刷新access token报错refresh token过期，此时应该：
+        // 1. 再用 uuid 拿一次新的refresh token
+        // 2. 拿新的refresh token换access token
+        const isAnonymous = this._cache.getStore(loginTypeKey) === LOGINTYPE.ANONYMOUS;
+        if (isAnonymous && code === 'INVALID_REFRESH_TOKEN') {
+          // 获取新的 refresh token
+          const anonymous_uuid = this._cache.getStore(anonymousUuidKey);
+          // 此处cache为基类property
+          const refresh_token = this._cache.getStore(refreshTokenKey);
+          const res = await this.send('auth.signInAnonymously', {
+            anonymous_uuid,
+            refresh_token
+          });
+          this.setRefreshToken(res.refresh_token);
+          return this._refreshAccessToken();
+        }
         activateEvent(EVENTS.LOGIN_STATE_EXPIRED);
         this._cache.removeStore(refreshTokenKey);
       }
@@ -356,6 +370,14 @@ class IRequest {
     }
 
     return response.data;
+  }
+
+  private setRefreshToken(refreshToken) {
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
+    // refresh token设置前，先清掉 access token
+    this._cache.removeStore(accessTokenKey);
+    this._cache.removeStore(accessTokenExpireKey);
+    this._cache.setStore(refreshTokenKey, refreshToken);
   }
 }
 

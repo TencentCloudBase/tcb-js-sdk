@@ -60,6 +60,7 @@ var util = __importStar(require("../lib/util"));
 var base_1 = require("./base");
 var events_1 = require("../lib/events");
 var adapters_1 = require("../adapters");
+var index_1 = require("./index");
 var AllowedScopes;
 (function (AllowedScopes) {
     AllowedScopes["snsapi_base"] = "snsapi_base";
@@ -84,7 +85,8 @@ var WeixinAuthProvider = (function (_super) {
             });
         });
     };
-    WeixinAuthProvider.prototype.getRedirectResult = function () {
+    WeixinAuthProvider.prototype.getRedirectResult = function (options) {
+        if (options === void 0) { options = { withUnionId: false }; }
         return __awaiter(this, void 0, void 0, function () {
             var code;
             return __generator(this, function (_a) {
@@ -92,28 +94,58 @@ var WeixinAuthProvider = (function (_super) {
                 if (!code) {
                     return [2, null];
                 }
-                return [2, this._signInWithCode(code)];
+                return [2, this._signInWithCode(code, options)];
             });
         });
     };
-    WeixinAuthProvider.prototype.signIn = function () {
+    WeixinAuthProvider.prototype.getLinkRedirectResult = function (options) {
+        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var result, err, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var _a, withUnionId, code, appid, loginType, hybridMiniapp;
+            return __generator(this, function (_b) {
+                _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a;
+                code = util.getWeixinCode();
+                if (!code) {
+                    return [2, null];
+                }
+                appid = this.appid;
+                loginType = (function (scope) {
+                    switch (scope) {
+                        case AllowedScopes.snsapi_login:
+                            return 'WECHAT-OPEN';
+                        default:
+                            return 'WECHAT-PUBLIC';
+                    }
+                })(this.scope);
+                hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
+                return [2, this._request.send('auth.linkWithWeixinCode', { payload: { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp, withUnionId: withUnionId } })];
+            });
+        });
+    };
+    WeixinAuthProvider.prototype.signIn = function (options) {
+        if (options === void 0) { options = {}; }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, withUnionId, _b, createUser, loginState, result, err, e_1;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
-                        if (!SignInPromiseMap[this.config.env]) {
-                            SignInPromiseMap[this.config.env] = this._signIn();
+                        _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a, _b = options.createUser, createUser = _b === void 0 ? true : _b;
+                        loginState = this.checkLocalLoginState();
+                        if (loginState) {
+                            return [2, loginState];
                         }
-                        _a.label = 1;
+                        if (!SignInPromiseMap[this.config.env]) {
+                            SignInPromiseMap[this.config.env] = this._signIn({ withUnionId: withUnionId, createUser: createUser });
+                        }
+                        _c.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
+                        _c.trys.push([1, 3, , 4]);
                         return [4, SignInPromiseMap[this.config.env]];
                     case 2:
-                        result = _a.sent();
+                        result = _c.sent();
                         return [3, 4];
                     case 3:
-                        e_1 = _a.sent();
+                        e_1 = _c.sent();
                         err = e_1;
                         return [3, 4];
                     case 4:
@@ -126,44 +158,42 @@ var WeixinAuthProvider = (function (_super) {
             });
         });
     };
-    WeixinAuthProvider.prototype._signIn = function () {
+    WeixinAuthProvider.prototype.checkLocalLoginState = function () {
+        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+        var accessToken = this._cache.getStore(accessTokenKey);
+        var accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
+        if (accessToken) {
+            if (accessTokenExpire && accessTokenExpire > Date.now()) {
+                return new index_1.LoginState(this.config.env);
+            }
+            else {
+                this._cache.removeStore(accessTokenKey);
+                this._cache.removeStore(accessTokenExpireKey);
+            }
+        }
+    };
+    WeixinAuthProvider.prototype._signIn = function (options) {
+        if (options === void 0) { options = { withUnionId: false, createUser: true }; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, accessToken, accessTokenExpire, code;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var code;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
-                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
-                        accessToken = this._cache.getStore(accessTokenKey);
-                        accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
-                        if (accessToken) {
-                            if (accessTokenExpire && accessTokenExpire > Date.now()) {
-                                return [2, {
-                                        credential: {
-                                            accessToken: accessToken,
-                                            refreshToken: this._cache.getStore(refreshTokenKey)
-                                        }
-                                    }];
-                            }
-                            else {
-                                this._cache.removeStore(accessTokenKey);
-                                this._cache.removeStore(accessTokenExpireKey);
-                            }
-                        }
                         if (!AllowedScopes[this.scope]) {
                             throw new Error('错误的scope类型');
                         }
                         if (!(adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP)) return [3, 2];
                         return [4, util.getMiniAppCode()];
                     case 1:
-                        code = _b.sent();
+                        code = _a.sent();
                         return [3, 3];
                     case 2:
                         code = util.getWeixinCode();
                         if (!code) {
                             return [2, this.redirect()];
                         }
-                        _b.label = 3;
-                    case 3: return [2, this._signInWithCode(code)];
+                        _a.label = 3;
+                    case 3: return [2, this._signInWithCode(code, options)];
                 }
             });
         });
@@ -178,7 +208,7 @@ var WeixinAuthProvider = (function (_super) {
         }
         location.href = host + "?appid=" + this.appid + "&redirect_uri=" + currUrl + "&response_type=code&scope=" + this.scope + "&state=" + this.state + "#wechat_redirect";
     };
-    WeixinAuthProvider.prototype._signInWithCode = function (code) {
+    WeixinAuthProvider.prototype._signInWithCode = function (code, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginType, refreshTokenRes, refreshToken;
             return __generator(this, function (_b) {
@@ -193,7 +223,7 @@ var WeixinAuthProvider = (function (_super) {
                                     return 'WECHAT-PUBLIC';
                             }
                         })(this.scope);
-                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code)];
+                        return [4, this.getRefreshTokenByWXCode(this.appid, loginType, code, options)];
                     case 1:
                         refreshTokenRes = _b.sent();
                         refreshToken = refreshTokenRes.refreshToken;
@@ -206,22 +236,30 @@ var WeixinAuthProvider = (function (_super) {
                         }
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_CHANGED);
                         events_1.activateEvent(events_1.EVENTS.LOGIN_TYPE_CHANGED, { loginType: base_1.LOGINTYPE.WECHAT, persistence: this.config.persistence });
-                        return [2, {
-                                credential: {
-                                    refreshToken: refreshToken
-                                }
-                            }];
+                        return [4, this.refreshUserInfo()];
+                    case 2:
+                        _b.sent();
+                        return [2, new index_1.LoginState(this.config.env)];
                 }
             });
         });
     };
-    WeixinAuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code) {
+    WeixinAuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code, options) {
+        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var action, hybridMiniapp;
-            return __generator(this, function (_a) {
-                action = 'auth.getJwt';
+            var _a, withUnionId, _b, createUser, action, hybridMiniapp;
+            return __generator(this, function (_c) {
+                _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a, _b = options.createUser, createUser = _b === void 0 ? true : _b;
+                action = 'auth.signIn';
                 hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
-                return [2, this._request.send(action, { appid: appid, loginType: loginType, code: code, hybridMiniapp: hybridMiniapp }).then(function (res) {
+                return [2, this._request.send(action, {
+                        appid: appid,
+                        loginType: loginType,
+                        loginCredential: code,
+                        hybridMiniapp: hybridMiniapp,
+                        withUnionId: withUnionId,
+                        createUser: createUser
+                    }).then(function (res) {
                         if (res.code) {
                             throw new Error("[tcb-js-sdk] \u5FAE\u4FE1\u767B\u5F55\u5931\u8D25: " + res.code);
                         }

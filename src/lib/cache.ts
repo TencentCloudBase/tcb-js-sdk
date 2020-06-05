@@ -7,6 +7,7 @@ import {
   REFRESH_TOKEN,
   ANONYMOUS_UUID,
   LOGIN_TYPE_KEY,
+  USER_INFO_KEY,
   KV
 } from '../types';
 import { isUndefined, isNull } from './util';
@@ -57,7 +58,14 @@ function createStorage(persistence: string, adapter: any): StorageInterface {
 }
 
 export class ICache {
-  public keys: KV<string> = {};
+  public keys: {
+    accessTokenKey: string;
+    accessTokenExpireKey: string;
+    refreshTokenKey: string;
+    anonymousUuidKey: string;
+    loginTypeKey: string;
+    userInfoKey: string;
+  };
 
   private _persistence: string;
   private _storage: StorageInterface;
@@ -73,12 +81,14 @@ export class ICache {
       const anonymousUuidKey = `${ANONYMOUS_UUID}_${config.env}`;
       const loginTypeKey = `${LOGIN_TYPE_KEY}_${config.env}`;
 
+      const userInfoKey = `${USER_INFO_KEY}_${config.env}`;
       this.keys = {
         accessTokenKey,
         accessTokenExpireKey,
         refreshTokenKey,
         anonymousUuidKey,
-        loginTypeKey
+        loginTypeKey,
+        userInfoKey
       };
     }
   }
@@ -175,6 +185,7 @@ function initCache(config: Config) {
     ...config,
     persistence: 'local'
   });
+
 }
 
 function getCache(env: string): ICache {

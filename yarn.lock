@@ -7941,10 +7941,10 @@ ts-jest@^23.10.4:
     semver "^5.5"
     yargs-parser "10.x"
 
-ts-loader@^7.0.0:
-  version "7.0.0"
-  resolved "http://r.tnpm.oa.com/ts-loader/download/ts-loader-7.0.0.tgz#7c74dfa8956e3e33b91d98d4ed7b6f7575c35c25"
-  integrity sha1-fHTfqJVuPjO5HZjU7XtvdXXDXCU=
+ts-loader@^6.2.1:
+  version "6.2.2"
+  resolved "http://r.tnpm.oa.com/ts-loader/download/ts-loader-6.2.2.tgz#dffa3879b01a1a1e0a4b85e2b8421dc0dfff1c58"
+  integrity sha1-3/o4ebAaGh4KS4XiuEIdwN//HFg=
   dependencies:
     chalk "^2.3.0"
     enhanced-resolve "^4.0.0"

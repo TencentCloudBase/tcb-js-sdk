@@ -166,7 +166,6 @@ var Auth = (function () {
         var _this = this;
         events_1.addEventListener(events_1.EVENTS.LOGIN_TYPE_CHANGED, function () {
             var loginState = _this.hasLoginState();
-            console.log('this.hasLoginState()', _this.hasLoginState());
             callback.call(_this, loginState);
         });
     };

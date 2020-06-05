@@ -13,6 +13,36 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.7.0] 2020-06-05
+- [Added] 新增用户信息读写接口
+  - `LoginState`
+    - `LoginState.loginType`
+    - `LoginState.user`
+    - `LoginState.isAnonymousAuth()`
+    - `LoginState.isCustomAuth()`
+    - `LoginState.isWeixinAuth()`
+  - `User`
+    - `User.uid`
+    - `User.loginType`
+    - `User.openid`
+    - `User.unionId`
+    - `User.qqMiniOpenId`
+    - `User.nickName`
+    - `User.gender`
+    - `User.avatarUrl`
+    - `User.location`
+    - `User.update()`
+    - `User.refresh()`
+  - `Auth`
+    - `Auth.currentUser`
+- [Added] 新增用户关联接口
+  - `User.linkWithTicket()`
+  - `User.linkWithRedirect()`
+  - `User.getLinkedUidList()`
+  - `User.setPrimaryUid()`
+  - `User.unlink()`
+  - `WeixinAuthProvider.getLinkRedirectResult()`
+
 ## [1.6.3] 2020-05-27
 - [Fixed] 兼容Windows操作系统PC微信打开的网页
 

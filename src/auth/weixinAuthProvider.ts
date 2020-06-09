@@ -1,7 +1,7 @@
 import { Config } from '../types';
 import { LoginResult } from './interface';
 import * as util from '../lib/util';
-import { AuthProvider, LOGINTYPE } from './base';
+import { AuthProvider } from './base';
 import { activateEvent, EVENTS } from '../lib/events';
 import { Adapter, RUNTIME } from '../adapters';
 import { LoginState } from './index';
@@ -163,7 +163,7 @@ export class WeixinAuthProvider extends AuthProvider {
     }
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     // 抛出登录类型更改事件
-    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: LOGINTYPE.WECHAT, persistence: this.config.persistence });
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: loginType, persistence: this.config.persistence });
 
     await this.refreshUserInfo();
     return new LoginState(this.config.env);

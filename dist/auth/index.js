@@ -275,14 +275,28 @@ var User = (function () {
     });
     Object.defineProperty(User.prototype, "openid", {
         get: function () {
-            return this.getLocalUserInfo('openid');
+            return this.getLocalUserInfo('wxOpenId');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "wxOpenId", {
+        get: function () {
+            return this.getLocalUserInfo('wxOpenId');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "wxPublicId", {
+        get: function () {
+            return this.getLocalUserInfo('wxPublicId');
         },
         enumerable: true,
         configurable: true
     });
     Object.defineProperty(User.prototype, "unionId", {
         get: function () {
-            return this.getLocalUserInfo('unionId');
+            return this.getLocalUserInfo('wxUnionId');
         },
         enumerable: true,
         configurable: true
@@ -290,6 +304,13 @@ var User = (function () {
     Object.defineProperty(User.prototype, "qqMiniOpenId", {
         get: function () {
             return this.getLocalUserInfo('qqMiniOpenId');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "customUserId", {
+        get: function () {
+            return this.getLocalUserInfo('customUserId');
         },
         enumerable: true,
         configurable: true
@@ -424,7 +445,6 @@ var LoginState = (function () {
             accessToken: accessToken,
             accessTokenExpire: accessTokenExpire
         };
-        this.loginType = this._cache.getStore(this._cache.keys.loginTypeKey);
         this.user = new User(envId);
     }
     Object.defineProperty(LoginState.prototype, "isAnonymousAuth", {
@@ -443,7 +463,14 @@ var LoginState = (function () {
     });
     Object.defineProperty(LoginState.prototype, "isWeixinAuth", {
         get: function () {
-            return this.loginType === base_1.LOGINTYPE.WECHAT;
+            return this.loginType === base_1.LOGINTYPE.WECHAT || this.loginType === base_1.LOGINTYPE.WECHAT_OPEN || this.loginType === base_1.LOGINTYPE.WECHAT_PUBLIC;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LoginState.prototype, "loginType", {
+        get: function () {
+            return this._cache.getStore(this._cache.keys.loginTypeKey);
         },
         enumerable: true,
         configurable: true

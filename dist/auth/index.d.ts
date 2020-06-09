@@ -54,8 +54,11 @@ export declare class User {
     get uid(): string;
     get loginType(): string;
     get openid(): string;
+    get wxOpenId(): string;
+    get wxPublicId(): string;
     get unionId(): string;
     get qqMiniOpenId(): string;
+    get customUserId(): string;
     get nickName(): string;
     get gender(): string;
     get avatarUrl(): string;
@@ -79,11 +82,11 @@ export declare class User {
 }
 export declare class LoginState {
     credential: any;
-    loginType: any;
     user: any;
     private _cache;
     constructor(envId: any);
     get isAnonymousAuth(): boolean;
     get isCustomAuth(): boolean;
     get isWeixinAuth(): boolean;
+    get loginType(): any;
 }

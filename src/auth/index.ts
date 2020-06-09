@@ -222,15 +222,27 @@ export class User {
   }
 
   get openid(): string {
-    return this.getLocalUserInfo('openid');
+    return this.getLocalUserInfo('wxOpenId');
+  }
+
+  get wxOpenId(): string {
+    return this.getLocalUserInfo('wxOpenId');
+  }
+
+  get wxPublicId(): string {
+    return this.getLocalUserInfo('wxPublicId');
   }
 
   get unionId(): string {
-    return this.getLocalUserInfo('unionId');
+    return this.getLocalUserInfo('wxUnionId');
   }
 
   get qqMiniOpenId(): string {
     return this.getLocalUserInfo('qqMiniOpenId');
+  }
+
+  get customUserId(): string {
+    return this.getLocalUserInfo('customUserId');
   }
 
   get nickName(): string {
@@ -316,7 +328,6 @@ export class User {
 
 export class LoginState {
   public credential;
-  public loginType;
   public user;
   private _cache: ICache;
   // private _request: IRequest;
@@ -337,7 +348,6 @@ export class LoginState {
       accessTokenExpire
     };
 
-    this.loginType = this._cache.getStore(this._cache.keys.loginTypeKey);
 
     this.user = new User(envId);
   }
@@ -351,6 +361,10 @@ export class LoginState {
   }
 
   get isWeixinAuth() {
-    return this.loginType === LOGINTYPE.WECHAT;
+    return this.loginType === LOGINTYPE.WECHAT || this.loginType === LOGINTYPE.WECHAT_OPEN || this.loginType === LOGINTYPE.WECHAT_PUBLIC;
+  }
+
+  get loginType() {
+    return this._cache.getStore(this._cache.keys.loginTypeKey);
   }
 }

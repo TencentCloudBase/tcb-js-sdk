@@ -13,6 +13,11 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.7.1] 2020-06-09
+
+- [Fixed] 修复 `User.isWeixinAuth` 返回结果不准确的问题
+- [Fixed] 修复 `User.openid`、`User.unionId`、`LoginState.loginType` 返回结果不准确的问题
+
 ## [1.7.0] 2020-06-05
 - [Added] 新增用户信息读写接口
   - `LoginState`

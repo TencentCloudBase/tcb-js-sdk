@@ -243,11 +243,15 @@ var IRequest = (function () {
     };
     IRequest.prototype.getAccessToken = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, accessTokenKey, accessTokenExpireKey, accessToken, accessTokenExpire, shouldRefreshAccessToken, _b;
+            var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, refreshToken, accessToken, accessTokenExpire, shouldRefreshAccessToken, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+                        _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey, refreshTokenKey = _a.refreshTokenKey;
+                        refreshToken = this._cache.getStore(refreshTokenKey);
+                        if (!refreshToken) {
+                            throw new Error('[tcb-js-sdk] refresh token不存在，登录状态异常');
+                        }
                         accessToken = this._cache.getStore(accessTokenKey);
                         accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
                         shouldRefreshAccessToken = true;

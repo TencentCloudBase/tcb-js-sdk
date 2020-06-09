@@ -220,7 +220,12 @@ class IRequest {
 
   // 获取access token
   async getAccessToken(): Promise<GetAccessTokenResult> {
-    const { accessTokenKey, accessTokenExpireKey } = this._cache.keys;
+    const { accessTokenKey, accessTokenExpireKey, refreshTokenKey } = this._cache.keys;
+    const refreshToken = this._cache.getStore(refreshTokenKey);
+    if (!refreshToken) {
+      // 不该出现的状态：有 access token 却没有 refresh token
+      throw new Error('[tcb-js-sdk] refresh token不存在，登录状态异常');
+    }
     // 如果没有access token或者过期，那么刷新
     let accessToken = this._cache.getStore(accessTokenKey);
     let accessTokenExpire = this._cache.getStore(accessTokenExpireKey);

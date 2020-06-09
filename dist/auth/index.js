@@ -65,7 +65,13 @@ var Auth = (function () {
     }
     Object.defineProperty(Auth.prototype, "currentUser", {
         get: function () {
-            return this.hasLoginState().user;
+            var loginState = this.hasLoginState();
+            if (loginState) {
+                return loginState.user || null;
+            }
+            else {
+                return null;
+            }
         },
         enumerable: true,
         configurable: true
@@ -185,10 +191,9 @@ var Auth = (function () {
         });
     };
     Auth.prototype.hasLoginState = function () {
-        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
-        var accessToken = this._cache.getStore(accessTokenKey);
-        var accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
-        if (accessToken && accessTokenExpire > new Date().getTime()) {
+        var refreshTokenKey = this._cache.keys.refreshTokenKey;
+        var refreshToken = this._cache.getStore(refreshTokenKey);
+        if (refreshToken) {
             return new LoginState(this.config.env);
         }
         else {

@@ -17,6 +17,7 @@
 
 - [Fixed] 修复 `User.isWeixinAuth` 返回结果不准确的问题
 - [Fixed] 修复 `User.openid`、`User.unionId`、`LoginState.loginType` 返回结果不准确的问题
+- [Fixed] 修复 `Auth.hasLoginState()`、`Auth.getLoginState()` 在短期密钥失效后返回 null 的问题
 
 ## [1.7.0] 2020-06-05
 - [Added] 新增用户信息读写接口

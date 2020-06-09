@@ -37,7 +37,12 @@ export class Auth {
   }
 
   get currentUser() {
-    return this.hasLoginState().user;
+    const loginState = this.hasLoginState();
+    if (loginState) {
+      return loginState.user || null;
+    } else {
+      return null;
+    }
   }
 
   get loginType(): LOGINTYPE {
@@ -127,11 +132,9 @@ export class Auth {
   }
 
   hasLoginState(): LoginState {
-    const { accessTokenKey, accessTokenExpireKey, } = this._cache.keys;
-    const accessToken = this._cache.getStore(accessTokenKey);
-    const accessTokenExpire = this._cache.getStore(accessTokenExpireKey);
-    // todo: 使用refresh token来判断
-    if (accessToken && accessTokenExpire > new Date().getTime()) {
+    const { refreshTokenKey } = this._cache.keys;
+    const refreshToken = this._cache.getStore(refreshTokenKey);
+    if (refreshToken) {
       return new LoginState(this.config.env);
     } else {
       return null;

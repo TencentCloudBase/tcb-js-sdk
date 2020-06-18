@@ -7,6 +7,7 @@ export declare enum LOGINTYPE {
     WECHAT_PUBLIC = "WECHAT-PUBLIC",
     WECHAT_OPEN = "WECHAT-OPEN",
     CUSTOM = "CUSTOM",
+    EMAIL = "EMAIL",
     NULL = "NULL"
 }
 export declare class AuthProvider {
@@ -15,6 +16,7 @@ export declare class AuthProvider {
     protected readonly _request: IRequest;
     constructor(config: Config);
     protected setRefreshToken(refreshToken: any): void;
+    protected setAccessToken(accessToken: any, accessTokenExpire: any): void;
     protected refreshUserInfo(): Promise<any>;
     protected setLocalUserInfo(userInfo: any): void;
 }

@@ -8,6 +8,7 @@ export enum LOGINTYPE {
   WECHAT_PUBLIC = 'WECHAT-PUBLIC',
   WECHAT_OPEN = 'WECHAT-OPEN',
   CUSTOM = 'CUSTOM',
+  EMAIL = 'EMAIL',
   NULL = 'NULL' // 保留字，代表未登录
 }
 
@@ -29,6 +30,12 @@ export class AuthProvider {
     this._cache.removeStore(accessTokenKey);
     this._cache.removeStore(accessTokenExpireKey);
     this._cache.setStore(refreshTokenKey, refreshToken);
+  }
+
+  protected setAccessToken(accessToken, accessTokenExpire) {
+    const { accessTokenKey, accessTokenExpireKey } = this._cache.keys;
+    this._cache.setStore(accessTokenKey, accessToken);
+    this._cache.setStore(accessTokenExpireKey, accessTokenExpire);
   }
 
   protected async refreshUserInfo() {

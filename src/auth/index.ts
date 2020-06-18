@@ -7,6 +7,7 @@ import { addEventListener, activateEvent, EVENTS } from '../lib/events';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
+import { EmailAuthProvider } from './emailAuthProvider';
 
 // export interface UserInfo {
 //   openid: string;
@@ -61,8 +62,16 @@ export class Auth {
     return new CustomAuthProvider(this.config);
   }
 
+  emailAuthProvider() {
+    return new EmailAuthProvider(this.config);
+  }
+
   async signInAnonymously() {
     return new AnonymousAuthProvider(this.config).signIn();
+  }
+
+  async signInWithEmailAndPassword(email: string, password: string) {
+    return new EmailAuthProvider(this.config).signIn(email, password);
   }
 
   async linkAndRetrieveDataWithTicket(ticket: string) {
@@ -97,6 +106,18 @@ export class Auth {
       persistence: this.config.persistence
     });
     return res;
+  }
+
+  async signUpWithEmailAndPassword(email, password) {
+    return this._request.send('auth.signUpWithEmailAndPassword', {
+      email, password
+    });
+  }
+
+  async sendPasswordResetEmail(email) {
+    return this._request.send('auth.sendPasswordResetEmail', {
+      email
+    });
   }
 
   onLoginStateChanged(callback: Function) {
@@ -155,7 +176,7 @@ export class Auth {
 
   getUserInfo(): any {
     const action = 'auth.getUserInfo';
-
+    console.warn('Auth.getUserInfo() 将会在下个主版本下线，请使用 Auth.currentUser 来获取用户信息');
     return this._request.send(action, {}).then(res => {
       if (res.code) {
         return res;
@@ -241,6 +262,14 @@ export class User {
     return this.getLocalUserInfo('qqMiniOpenId');
   }
 
+  get email(): string {
+    return this.getLocalUserInfo('email');
+  }
+
+  get hasPassword(): boolean {
+    return this.getLocalUserInfo('hasPassword');
+  }
+
   get customUserId(): string {
     return this.getLocalUserInfo('customUserId');
   }
@@ -277,6 +306,18 @@ export class User {
     provider.signInWithRedirect();
   }
 
+  updatePassword(newPassword, oldPassword) {
+    return this._request.send('auth.updatePassword', {
+      oldPassword,
+      newPassword
+    });
+  }
+
+  updateEmail(newEmail) {
+    return this._request.send('auth.updateEmail', {
+      newEmail
+    });
+  }
 
   async getLinkedUidList() {
     const { data } = await this._request.send('auth.getLinkedUidList', {});

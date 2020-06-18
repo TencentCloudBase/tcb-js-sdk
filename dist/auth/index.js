@@ -54,6 +54,7 @@ var cache_1 = require("../lib/cache");
 var request_1 = require("../lib/request");
 var events_1 = require("../lib/events");
 var customAuthProvider_1 = require("./customAuthProvider");
+var emailAuthProvider_1 = require("./emailAuthProvider");
 var Auth = (function () {
     function Auth(config) {
         this.config = config;
@@ -93,10 +94,20 @@ var Auth = (function () {
     Auth.prototype.customAuthProvider = function () {
         return new customAuthProvider_1.CustomAuthProvider(this.config);
     };
+    Auth.prototype.emailAuthProvider = function () {
+        return new emailAuthProvider_1.EmailAuthProvider(this.config);
+    };
     Auth.prototype.signInAnonymously = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2, new anonymousAuthProvider_1.AnonymousAuthProvider(this.config).signIn()];
+            });
+        });
+    };
+    Auth.prototype.signInWithEmailAndPassword = function (email, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, new emailAuthProvider_1.EmailAuthProvider(this.config).signIn(email, password)];
             });
         });
     };
@@ -147,6 +158,24 @@ var Auth = (function () {
                         });
                         return [2, res];
                 }
+            });
+        });
+    };
+    Auth.prototype.signUpWithEmailAndPassword = function (email, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, this._request.send('auth.signUpWithEmailAndPassword', {
+                        email: email, password: password
+                    })];
+            });
+        });
+    };
+    Auth.prototype.sendPasswordResetEmail = function (email) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2, this._request.send('auth.sendPasswordResetEmail', {
+                        email: email
+                    })];
             });
         });
     };
@@ -215,6 +244,7 @@ var Auth = (function () {
     };
     Auth.prototype.getUserInfo = function () {
         var action = 'auth.getUserInfo';
+        console.warn('Auth.getUserInfo() 将会在下个主版本下线，请使用 Auth.currentUser 来获取用户信息');
         return this._request.send(action, {}).then(function (res) {
             if (res.code) {
                 return res;
@@ -308,6 +338,20 @@ var User = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(User.prototype, "email", {
+        get: function () {
+            return this.getLocalUserInfo('email');
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "hasPassword", {
+        get: function () {
+            return this.getLocalUserInfo('hasPassword');
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(User.prototype, "customUserId", {
         get: function () {
             return this.getLocalUserInfo('customUserId');
@@ -356,6 +400,17 @@ var User = (function () {
     };
     User.prototype.linkWithRedirect = function (provider) {
         provider.signInWithRedirect();
+    };
+    User.prototype.updatePassword = function (newPassword, oldPassword) {
+        return this._request.send('auth.updatePassword', {
+            oldPassword: oldPassword,
+            newPassword: newPassword
+        });
+    };
+    User.prototype.updateEmail = function (newEmail) {
+        return this._request.send('auth.updateEmail', {
+            newEmail: newEmail
+        });
     };
     User.prototype.getLinkedUidList = function () {
         return __awaiter(this, void 0, void 0, function () {

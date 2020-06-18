@@ -45,6 +45,7 @@ var LOGINTYPE;
     LOGINTYPE["WECHAT_PUBLIC"] = "WECHAT-PUBLIC";
     LOGINTYPE["WECHAT_OPEN"] = "WECHAT-OPEN";
     LOGINTYPE["CUSTOM"] = "CUSTOM";
+    LOGINTYPE["EMAIL"] = "EMAIL";
     LOGINTYPE["NULL"] = "NULL";
 })(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
 var AuthProvider = (function () {
@@ -58,6 +59,11 @@ var AuthProvider = (function () {
         this._cache.removeStore(accessTokenKey);
         this._cache.removeStore(accessTokenExpireKey);
         this._cache.setStore(refreshTokenKey, refreshToken);
+    };
+    AuthProvider.prototype.setAccessToken = function (accessToken, accessTokenExpire) {
+        var _a = this._cache.keys, accessTokenKey = _a.accessTokenKey, accessTokenExpireKey = _a.accessTokenExpireKey;
+        this._cache.setStore(accessTokenKey, accessToken);
+        this._cache.setStore(accessTokenExpireKey, accessTokenExpire);
     };
     AuthProvider.prototype.refreshUserInfo = function () {
         return __awaiter(this, void 0, void 0, function () {

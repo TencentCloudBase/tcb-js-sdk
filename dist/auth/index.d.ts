@@ -4,6 +4,7 @@ import { LOGINTYPE } from './base';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
+import { EmailAuthProvider } from './emailAuthProvider';
 export declare class Auth {
     private config;
     private _cache;
@@ -19,13 +20,17 @@ export declare class Auth {
     }): WeixinAuthProvider;
     anonymousAuthProvider(): AnonymousAuthProvider;
     customAuthProvider(): CustomAuthProvider;
+    emailAuthProvider(): EmailAuthProvider;
     signInAnonymously(): Promise<LoginState>;
+    signInWithEmailAndPassword(email: string, password: string): Promise<LoginResult>;
     linkAndRetrieveDataWithTicket(ticket: string): Promise<{
         credential: {
             refreshToken: any;
         };
     }>;
     signOut(): Promise<any>;
+    signUpWithEmailAndPassword(email: any, password: any): Promise<any>;
+    sendPasswordResetEmail(email: any): Promise<any>;
     onLoginStateChanged(callback: Function): void;
     onLoginStateExpired(callback: Function): void;
     onAccessTokenRefreshed(callback: Function): void;
@@ -58,6 +63,8 @@ export declare class User {
     get wxPublicId(): string;
     get unionId(): string;
     get qqMiniOpenId(): string;
+    get email(): string;
+    get hasPassword(): boolean;
     get customUserId(): string;
     get nickName(): string;
     get gender(): string;
@@ -69,6 +76,8 @@ export declare class User {
     };
     linkWithTicket(ticket: string): Promise<any>;
     linkWithRedirect(provider: any): void;
+    updatePassword(newPassword: any, oldPassword: any): Promise<any>;
+    updateEmail(newEmail: any): Promise<any>;
     getLinkedUidList(): Promise<{
         users: any;
         hasPrimaryUid: boolean;

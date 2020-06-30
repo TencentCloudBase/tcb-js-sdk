@@ -21,6 +21,7 @@
   - `Auth.sendPasswordResetEmail()`
   - `User.updatePassword()`
   - `User.updateEmail()`
+- [Changed] `Storage.downloadFile` 浏览器环境下可直接保存文件
 
 ## [1.7.1] 2020-06-09
 

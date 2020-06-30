@@ -13,6 +13,15 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.8.0] 2020-06-30
+
+- [Added] 新增邮箱密码登录的相关接口
+  - `Auth.signUpWithEmailAndPassword()`
+  - `Auth.signInWithEmailAndPassword()`
+  - `Auth.sendPasswordResetEmail()`
+  - `User.updatePassword()`
+  - `User.updateEmail()`
+
 ## [1.7.1] 2020-06-09
 
 - [Fixed] 修复 `User.isWeixinAuth` 返回结果不准确的问题

@@ -46,7 +46,11 @@ const actionsWithoutAccessToken = [
   'auth.signInWithTicket',
   'auth.signInAnonymously',
   'auth.signIn',
-  'auth.fetchAccessTokenWithRefreshToken'
+  'auth.fetchAccessTokenWithRefreshToken',
+  'auth.signUpWithEmailAndPassword',
+  'auth.activateEndUserMail',
+  'auth.sendPasswordResetEmail',
+  'auth.resetPasswordWithToken'
 ];
 
 const commonHeader = {

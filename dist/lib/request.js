@@ -59,7 +59,11 @@ var actionsWithoutAccessToken = [
     'auth.signInWithTicket',
     'auth.signInAnonymously',
     'auth.signIn',
-    'auth.fetchAccessTokenWithRefreshToken'
+    'auth.fetchAccessTokenWithRefreshToken',
+    'auth.signUpWithEmailAndPassword',
+    'auth.activateEndUserMail',
+    'auth.sendPasswordResetEmail',
+    'auth.resetPasswordWithToken'
 ];
 var commonHeader = {
     'X-SDK-Version': types_1.SDK_VERISON

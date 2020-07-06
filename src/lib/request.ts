@@ -267,7 +267,13 @@ class IRequest {
 
     // 下面几种 action 不需要 access token
     if (actionsWithoutAccessToken.indexOf(action) === -1) {
-      tmpObj.access_token = (await this.getAccessToken()).accessToken;
+      const { refreshTokenKey } = this._cache.keys;
+
+      // 若有 refreshToken 则任务有登录态 刷 accessToken
+      let refreshToken = this._cache.getStore(refreshTokenKey);
+      if (refreshToken) {
+        tmpObj.access_token = (await this.getAccessToken()).accessToken;
+      }
     }
 
     // 拼body和content-type

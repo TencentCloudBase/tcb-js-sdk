@@ -285,7 +285,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -294,6 +294,9 @@ var IRequest = (function () {
                         tmpObj = __assign({ action: action,
                             dataVersion: types_1.dataVersion, env: this.config.env }, params);
                         if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
+                        refreshTokenKey = this._cache.keys.refreshTokenKey;
+                        refreshToken = this._cache.getStore(refreshTokenKey);
+                        if (!refreshToken) return [3, 2];
                         _a = tmpObj;
                         return [4, this.getAccessToken()];
                     case 1:

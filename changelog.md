@@ -13,6 +13,13 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.9,1] 2020-07-10
+
+- [Added] 新增账号密码登录的相关接口
+  - `Auth.signInWithUsernameAndPassword()`
+  - `Auth.isUsernameRegistered()`
+  - `User.updateUsername()`
+
 ## [1.9.0] 2020-07-06 
 - [Added] 新增未登录请求模式，本地无登录态时可以请求资源。
 

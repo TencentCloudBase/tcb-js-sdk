@@ -57,3 +57,72 @@ export function test_auth(app, appid: string) {
     registerAuthTest(app, appid, scope);
   }
 }
+
+export async function testUsernameAuthClose(app, options: {
+  username: string;
+  password: string;
+  email: string;
+}) {
+  const auth = app.auth({
+    persistence: 'session'
+  });
+
+  const { username, password } = options;
+
+  await customRegister('usernameAuth: 控制台未开通账号密码登录', async () => {
+    try {
+      await auth.signInWithUsernameAndPassword(username, password);
+    } catch (error) {
+      if (!error.message.includes('[102003]')) {
+        throw new Error('控制台未开通账号密码登录的返回错误码应为 "[102003] user not exist"');
+      }
+    }
+  });
+}
+
+export async function testUsernameAuthOpen(app, options: {
+  username: string;
+  password: string;
+  email: string;
+}) {
+
+  const auth = app.auth({
+    persistence: 'session'
+  });
+  const user = auth.currentUser;
+
+  const { username, password, email } = options;
+
+  await customRegister('usernameAuth: 查询账号是否注册', async () => {
+    const unRegisteredUsername = 'j`fh)f28*234@';
+    const registered = await auth.isUsernameRegistered(unRegisteredUsername); // 一个没有被注册的账号
+    if (registered === true) {
+      throw new Error(`${unRegisteredUsername} 不应被注册`);
+    }
+  });
+
+  await customRegister('usernameAuth: 绑定账号密码', async () => {
+    await auth.signInWithEmailAndPassword(email, password);
+    await user.updateUsername(username);
+    const registered = await auth.isUsernameRegistered(username);
+    if (registered !== true) {
+      throw new Error('账号名绑定失败');
+    }
+  });
+
+  await customRegister('usernameAuth: 账号密码登录', async () => {
+    await auth.signInWithUsernameAndPassword(username, password);
+    const info = await auth.getUserInfo();
+    if (info.loginType !== 'USERNAME') {
+      throw new Error('登录信息 loginType 字段错误');
+    }
+    if (info.username !== username) {
+      throw new Error('登录信息 username 字段错误');
+    }
+  });
+}
+
+async function customRegister(info: string, callback: Function) {
+  console.log('>>> Run demo:', info);
+  await callback();
+}

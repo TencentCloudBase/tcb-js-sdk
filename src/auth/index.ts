@@ -8,6 +8,7 @@ import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
 import { EmailAuthProvider } from './emailAuthProvider';
+import { UsernameAuthProvider } from './usernameAuthProvider';
 
 // export interface UserInfo {
 //   openid: string;
@@ -66,12 +67,20 @@ export class Auth {
     return new EmailAuthProvider(this.config);
   }
 
+  usernameAuthProvider() {
+    return new UsernameAuthProvider(this.config);
+  }
+
   async signInAnonymously() {
     return new AnonymousAuthProvider(this.config).signIn();
   }
 
   async signInWithEmailAndPassword(email: string, password: string) {
     return new EmailAuthProvider(this.config).signIn(email, password);
+  }
+
+  signInWithUsernameAndPassword(username: string, password: string) {
+    return new UsernameAuthProvider(this.config).signIn(username, password);
   }
 
   async linkAndRetrieveDataWithTicket(ticket: string) {
@@ -160,6 +169,17 @@ export class Auth {
     } else {
       return null;
     }
+  }
+
+  async isUsernameRegistered(username: string): Promise<boolean> {
+    if (typeof username !== 'string') {
+      throw new Error('username must be a string');
+    }
+
+    const { data } = await this._request.send('auth.isUsernameRegistered', {
+      username
+    });
+    return data && data.isRegistered;
   }
 
   getLoginState() {
@@ -316,6 +336,16 @@ export class User {
   updateEmail(newEmail) {
     return this._request.send('auth.updateEmail', {
       newEmail
+    });
+  }
+
+  updateUsername(username: string) {
+    if (typeof username !== 'string') {
+      throw new Error('username must be a string');
+    }
+
+    return this._request.send('auth.updateUsername', {
+      username
     });
   }
 

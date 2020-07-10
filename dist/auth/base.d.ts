@@ -8,6 +8,7 @@ export declare enum LOGINTYPE {
     WECHAT_OPEN = "WECHAT-OPEN",
     CUSTOM = "CUSTOM",
     EMAIL = "EMAIL",
+    USERNAME = "USERNAME",
     NULL = "NULL"
 }
 export declare class AuthProvider {

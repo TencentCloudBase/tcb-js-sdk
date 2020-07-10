@@ -55,6 +55,7 @@ var request_1 = require("../lib/request");
 var events_1 = require("../lib/events");
 var customAuthProvider_1 = require("./customAuthProvider");
 var emailAuthProvider_1 = require("./emailAuthProvider");
+var usernameAuthProvider_1 = require("./usernameAuthProvider");
 var Auth = (function () {
     function Auth(config) {
         this.config = config;
@@ -97,6 +98,9 @@ var Auth = (function () {
     Auth.prototype.emailAuthProvider = function () {
         return new emailAuthProvider_1.EmailAuthProvider(this.config);
     };
+    Auth.prototype.usernameAuthProvider = function () {
+        return new usernameAuthProvider_1.UsernameAuthProvider(this.config);
+    };
     Auth.prototype.signInAnonymously = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -110,6 +114,9 @@ var Auth = (function () {
                 return [2, new emailAuthProvider_1.EmailAuthProvider(this.config).signIn(email, password)];
             });
         });
+    };
+    Auth.prototype.signInWithUsernameAndPassword = function (username, password) {
+        return new usernameAuthProvider_1.UsernameAuthProvider(this.config).signIn(username, password);
     };
     Auth.prototype.linkAndRetrieveDataWithTicket = function (ticket) {
         return __awaiter(this, void 0, void 0, function () {
@@ -228,6 +235,25 @@ var Auth = (function () {
         else {
             return null;
         }
+    };
+    Auth.prototype.isUsernameRegistered = function (username) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (typeof username !== 'string') {
+                            throw new Error('username must be a string');
+                        }
+                        return [4, this._request.send('auth.isUsernameRegistered', {
+                                username: username
+                            })];
+                    case 1:
+                        data = (_a.sent()).data;
+                        return [2, data && data.isRegistered];
+                }
+            });
+        });
     };
     Auth.prototype.getLoginState = function () {
         return Promise.resolve(this.hasLoginState());
@@ -410,6 +436,14 @@ var User = (function () {
     User.prototype.updateEmail = function (newEmail) {
         return this._request.send('auth.updateEmail', {
             newEmail: newEmail
+        });
+    };
+    User.prototype.updateUsername = function (username) {
+        if (typeof username !== 'string') {
+            throw new Error('username must be a string');
+        }
+        return this._request.send('auth.updateUsername', {
+            username: username
         });
     };
     User.prototype.getLinkedUidList = function () {

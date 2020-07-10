@@ -46,6 +46,7 @@ var LOGINTYPE;
     LOGINTYPE["WECHAT_OPEN"] = "WECHAT-OPEN";
     LOGINTYPE["CUSTOM"] = "CUSTOM";
     LOGINTYPE["EMAIL"] = "EMAIL";
+    LOGINTYPE["USERNAME"] = "USERNAME";
     LOGINTYPE["NULL"] = "NULL";
 })(LOGINTYPE = exports.LOGINTYPE || (exports.LOGINTYPE = {}));
 var AuthProvider = (function () {

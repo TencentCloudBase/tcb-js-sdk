@@ -5,6 +5,7 @@ import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
 import { EmailAuthProvider } from './emailAuthProvider';
+import { UsernameAuthProvider } from './usernameAuthProvider';
 export declare class Auth {
     private config;
     private _cache;
@@ -21,8 +22,10 @@ export declare class Auth {
     anonymousAuthProvider(): AnonymousAuthProvider;
     customAuthProvider(): CustomAuthProvider;
     emailAuthProvider(): EmailAuthProvider;
+    usernameAuthProvider(): UsernameAuthProvider;
     signInAnonymously(): Promise<LoginState>;
     signInWithEmailAndPassword(email: string, password: string): Promise<LoginResult>;
+    signInWithUsernameAndPassword(username: string, password: string): Promise<LoginResult>;
     linkAndRetrieveDataWithTicket(ticket: string): Promise<{
         credential: {
             refreshToken: any;
@@ -41,6 +44,7 @@ export declare class Auth {
         env: string;
     }>;
     hasLoginState(): LoginState;
+    isUsernameRegistered(username: string): Promise<boolean>;
     getLoginState(): Promise<LoginState>;
     signInWithTicket(ticket: string): Promise<LoginResult>;
     shouldRefreshAccessToken(hook: any): void;
@@ -78,6 +82,7 @@ export declare class User {
     linkWithRedirect(provider: any): void;
     updatePassword(newPassword: any, oldPassword: any): Promise<any>;
     updateEmail(newEmail: any): Promise<any>;
+    updateUsername(username: string): Promise<any>;
     getLinkedUidList(): Promise<{
         users: any;
         hasPrimaryUid: boolean;

@@ -63,7 +63,8 @@ var actionsWithoutAccessToken = [
     'auth.signUpWithEmailAndPassword',
     'auth.activateEndUserMail',
     'auth.sendPasswordResetEmail',
-    'auth.resetPasswordWithToken'
+    'auth.resetPasswordWithToken',
+    'auth.isUsernameRegistered'
 ];
 var commonHeader = {
     'X-SDK-Version': types_1.SDK_VERISON

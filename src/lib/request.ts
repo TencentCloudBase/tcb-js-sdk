@@ -50,7 +50,8 @@ const actionsWithoutAccessToken = [
   'auth.signUpWithEmailAndPassword',
   'auth.activateEndUserMail',
   'auth.sendPasswordResetEmail',
-  'auth.resetPasswordWithToken'
+  'auth.resetPasswordWithToken',
+  'auth.isUsernameRegistered'
 ];
 
 const commonHeader = {

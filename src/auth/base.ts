@@ -9,6 +9,7 @@ export enum LOGINTYPE {
   WECHAT_OPEN = 'WECHAT-OPEN',
   CUSTOM = 'CUSTOM',
   EMAIL = 'EMAIL',
+  USERNAME = 'USERNAME',
   NULL = 'NULL' // 保留字，代表未登录
 }
 

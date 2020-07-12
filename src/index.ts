@@ -7,8 +7,7 @@ import { IRequest, initRequest } from './lib/request';
 import { addEventListener, removeEventListener } from './lib/events';
 import { useAdapters, Adapter, useDefaultAdapter, RUNTIME } from './adapters';
 import { SDKAdapterInterface, CloudbaseAdapter, IRequestConfig } from '@cloudbase/adapter-interface';
-import { AppSecret, dataVersion } from './types';
-import { createSign } from './lib/util';
+import { AppSecret } from './types';
 import { initCache } from './lib/cache';
 
 interface ICloudbaseConfig {
@@ -107,15 +106,6 @@ class TCB {
     }
     Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
     Db.runtime = Adapter.runtime;
-    if (Adapter.runtime !== RUNTIME.WEB) {
-      Db.dataVersion = dataVersion;
-      Db.createSign = createSign;
-
-      Db.appSecretInfo = {
-        appSign: this.config.appSign,
-        ...this.config.appSecret
-      };
-    }
     if (!Db.ws) {
       Db.ws = null;
     }

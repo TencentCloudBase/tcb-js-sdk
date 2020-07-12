@@ -64,8 +64,6 @@ var Functions = __importStar(require("./functions"));
 var request_1 = require("./lib/request");
 var events_1 = require("./lib/events");
 var adapters_1 = require("./adapters");
-var types_1 = require("./types");
-var util_1 = require("./lib/util");
 var cache_1 = require("./lib/cache");
 var DEFAULT_INIT_CONFIG = {
     timeout: 15000,
@@ -128,11 +126,6 @@ var TCB = (function () {
         }
         database_1.Db.getAccessToken = this.authObj.getAccessToken.bind(this.authObj);
         database_1.Db.runtime = adapters_1.Adapter.runtime;
-        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
-            database_1.Db.dataVersion = types_1.dataVersion;
-            database_1.Db.createSign = util_1.createSign;
-            database_1.Db.appSecretInfo = __assign({ appSign: this.config.appSign }, this.config.appSecret);
-        }
         if (!database_1.Db.ws) {
             database_1.Db.ws = null;
         }

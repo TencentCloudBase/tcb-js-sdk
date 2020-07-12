@@ -3,8 +3,7 @@ import {
   BASE_URL,
   SDK_VERISON,
   KV,
-  protocol,
-  dataVersion
+  protocol
 } from '../types';
 import {
   IRequestOptions,
@@ -261,7 +260,6 @@ class IRequest {
     const tmpObj = {
       action,
       // webDeviceId,
-      dataVersion,
       env: this.config.env,
       ...params
     };
@@ -328,6 +326,11 @@ class IRequest {
     const traceHeader = this._localCache.getStore(tcbTraceKey);
     if (traceHeader) {
       opts.headers['X-TCB-Trace'] = traceHeader;
+    }
+
+    // 非web平台，需要校验凭证，带上该请求头
+    if (Adapter.runtime !== RUNTIME.WEB) {
+      opts.headers['X-Check-App-Source'] = true;
     }
 
     // 发出请求

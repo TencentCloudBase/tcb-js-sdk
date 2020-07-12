@@ -292,8 +292,7 @@ var IRequest = (function () {
                     case 0:
                         tcbTraceKey = "x-tcb-trace_" + this.config.env;
                         contentType = 'application/x-www-form-urlencoded';
-                        tmpObj = __assign({ action: action,
-                            dataVersion: types_1.dataVersion, env: this.config.env }, params);
+                        tmpObj = __assign({ action: action, env: this.config.env }, params);
                         if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
                         refreshTokenKey = this._cache.keys.refreshTokenKey;
                         refreshToken = this._cache.getStore(refreshTokenKey);
@@ -348,6 +347,9 @@ var IRequest = (function () {
                         traceHeader = this._localCache.getStore(tcbTraceKey);
                         if (traceHeader) {
                             opts.headers['X-TCB-Trace'] = traceHeader;
+                        }
+                        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
+                            opts.headers['X-Check-App-Source'] = true;
                         }
                         parse = params.parse, inQuery = params.inQuery, search = params.search;
                         formatQuery = {

@@ -286,7 +286,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, checkAppSourceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -343,13 +343,7 @@ var IRequest = (function () {
                                 appAccessKeyId: appAccessKeyId,
                                 appSign: appSign
                             }, appAccessKey);
-                            checkAppSourceHeader = {
-                                timestamp: timestamp,
-                                appAccessKeyId: appAccessKeyId,
-                                appSign: appSign,
-                                sign: sign
-                            };
-                            opts.headers['X-TCB-App-Source'] = JSON.stringify(checkAppSourceHeader);
+                            opts.headers['X-TCB-App-Source'] = "timestamp=" + timestamp + ";appAccessKeyId=" + appAccessKeyId + ";appSign=" + appSign + ";sign=" + sign;
                         }
                         parse = params.parse, inQuery = params.inQuery, search = params.search;
                         formatQuery = {

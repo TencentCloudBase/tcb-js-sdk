@@ -321,14 +321,7 @@ class IRequest {
         appSign
       }, appAccessKey);
 
-      const checkAppSourceHeader = {
-        timestamp,
-        appAccessKeyId,
-        appSign,
-        sign
-      };
-
-      opts.headers['X-TCB-App-Source'] = JSON.stringify(checkAppSourceHeader);
+      opts.headers['X-TCB-App-Source'] = `timestamp=${timestamp};appAccessKeyId=${appAccessKeyId};appSign=${appSign};sign=${sign}`;
     }
 
     // 发出请求

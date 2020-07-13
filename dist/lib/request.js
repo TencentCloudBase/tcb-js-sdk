@@ -286,7 +286,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, checkAppSourceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -321,21 +321,6 @@ var IRequest = (function () {
                                 }
                             }
                         }
-                        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
-                            _b = this.config, appSign = _b.appSign, appSecret = _b.appSecret;
-                            timestamp = Date.now();
-                            appAccessKey = appSecret.appAccessKey, appAccessKeyId = appSecret.appAccessKeyId;
-                            sign = util_1.createSign({
-                                data: payload,
-                                timestamp: timestamp,
-                                appAccessKeyId: appAccessKeyId,
-                                appSign: appSign
-                            }, appAccessKey);
-                            payload = __assign(__assign({}, payload), { timestamp: timestamp,
-                                appAccessKey: appAccessKey,
-                                appSign: appSign,
-                                sign: sign });
-                        }
                         opts = {
                             headers: {
                                 'content-type': contentType
@@ -349,7 +334,22 @@ var IRequest = (function () {
                             opts.headers['X-TCB-Trace'] = traceHeader;
                         }
                         if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
-                            opts.headers['X-Check-App-Source'] = true;
+                            _b = this.config, appSign = _b.appSign, appSecret = _b.appSecret;
+                            timestamp = Date.now();
+                            appAccessKey = appSecret.appAccessKey, appAccessKeyId = appSecret.appAccessKeyId;
+                            sign = util_1.createSign({
+                                data: payload,
+                                timestamp: timestamp,
+                                appAccessKeyId: appAccessKeyId,
+                                appSign: appSign
+                            }, appAccessKey);
+                            checkAppSourceHeader = {
+                                timestamp: timestamp,
+                                appAccessKeyId: appAccessKeyId,
+                                appSign: appSign,
+                                sign: sign
+                            };
+                            opts.headers['X-TCB-App-Source'] = JSON.stringify(checkAppSourceHeader);
                         }
                         parse = params.parse, inQuery = params.inQuery, search = params.search;
                         formatQuery = {

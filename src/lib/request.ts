@@ -294,26 +294,7 @@ class IRequest {
         }
       }
     }
-    // 非web平台使用凭证检验有效性
-    if (Adapter.runtime !== RUNTIME.WEB) {
-      const { appSign, appSecret } = this.config;
-      const timestamp = Date.now();
-      const { appAccessKey, appAccessKeyId } = appSecret;
-      const sign = createSign({
-        data: payload,
-        timestamp,
-        appAccessKeyId,
-        appSign
-      }, appAccessKey);
 
-      payload = {
-        ...payload,
-        timestamp,
-        appAccessKey,
-        appSign,
-        sign
-      };
-    }
     let opts: any = {
       headers: {
         'content-type': contentType
@@ -328,9 +309,26 @@ class IRequest {
       opts.headers['X-TCB-Trace'] = traceHeader;
     }
 
-    // 非web平台，需要校验凭证，带上该请求头
+    // 非web平台使用凭证检验有效性
     if (Adapter.runtime !== RUNTIME.WEB) {
-      opts.headers['X-Check-App-Source'] = true;
+      const { appSign, appSecret } = this.config;
+      const timestamp = Date.now();
+      const { appAccessKey, appAccessKeyId } = appSecret;
+      const sign = createSign({
+        data: payload,
+        timestamp,
+        appAccessKeyId,
+        appSign
+      }, appAccessKey);
+
+      const checkAppSourceHeader = {
+        timestamp,
+        appAccessKeyId,
+        appSign,
+        sign
+      };
+
+      opts.headers['X-TCB-App-Source'] = JSON.stringify(checkAppSourceHeader);
     }
 
     // 发出请求

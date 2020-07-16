@@ -25,9 +25,9 @@ declare class TCB {
     off(eventName: string, callback: Function): void;
     callFunction(params: {
         name: string;
-        data: any;
-        query: any;
-        parse: boolean;
+        data?: any;
+        query?: any;
+        parse?: boolean;
     }, callback?: Function): any;
     deleteFile(params: {
         fileList: string[];

@@ -12,7 +12,7 @@ import tcb from '../dist/index';
 // import tcb from '../src';
 // import { test_ext_ci } from './ext_ci';
 // 默认情况下不测试登录
-import {  testUsernameAuthOpen } from './auth';
+// import {  testUsernameAuthOpen } from './auth';
 
 // import * as extCi from '@cloudbase/extension-ci';
 
@@ -31,28 +31,15 @@ let init = async function() {
     // env: 'hosting-a13d0a',
     // env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
-    // env: 'dev-withnate-a76f76',
+    env: 'dev-withnate-a76f76',
 
     // 账号密码登录云环境
     // env: 'peter2005271641', // @明明 @董沅鑫 未在控制台开通账号密码登录
-    env: 'devchs-02-1549b5', // @陈实 @董沅鑫 已在控制台开通账号密码登录
+    // env: 'devchs-02-1549b5', // @陈实 @董沅鑫 已在控制台开通账号密码登录
 
     timeout: 150000
     // env: 'luke-3de127'
   });
-
-  // testUsernameAuthClose(app, {
-  //   email: 'nbsky3@163.com',
-  //   password: 'chenshi12',
-  //   username: 'dongyuanxin'
-  // })
-
-  testUsernameAuthOpen(app, {
-    email: 'nbsky3@163.com',
-    password: 'chenshi12',
-    username: 'dongyuanxin'
-  });
-
 
   // await test_ext_ci(app);
 

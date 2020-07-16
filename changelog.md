@@ -13,7 +13,7 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
-## [1.9,1] 2020-07-10
+## [1.10.0] 2020-07-16
 
 - [Added] 新增账号密码登录的相关接口
   - `Auth.signInWithUsernameAndPassword()`

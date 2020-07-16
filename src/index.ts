@@ -151,7 +151,7 @@ class TCB {
   }
 
   callFunction(
-    params: { name: string; data: any; query: any; parse: boolean },
+    params: { name: string; data?: any; query?: any; parse?: boolean },
     callback?: Function
   ) {
     return Functions.callFunction.apply(this, [params, callback]);

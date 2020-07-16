@@ -716,10 +716,10 @@
   resolved "https://registry.npmjs.org/@cloudbase/adapter-interface/-/adapter-interface-0.4.0.tgz#c57935b503e7bface4b151df63a87dc564ae9907"
   integrity sha512-vbNQlr4NK5mdsMr3elk4/OdE/opLpZB+8JPTXAQM4/ldcTZtmb1Dnt3T2g9u5LSHDlRjdzyeM5ARvVqUq+2bmw==
 
-"@cloudbase/database@^0.9.16-beta":
-  version "0.9.16-beta"
-  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.16-beta.tgz#e972b447704df4ff45bdd8a80482a39cd8abaf59"
-  integrity sha512-NDwaRWW/rJC8aF9BkFoK6dBXruHJwSh01NnJeeRHgCaofWuu8uC8mDjEJC6oCtBfJQwX01zizaDnZ4CpjbXVJA==
+"@cloudbase/database@^0.9.17-beta":
+  version "0.9.17-beta"
+  resolved "https://registry.npmjs.org/@cloudbase/database/-/database-0.9.17-beta.tgz#31010405323e1524c66bec1780c84ecad8cbbe43"
+  integrity sha512-iC3gU/6TJ/d0mv7i7xkCHvfOzjDk7GeFk4oa7QIm7XNYjKOddumCLsUYnWVIM7bEA7G7wRmwuwoUbgimv72sbg==
   dependencies:
     bson "^4.0.2"
     lodash.clonedeep "4.5.0"
@@ -1842,9 +1842,9 @@ bser@^2.0.0:
     node-int64 "^0.4.0"
 
 bson@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/bson/-/bson-4.0.2.tgz#2929fdfed1a145b1c361908a2b950a6cf4bed2c2"
-  integrity sha512-rBdCxMBCg2aR420e1oKUejjcuPZLTibA7zEhWAlliFWEwzuBCC9Dkp5r7VFFIQB2t1WVsvTbohry575mc7Xw5A==
+  version "4.0.4"
+  resolved "https://registry.npmjs.org/bson/-/bson-4.0.4.tgz#4bda2cedf2ae7a18d15cb24ee1ede8c797f8eecf"
+  integrity sha512-Ioi3TD0/1V3aI8+hPfC56TetYmzfq2H07jJa9A1lKTxWsFtHtYdLMGMXjtGEg9v0f72NSM07diRQEUNYhLupIA==
   dependencies:
     buffer "^5.1.0"
     long "^4.0.0"

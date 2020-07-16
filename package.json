@@ -1,6 +1,6 @@
 {
   "name": "tcb-js-sdk",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",
@@ -28,7 +28,7 @@
   "license": "ISC",
   "dependencies": {
     "@cloudbase/adapter-interface": "^0.4.0",
-    "@cloudbase/database": "^0.9.16-beta",
+    "@cloudbase/database": "^0.9.17-beta",
     "axios": "^0.19.1",
     "cloudbase-adapter-wx_mp": "^0.1.0",
     "crypto-js": "^3.1.9-1",

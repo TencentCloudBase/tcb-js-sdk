@@ -17,7 +17,7 @@ import tcb from '../dist/index';
 // import * as extCi from '@cloudbase/extension-ci';
 
 let app;
-// const appid = 'wxacfb81f2ced64e70';
+const appid = 'wxacfb81f2ced64e70';
 
 let init = async function() {
   console.log('web test starting init');
@@ -31,7 +31,9 @@ let init = async function() {
     // env: 'hosting-a13d0a',
     // env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
-    env: 'dev-withnate-a76f76',
+    // env: 'dev-withnate-a76f76',
+    env: 'hjjhjg-cfd2b6',
+    // env: '',
 
     // 账号密码登录云环境
     // env: 'peter2005271641', // @明明 @董沅鑫 未在控制台开通账号密码登录
@@ -40,6 +42,18 @@ let init = async function() {
     timeout: 150000
     // env: 'luke-3de127'
   });
+
+  // testUsernameAuthClose(app, {
+  //   email: 'nbsky3@163.com',
+  //   password: 'chenshi12',
+  //   username: 'dongyuanxin'
+  // })
+
+  // testUsernameAuthOpen(app, {
+  //   email: 'nbsky3@163.com',
+  //   password: 'chenshi12',
+  //   username: 'dongyuanxin'
+  // });
 
   // await test_ext_ci(app);
 
@@ -105,6 +119,34 @@ window['initIndex'] = function() {
     htmlStr += `<option value="${index}">${msg}</option>`;
   });
   selectEle.innerHTML = htmlStr;
+};
+
+window['loginWithWeixin'] = function () {
+  const auth = app.auth({
+    persistence: 'local'
+  });
+
+  const wxProvider = auth
+    .weixinAuthProvider({
+      appid: appid,
+      scope: 'snsapi_userinfo'
+    });
+
+  // 自动跳转登录
+  // let wxLoginState = await wxProvider.signIn({ syncUserInfo: true})
+  // console.log('>>> wxLoginState is', wxLoginState)
+
+  document.getElementById('loginWithWeixin')
+    .addEventListener('click', () => {
+      wxProvider.signInWithRedirect();
+    });
+
+  document.getElementById('getLoginResultWithWeixin')
+    .addEventListener('click', async () => {
+      const wxLoginState = await wxProvider.getRedirectResult({ syncUserInfo: true });
+      console.log('>>> wxLoginState is', wxLoginState);
+    });
+
 };
 
 init();

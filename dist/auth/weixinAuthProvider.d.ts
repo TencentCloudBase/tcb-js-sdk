@@ -8,8 +8,9 @@ export declare class WeixinAuthProvider extends AuthProvider {
     private appid;
     constructor(config: Config, appid: string, scope: string, state?: string);
     signInWithRedirect(): Promise<any>;
-    getRedirectResult(options?: {
-        withUnionId: boolean;
+    getRedirectResult(options: {
+        withUnionId?: boolean;
+        syncUserInfo?: boolean;
     }): Promise<LoginState>;
     getLinkRedirectResult(options?: {
         withUnionId?: boolean;
@@ -17,6 +18,7 @@ export declare class WeixinAuthProvider extends AuthProvider {
     signIn(options?: {
         withUnionId?: boolean;
         createUser?: boolean;
+        syncUserInfo?: boolean;
     }): Promise<LoginState>;
     private checkLocalLoginState;
     private _signIn;

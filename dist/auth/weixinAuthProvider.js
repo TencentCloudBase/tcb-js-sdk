@@ -86,7 +86,6 @@ var WeixinAuthProvider = (function (_super) {
         });
     };
     WeixinAuthProvider.prototype.getRedirectResult = function (options) {
-        if (options === void 0) { options = { withUnionId: false }; }
         return __awaiter(this, void 0, void 0, function () {
             var code;
             return __generator(this, function (_a) {
@@ -125,27 +124,27 @@ var WeixinAuthProvider = (function (_super) {
     WeixinAuthProvider.prototype.signIn = function (options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a, withUnionId, _b, createUser, loginState, result, err, e_1;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var _a, withUnionId, _b, createUser, _c, syncUserInfo, loginState, result, err, e_1;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
-                        _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a, _b = options.createUser, createUser = _b === void 0 ? true : _b;
+                        _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a, _b = options.createUser, createUser = _b === void 0 ? true : _b, _c = options.syncUserInfo, syncUserInfo = _c === void 0 ? false : _c;
                         loginState = this.checkLocalLoginState();
                         if (loginState) {
                             return [2, loginState];
                         }
                         if (!SignInPromiseMap[this.config.env]) {
-                            SignInPromiseMap[this.config.env] = this._signIn({ withUnionId: withUnionId, createUser: createUser });
+                            SignInPromiseMap[this.config.env] = this._signIn({ withUnionId: withUnionId, createUser: createUser, syncUserInfo: syncUserInfo });
                         }
-                        _c.label = 1;
+                        _d.label = 1;
                     case 1:
-                        _c.trys.push([1, 3, , 4]);
+                        _d.trys.push([1, 3, , 4]);
                         return [4, SignInPromiseMap[this.config.env]];
                     case 2:
-                        result = _c.sent();
+                        result = _d.sent();
                         return [3, 4];
                     case 3:
-                        e_1 = _c.sent();
+                        e_1 = _d.sent();
                         err = e_1;
                         return [3, 4];
                     case 4:
@@ -173,7 +172,7 @@ var WeixinAuthProvider = (function (_super) {
         }
     };
     WeixinAuthProvider.prototype._signIn = function (options) {
-        if (options === void 0) { options = { withUnionId: false, createUser: true }; }
+        if (options === void 0) { options = { withUnionId: false, createUser: true, syncUserInfo: false }; }
         return __awaiter(this, void 0, void 0, function () {
             var code;
             return __generator(this, function (_a) {
@@ -247,15 +246,17 @@ var WeixinAuthProvider = (function (_super) {
     WeixinAuthProvider.prototype.getRefreshTokenByWXCode = function (appid, loginType, code, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a, withUnionId, _b, createUser, action, hybridMiniapp;
+            var _a, withUnionId, _b, createUser, syncUserInfo, action, hybridMiniapp;
             return __generator(this, function (_c) {
                 _a = options.withUnionId, withUnionId = _a === void 0 ? false : _a, _b = options.createUser, createUser = _b === void 0 ? true : _b;
+                syncUserInfo = this.scope === 'snsapi_base' ? false : options.syncUserInfo || false;
                 action = 'auth.signIn';
                 hybridMiniapp = adapters_1.Adapter.runtime === adapters_1.RUNTIME.WX_MP ? '1' : '0';
                 return [2, this._request.send(action, {
                         appid: appid,
                         loginType: loginType,
                         loginCredential: code,
+                        syncUserInfo: syncUserInfo,
                         hybridMiniapp: hybridMiniapp,
                         withUnionId: withUnionId,
                         createUser: createUser

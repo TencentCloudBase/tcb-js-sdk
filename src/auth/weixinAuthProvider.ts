@@ -39,7 +39,7 @@ export class WeixinAuthProvider extends AuthProvider {
     return this.redirect();
   }
 
-  async getRedirectResult(options = { withUnionId: false }) {
+  async getRedirectResult(options: { withUnionId?: boolean; syncUserInfo?: boolean }) {
     const code = util.getWeixinCode();
     if (!code) {
       return null;
@@ -66,14 +66,15 @@ export class WeixinAuthProvider extends AuthProvider {
     return this._request.send('auth.linkWithWeixinCode', { payload: { appid, loginType, code, hybridMiniapp, withUnionId }});
   }
 
-  async signIn(options: { withUnionId?: boolean; createUser?: boolean } = {}): Promise<LoginState> {
-    const { withUnionId = false, createUser = true } = options;
+  async signIn(options: { withUnionId?: boolean; createUser?: boolean; syncUserInfo?: boolean } = {}): Promise<LoginState> {
+    const { withUnionId = false, createUser = true, syncUserInfo = false } = options;
+
     const loginState = this.checkLocalLoginState();
     if (loginState) {
       return loginState;
     }
     if (!SignInPromiseMap[this.config.env]) {
-      SignInPromiseMap[this.config.env] = this._signIn({ withUnionId, createUser });
+      SignInPromiseMap[this.config.env] = this._signIn({ withUnionId, createUser, syncUserInfo });
     }
     let result;
     let err;
@@ -107,7 +108,7 @@ export class WeixinAuthProvider extends AuthProvider {
     }
   }
 
-  private async _signIn(options = { withUnionId: false, createUser: true }): Promise<LoginResult> {
+  private async _signIn(options = { withUnionId: false, createUser: true, syncUserInfo: false }): Promise<LoginResult> {
     if (!AllowedScopes[this.scope]) {
       throw new Error('错误的scope类型');
     }
@@ -169,14 +170,23 @@ export class WeixinAuthProvider extends AuthProvider {
     return new LoginState(this.config.env);
   }
 
-  private async getRefreshTokenByWXCode(appid: string, loginType: string, code: string, options: any = {}): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
+  private async getRefreshTokenByWXCode(
+    appid: string,
+    loginType: string,
+    code: string,
+    options: any = {}
+  ): Promise<{ refreshToken: string; accessToken: string; accessTokenExpire: number }> {
     const { withUnionId = false, createUser = true } = options;
+    // snsapi_userinfo 和 snsapi_login 才可以获取用户的微信信息
+    const syncUserInfo = this.scope === 'snsapi_base' ? false : options.syncUserInfo || false;
+
     const action = 'auth.signIn';
     const hybridMiniapp = Adapter.runtime === RUNTIME.WX_MP ? '1' : '0';
     return this._request.send(action, {
       appid,
       loginType,
       loginCredential: code,
+      syncUserInfo,
       hybridMiniapp,
       withUnionId,
       createUser

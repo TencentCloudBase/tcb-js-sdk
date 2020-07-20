@@ -13,6 +13,9 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.10.3] 2020-07-20
+- [Fix] 修复微信小程序上传图片不完整问题
+
 ## [1.10.2] 2020-07-17
 
 - [Changed] `WeixinAuthProvider.signIn()` 新增 `syncUserInfo` 参数，同步微信账号信息作为用户信息

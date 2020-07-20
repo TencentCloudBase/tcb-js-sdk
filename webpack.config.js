@@ -6,22 +6,22 @@ const Visualizer = require('webpack-visualizer-plugin');
 const modName = 'tcb';
 
 // 合并声明文件plugin
-function DtsBundlePlugin() { }
-DtsBundlePlugin.prototype.apply = function (compiler) {
-  compiler.plugin('done', function () {
-    if (process.env.NODE_ENV === 'e2e') {
-      return;
-    }
-    const dts = require('dts-bundle');
+// function DtsBundlePlugin() { }
+// DtsBundlePlugin.prototype.apply = function (compiler) {
+//   compiler.plugin('done', function () {
+//     if (process.env.NODE_ENV === 'e2e') {
+//       return;
+//     }
+//     const dts = require('dts-bundle');
 
-    dts.bundle({
-      name: modName,
-      main: 'dist/index.d.ts',
-      out: path.join(__dirname, `tcbjs/${package.version}/${modName}.d.ts`),
-      outputAsModuleFolder: true
-    });
-  });
-};
+//     dts.bundle({
+//       name: modName,
+//       main: 'dist/index.d.ts',
+//       out: path.join(__dirname, `tcbjs/${package.version}/${modName}.d.ts`),
+//       outputAsModuleFolder: true
+//     });
+//   });
+// };
 
 module.exports = {
   mode: 'production',
@@ -47,18 +47,19 @@ module.exports = {
     rules: [
       {
         test: /\.js?$/,
-        include: [
-          path.resolve(__dirname, 'dist'),
-          /node_modules\/@cloudbase\/database/
-        ],
+        // include: [
+        //   path.resolve(__dirname, 'dist'),
+        //   /node_modules\/@cloudbase\/database/
+        // ],
         loader: 'babel-loader',
+        exclude: [/node_modules/],
         options: {
           presets: [
             [
               '@babel/preset-env',
               {
                 modules: 'commonjs',
-                useBuiltIns: 'usage',
+                // useBuiltIns: 'usage',
                 corejs: 3
               }
             ]
@@ -75,6 +76,7 @@ module.exports = {
     new Visualizer({
       filename: './statistics.html'
     }),
-    new DtsBundlePlugin()
-  ]
+    // new DtsBundlePlugin()
+  ],
+  // externals: { crypto: 'crypto'}
 };

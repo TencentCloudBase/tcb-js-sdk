@@ -177,3 +177,17 @@ export function createSign(payload: KV<any>, secret: string): string {
   const sign = base64url(hs256(token, secret));
   return `${token}.${sign}`;
 }
+
+export function describeClassGetters(className: Function): string[] {
+  const methods = Reflect.ownKeys(className.prototype) as string[];
+  const getters = [];
+  methods.forEach(method => {
+    if (
+      typeof Object.getOwnPropertyDescriptor(className.prototype, method).get === 'function'
+    ) {
+      getters.push(method);
+    }
+  });
+
+  return getters;
+}

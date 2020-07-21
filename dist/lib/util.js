@@ -158,3 +158,14 @@ function createSign(payload, secret) {
     return token + "." + sign;
 }
 exports.createSign = createSign;
+function describeClassGetters(className) {
+    var methods = Reflect.ownKeys(className.prototype);
+    var getters = [];
+    methods.forEach(function (method) {
+        if (typeof Object.getOwnPropertyDescriptor(className.prototype, method).get === 'function') {
+            getters.push(method);
+        }
+    });
+    return getters;
+}
+exports.describeClassGetters = describeClassGetters;

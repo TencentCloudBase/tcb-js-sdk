@@ -240,6 +240,24 @@ export class Auth {
 }
 
 export class User {
+  public uin: string;
+  public loginType: string;
+  public openid: string;
+  public wxOpenId: string;
+  public wxPublicId: string;
+  public unionId: string;
+  public qqMiniOpenId: string;
+  public email: string;
+  public hasPassword: boolean;
+  public customUserId: string;
+  public nickName: string;
+  public gender: string;
+  public avatarUrl: string;
+  public location: {
+    country: string;
+    province: string;
+    city: string;
+  }
   private _cache: ICache;
   private _request: IRequest;
   private _envId: string;
@@ -345,7 +363,6 @@ export class User {
       this[infoKey] = userInfo[infoKey];
     });
 
-    // @ts-ignore
     this.location = {
       country: userInfo['country'],
       province: userInfo['province'],

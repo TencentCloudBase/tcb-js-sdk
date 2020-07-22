@@ -56,6 +56,24 @@ export declare class Auth {
     private _onLoginTypeChanged;
 }
 export declare class User {
+    uin: string;
+    loginType: string;
+    openid: string;
+    wxOpenId: string;
+    wxPublicId: string;
+    unionId: string;
+    qqMiniOpenId: string;
+    email: string;
+    hasPassword: boolean;
+    customUserId: string;
+    nickName: string;
+    gender: string;
+    avatarUrl: string;
+    location: {
+        country: string;
+        province: string;
+        city: string;
+    };
     private _cache;
     private _request;
     private _envId;

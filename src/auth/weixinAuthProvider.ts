@@ -164,7 +164,11 @@ export class WeixinAuthProvider extends AuthProvider {
     }
     activateEvent(EVENTS.LOGIN_STATE_CHANGED);
     // 抛出登录类型更改事件
-    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, { loginType: loginType, persistence: this.config.persistence });
+    activateEvent(EVENTS.LOGIN_TYPE_CHANGED, {
+      env: this.config.env,
+      loginType: loginType,
+      persistence: this.config.persistence
+    });
 
     await this.refreshUserInfo();
     return new LoginState(this.config.env);

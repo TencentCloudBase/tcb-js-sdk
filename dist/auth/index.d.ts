@@ -56,6 +56,9 @@ export declare class Auth {
     private _onLoginTypeChanged;
 }
 export declare class User {
+    protected info: {
+        [infoKey: string]: string;
+    };
     private _cache;
     private _request;
     private _envId;

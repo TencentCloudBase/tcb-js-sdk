@@ -53,6 +53,7 @@ var base_1 = require("./base");
 var cache_1 = require("../lib/cache");
 var request_1 = require("../lib/request");
 var events_1 = require("../lib/events");
+var util_1 = require("../lib/util");
 var customAuthProvider_1 = require("./customAuthProvider");
 var emailAuthProvider_1 = require("./emailAuthProvider");
 var usernameAuthProvider_1 = require("./usernameAuthProvider");
@@ -308,12 +309,18 @@ var Auth = (function () {
 exports.Auth = Auth;
 var User = (function () {
     function User(envId) {
+        var _this = this;
         if (!envId) {
             throw new Error('envId is not defined');
         }
+        this.info = {};
         this._envId = envId;
         this._cache = cache_1.getCache(this._envId);
         this._request = request_1.getRequestByEnvId(this._envId);
+        util_1.describeClassGetters(User)
+            .forEach(function (infoKey) {
+            _this.info[infoKey] = _this.getLocalUserInfo(infoKey);
+        });
     }
     Object.defineProperty(User.prototype, "uid", {
         get: function () {
@@ -510,6 +517,7 @@ var User = (function () {
     User.prototype.setLocalUserInfo = function (userInfo) {
         var userInfoKey = this._cache.keys.userInfoKey;
         this._cache.setStore(userInfoKey, userInfo);
+        this.info = userInfo;
     };
     User.prototype.getLocalUserInfo = function (key) {
         var userInfoKey = this._cache.keys.userInfoKey;

@@ -4,6 +4,7 @@ import { LOGINTYPE } from './base';
 import { ICache, getCache } from '../lib/cache';
 import { IRequest, getRequestByEnvId } from '../lib/request';
 import { addEventListener, activateEvent, EVENTS } from '../lib/events';
+import { describeClassGetters } from '../lib/util';
 import { LoginResult } from './interface';
 import { Config } from '../types';
 import { CustomAuthProvider } from './customAuthProvider';
@@ -239,8 +240,10 @@ export class Auth {
   }
 }
 
-
 export class User {
+  protected info: {
+    [infoKey: string]: string;
+  };
   private _cache: ICache;
   private _request: IRequest;
   private _envId: string;
@@ -249,9 +252,15 @@ export class User {
     if (!envId) {
       throw new Error('envId is not defined');
     }
+    this.info = {};
     this._envId = envId;
     this._cache = getCache(this._envId);
     this._request = getRequestByEnvId(this._envId);
+
+    describeClassGetters(User)
+      .forEach(infoKey => {
+        this.info[infoKey] = this.getLocalUserInfo(infoKey);
+      });
   }
 
   get uid(): string {
@@ -388,6 +397,7 @@ export class User {
   private setLocalUserInfo(userInfo) {
     const { userInfoKey } = this._cache.keys;
     this._cache.setStore(userInfoKey, userInfo);
+    this.info = userInfo;
   }
 
   private getLocalUserInfo(key) {

@@ -56,28 +56,28 @@ export declare class Auth {
     private _onLoginTypeChanged;
 }
 export declare class User {
+    uin: string;
+    loginType: string;
+    openid: string;
+    wxOpenId: string;
+    wxPublicId: string;
+    unionId: string;
+    qqMiniOpenId: string;
+    email: string;
+    hasPassword: boolean;
+    customUserId: string;
+    nickName: string;
+    gender: string;
+    avatarUrl: string;
+    location: {
+        country: string;
+        province: string;
+        city: string;
+    };
     private _cache;
     private _request;
     private _envId;
     constructor(envId: string);
-    get uid(): string;
-    get loginType(): string;
-    get openid(): string;
-    get wxOpenId(): string;
-    get wxPublicId(): string;
-    get unionId(): string;
-    get qqMiniOpenId(): string;
-    get email(): string;
-    get hasPassword(): boolean;
-    get customUserId(): string;
-    get nickName(): string;
-    get gender(): string;
-    get avatarUrl(): string;
-    get location(): {
-        country: any;
-        province: any;
-        city: any;
-    };
     linkWithTicket(ticket: string): Promise<any>;
     linkWithRedirect(provider: any): void;
     updatePassword(newPassword: any, oldPassword: any): Promise<any>;
@@ -91,8 +91,8 @@ export declare class User {
     unlink(platform: any): Promise<any>;
     update(userInfo: any): Promise<void>;
     refresh(): Promise<any>;
+    private setUserInfo;
     private setLocalUserInfo;
-    private getLocalUserInfo;
 }
 export declare class LoginState {
     credential: any;

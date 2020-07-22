@@ -16,6 +16,7 @@
 ## [1.10.4] 2020-07-22
 
 - [Fix] 修复 `LoginState.isWeixinAuth` 失效问题
+- [Fix] 修复 `Auth.currentUser` 上的用户信息无法解构赋值
 
 ## [1.10.3] 2020-07-20
 - [Fix] 修复微信小程序上传图片不完整问题

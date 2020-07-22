@@ -239,8 +239,25 @@ export class Auth {
   }
 }
 
-
 export class User {
+  public uin: string;
+  public loginType: string;
+  public openid: string;
+  public wxOpenId: string;
+  public wxPublicId: string;
+  public unionId: string;
+  public qqMiniOpenId: string;
+  public email: string;
+  public hasPassword: boolean;
+  public customUserId: string;
+  public nickName: string;
+  public gender: string;
+  public avatarUrl: string;
+  public location: {
+    country: string;
+    province: string;
+    city: string;
+  }
   private _cache: ICache;
   private _request: IRequest;
   private _envId: string;
@@ -252,67 +269,7 @@ export class User {
     this._envId = envId;
     this._cache = getCache(this._envId);
     this._request = getRequestByEnvId(this._envId);
-  }
-
-  get uid(): string {
-    return this.getLocalUserInfo('uid');
-  }
-
-  get loginType(): string {
-    return this.getLocalUserInfo('loginType');
-  }
-
-  get openid(): string {
-    return this.getLocalUserInfo('wxOpenId');
-  }
-
-  get wxOpenId(): string {
-    return this.getLocalUserInfo('wxOpenId');
-  }
-
-  get wxPublicId(): string {
-    return this.getLocalUserInfo('wxPublicId');
-  }
-
-  get unionId(): string {
-    return this.getLocalUserInfo('wxUnionId');
-  }
-
-  get qqMiniOpenId(): string {
-    return this.getLocalUserInfo('qqMiniOpenId');
-  }
-
-  get email(): string {
-    return this.getLocalUserInfo('email');
-  }
-
-  get hasPassword(): boolean {
-    return this.getLocalUserInfo('hasPassword');
-  }
-
-  get customUserId(): string {
-    return this.getLocalUserInfo('customUserId');
-  }
-
-  get nickName(): string {
-    return this.getLocalUserInfo('nickName');
-  }
-
-  get gender(): string {
-    return this.getLocalUserInfo('gender');
-  }
-
-  get avatarUrl(): string {
-    return this.getLocalUserInfo('avatarUrl');
-  }
-
-  get location() {
-    const location = {
-      country: this.getLocalUserInfo('country'),
-      province: this.getLocalUserInfo('province'),
-      city: this.getLocalUserInfo('city')
-    };
-    return location;
+    this.setUserInfo();
   }
 
   linkWithTicket(ticket: string) {
@@ -385,15 +342,39 @@ export class User {
     return userInfo;
   }
 
+  private setUserInfo() {
+    const { userInfoKey } = this._cache.keys;
+    const userInfo = this._cache.getStore(userInfoKey);
+    [
+      'uid',
+      'loginType',
+      'openid',
+      'wxOpenId',
+      'wxPublicId',
+      'unionId',
+      'qqMiniOpenId',
+      'email',
+      'hasPassword',
+      'customUserId',
+      'nickName',
+      'gender',
+      'avatarUrl',
+    ].forEach(infoKey => {
+      this[infoKey] = userInfo[infoKey];
+    });
+
+    this.location = {
+      country: userInfo['country'],
+      province: userInfo['province'],
+      city: userInfo['city']
+    };
+
+  }
+
   private setLocalUserInfo(userInfo) {
     const { userInfoKey } = this._cache.keys;
     this._cache.setStore(userInfoKey, userInfo);
-  }
-
-  private getLocalUserInfo(key) {
-    const { userInfoKey } = this._cache.keys;
-    const userInfo = this._cache.getStore(userInfoKey);
-    return userInfo[key];
+    this.setUserInfo();
   }
 }
 

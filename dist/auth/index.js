@@ -314,110 +314,8 @@ var User = (function () {
         this._envId = envId;
         this._cache = cache_1.getCache(this._envId);
         this._request = request_1.getRequestByEnvId(this._envId);
+        this.setUserInfo();
     }
-    Object.defineProperty(User.prototype, "uid", {
-        get: function () {
-            return this.getLocalUserInfo('uid');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "loginType", {
-        get: function () {
-            return this.getLocalUserInfo('loginType');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "openid", {
-        get: function () {
-            return this.getLocalUserInfo('wxOpenId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "wxOpenId", {
-        get: function () {
-            return this.getLocalUserInfo('wxOpenId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "wxPublicId", {
-        get: function () {
-            return this.getLocalUserInfo('wxPublicId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "unionId", {
-        get: function () {
-            return this.getLocalUserInfo('wxUnionId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "qqMiniOpenId", {
-        get: function () {
-            return this.getLocalUserInfo('qqMiniOpenId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "email", {
-        get: function () {
-            return this.getLocalUserInfo('email');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "hasPassword", {
-        get: function () {
-            return this.getLocalUserInfo('hasPassword');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "customUserId", {
-        get: function () {
-            return this.getLocalUserInfo('customUserId');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "nickName", {
-        get: function () {
-            return this.getLocalUserInfo('nickName');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "gender", {
-        get: function () {
-            return this.getLocalUserInfo('gender');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "avatarUrl", {
-        get: function () {
-            return this.getLocalUserInfo('avatarUrl');
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "location", {
-        get: function () {
-            var location = {
-                country: this.getLocalUserInfo('country'),
-                province: this.getLocalUserInfo('province'),
-                city: this.getLocalUserInfo('city')
-            };
-            return location;
-        },
-        enumerable: true,
-        configurable: true
-    });
     User.prototype.linkWithTicket = function (ticket) {
         if (typeof ticket !== 'string') {
             throw new Error('ticket must be string');
@@ -507,14 +405,37 @@ var User = (function () {
             });
         });
     };
+    User.prototype.setUserInfo = function () {
+        var _this = this;
+        var userInfoKey = this._cache.keys.userInfoKey;
+        var userInfo = this._cache.getStore(userInfoKey);
+        [
+            'uid',
+            'loginType',
+            'openid',
+            'wxOpenId',
+            'wxPublicId',
+            'unionId',
+            'qqMiniOpenId',
+            'email',
+            'hasPassword',
+            'customUserId',
+            'nickName',
+            'gender',
+            'avatarUrl',
+        ].forEach(function (infoKey) {
+            _this[infoKey] = userInfo[infoKey];
+        });
+        this.location = {
+            country: userInfo['country'],
+            province: userInfo['province'],
+            city: userInfo['city']
+        };
+    };
     User.prototype.setLocalUserInfo = function (userInfo) {
         var userInfoKey = this._cache.keys.userInfoKey;
         this._cache.setStore(userInfoKey, userInfo);
-    };
-    User.prototype.getLocalUserInfo = function (key) {
-        var userInfoKey = this._cache.keys.userInfoKey;
-        var userInfo = this._cache.getStore(userInfoKey);
-        return userInfo[key];
+        this.setUserInfo();
     };
     return User;
 }());

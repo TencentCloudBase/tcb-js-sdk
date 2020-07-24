@@ -13,6 +13,10 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.10.4] 2020-07-24
+
+- [Fix] 修复非 Node.js 环境下访问 `process` 造成报错的问题
+
 ## [1.10.4] 2020-07-22
 
 - [Fix] 修复 `LoginState.isWeixinAuth` 失效问题

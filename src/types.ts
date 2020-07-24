@@ -48,7 +48,7 @@ export const protocol = typeof location !== 'undefined' && location.protocol ===
 
 // export const BASE_URL = '//118.126.68.63/web';
 export const BASE_URL =
-  process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
+  typeof process !== 'undefined' && process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
     ? '//tcb-pre.tencentcloudapi.com/web'
     : '//tcb-api.tencentcloudapi.com/web';
 // debug

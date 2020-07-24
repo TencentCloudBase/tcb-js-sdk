@@ -122,7 +122,7 @@ var ICache = (function () {
     };
     ICache.prototype.getStore = function (key, version) {
         try {
-            if (process && process.env && process.env.tcb_token) {
+            if (typeof process !== 'undefined' && process.env && process.env.tcb_token) {
                 return process.env.tcb_token;
             }
             if (!this._storage) {

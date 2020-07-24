@@ -16,7 +16,7 @@ exports.ANONYMOUS_UUID = 'anonymous_uuid';
 exports.LOGIN_TYPE_KEY = 'login_type';
 exports.USER_INFO_KEY = 'user_info';
 exports.protocol = typeof location !== 'undefined' && location.protocol === 'http:' ? 'http:' : 'https:';
-exports.BASE_URL = process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
+exports.BASE_URL = typeof process !== 'undefined' && process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
     ? '//tcb-pre.tencentcloudapi.com/web'
     : '//tcb-api.tencentcloudapi.com/web';
 exports.dataVersion = '2020-01-10';

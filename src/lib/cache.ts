@@ -140,7 +140,7 @@ export class ICache {
     // forceLocal强制取localstory
     try {
       //测试用例使用
-      if (process && process.env && process.env.tcb_token) {
+      if (typeof process !== 'undefined' && process.env && process.env.tcb_token) {
         return process.env.tcb_token;
       }
 

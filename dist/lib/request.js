@@ -286,14 +286,13 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, opts, traceHeader, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
                         tcbTraceKey = "x-tcb-trace_" + this.config.env;
                         contentType = 'application/x-www-form-urlencoded';
-                        tmpObj = __assign({ action: action,
-                            dataVersion: types_1.dataVersion, env: this.config.env }, params);
+                        tmpObj = __assign({ action: action, env: this.config.env }, params);
                         if (!(actionsWithoutAccessToken.indexOf(action) === -1)) return [3, 2];
                         refreshTokenKey = this._cache.keys.refreshTokenKey;
                         refreshToken = this._cache.getStore(refreshTokenKey);
@@ -322,21 +321,6 @@ var IRequest = (function () {
                                 }
                             }
                         }
-                        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
-                            _b = this.config, appSign = _b.appSign, appSecret = _b.appSecret;
-                            timestamp = Date.now();
-                            appAccessKey = appSecret.appAccessKey, appAccessKeyId = appSecret.appAccessKeyId;
-                            sign = util_1.createSign({
-                                data: payload,
-                                timestamp: timestamp,
-                                appAccessKeyId: appAccessKeyId,
-                                appSign: appSign
-                            }, appAccessKey);
-                            payload = __assign(__assign({}, payload), { timestamp: timestamp,
-                                appAccessKey: appAccessKey,
-                                appSign: appSign,
-                                sign: sign });
-                        }
                         opts = {
                             headers: {
                                 'content-type': contentType
@@ -348,6 +332,18 @@ var IRequest = (function () {
                         traceHeader = this._localCache.getStore(tcbTraceKey);
                         if (traceHeader) {
                             opts.headers['X-TCB-Trace'] = traceHeader;
+                        }
+                        if (adapters_1.Adapter.runtime !== adapters_1.RUNTIME.WEB) {
+                            _b = this.config, appSign = _b.appSign, appSecret = _b.appSecret;
+                            timestamp = Date.now();
+                            appAccessKey = appSecret.appAccessKey, appAccessKeyId = appSecret.appAccessKeyId;
+                            sign = util_1.createSign({
+                                data: payload,
+                                timestamp: timestamp,
+                                appAccessKeyId: appAccessKeyId,
+                                appSign: appSign
+                            }, appAccessKey);
+                            opts.headers['X-TCB-App-Source'] = "timestamp=" + timestamp + ";appAccessKeyId=" + appAccessKeyId + ";appSign=" + appSign + ";sign=" + sign;
                         }
                         parse = params.parse, inQuery = params.inQuery, search = params.search;
                         formatQuery = {

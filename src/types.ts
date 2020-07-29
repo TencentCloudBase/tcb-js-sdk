@@ -58,4 +58,4 @@ export const BASE_URL =
 
 // export const BASE_URL = '//212.129.229.68/web';
 
-export const dataVersion = '2020-01-10';
+// export const dataVersion = '2020-01-10';

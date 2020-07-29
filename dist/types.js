@@ -19,4 +19,3 @@ exports.protocol = typeof location !== 'undefined' && location.protocol === 'htt
 exports.BASE_URL = typeof process !== 'undefined' && process.env.NODE_ENV === 'e2e' && process.env.END_POINT === 'pre'
     ? '//tcb-pre.tencentcloudapi.com/web'
     : '//tcb-api.tencentcloudapi.com/web';
-exports.dataVersion = '2020-01-10';

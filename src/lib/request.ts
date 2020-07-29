@@ -3,8 +3,7 @@ import {
   BASE_URL,
   SDK_VERISON,
   KV,
-  protocol,
-  dataVersion
+  protocol
 } from '../types';
 import {
   IRequestOptions,
@@ -261,7 +260,6 @@ class IRequest {
     const tmpObj = {
       action,
       // webDeviceId,
-      dataVersion,
       env: this.config.env,
       ...params
     };
@@ -296,26 +294,7 @@ class IRequest {
         }
       }
     }
-    // 非web平台使用凭证检验有效性
-    if (Adapter.runtime !== RUNTIME.WEB) {
-      const { appSign, appSecret } = this.config;
-      const timestamp = Date.now();
-      const { appAccessKey, appAccessKeyId } = appSecret;
-      const sign = createSign({
-        data: payload,
-        timestamp,
-        appAccessKeyId,
-        appSign
-      }, appAccessKey);
 
-      payload = {
-        ...payload,
-        timestamp,
-        appAccessKey,
-        appSign,
-        sign
-      };
-    }
     let opts: any = {
       headers: {
         'content-type': contentType
@@ -328,6 +307,21 @@ class IRequest {
     const traceHeader = this._localCache.getStore(tcbTraceKey);
     if (traceHeader) {
       opts.headers['X-TCB-Trace'] = traceHeader;
+    }
+
+    // 非web平台使用凭证检验有效性
+    if (Adapter.runtime !== RUNTIME.WEB) {
+      const { appSign, appSecret } = this.config;
+      const timestamp = Date.now();
+      const { appAccessKey, appAccessKeyId } = appSecret;
+      const sign = createSign({
+        data: payload,
+        timestamp,
+        appAccessKeyId,
+        appSign
+      }, appAccessKey);
+
+      opts.headers['X-TCB-App-Source'] = `timestamp=${timestamp};appAccessKeyId=${appAccessKeyId};appSign=${appSign};sign=${sign}`;
     }
 
     // 发出请求

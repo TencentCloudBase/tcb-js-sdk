@@ -54,7 +54,7 @@ const actionsWithoutAccessToken = [
 ];
 
 const commonHeader = {
-  'X-SDK-Version': SDK_VERISON
+  'X-SDK-Version': `tcb-js-sdk/${SDK_VERISON}`
 };
 
 function bindHooks(instance: SDKRequestInterface, name: string, hooks: RequestBeforeHook[]) {

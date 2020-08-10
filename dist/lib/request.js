@@ -67,7 +67,7 @@ var actionsWithoutAccessToken = [
     'auth.isUsernameRegistered'
 ];
 var commonHeader = {
-    'X-SDK-Version': types_1.SDK_VERISON
+    'X-SDK-Version': "tcb-js-sdk/" + types_1.SDK_VERISON
 };
 function bindHooks(instance, name, hooks) {
     var originMethod = instance[name];

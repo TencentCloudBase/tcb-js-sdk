@@ -1,6 +1,6 @@
 {
   "name": "tcb-js-sdk",
-  "version": "1.10.8",
+  "version": "1.10.9",
   "description": "js sdk for tcb",
   "main": "dist/index.js",
   "types": "./dist/index.d.ts",

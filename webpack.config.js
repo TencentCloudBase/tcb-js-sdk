@@ -47,10 +47,6 @@ module.exports = {
     rules: [
       {
         test: /\.js?$/,
-        // include: [
-        //   path.resolve(__dirname, 'dist'),
-        //   /node_modules\/@cloudbase\/database/
-        // ],
         loader: 'babel-loader',
         exclude: [/node_modules/],
         options: {
@@ -64,6 +60,13 @@ module.exports = {
               }
             ]
           ]
+        }
+      },
+      {
+        test: /package\.json$/,
+        loader: 'package-json-cleanup-loader',
+        options: {
+          only: ['version']
         }
       }
     ]

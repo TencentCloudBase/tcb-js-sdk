@@ -1,5 +1,7 @@
 # Tencent Cloud Base(TCB) JavaScript SDK ![npm (tag)](https://img.shields.io/npm/v/tcb-js-sdk)
 
+**DEPRECATED 已更名[@cloudbase/js-sdk](https://github.com/TencentCloudBase/cloudbase-js-sdk)，此仓库只维护现有能力不再增加新能力**
+
 ## 介绍
 
 TCB 提供开发应用所需服务和基础设施。TCB JS SDK 让你可以在网页端使用 JavaScript 代码服务访问 TCB 的的服务。你可以使用该 SDK 构建自己的公众号页面或者独立的网站等 Web 服务。

@@ -128,7 +128,7 @@ export class ICache {
     try {
       this._storage.setItem(key, content);
     } catch (e) {
-      return;
+      throw e;
     }
     return;
   }

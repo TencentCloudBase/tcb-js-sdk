@@ -13,6 +13,10 @@
 - `Fixed` 对bug的修复
 - `Security` 对安全的改进
 
+## [1.10.10] 2020-09-23
+- [Fixed] 兼容微信小程序插件环境
+- [Fixed] storage 满仓写报错
+
 ## [1.10.9] 2020-09-01
 - [Fixed] 修复js打包后包含冗余的package.json信息
 

@@ -2149,10 +2149,10 @@ clone-deep@^0.2.4:
     lazy-cache "^1.0.3"
     shallow-clone "^0.1.2"
 
-cloudbase-adapter-wx_mp@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/cloudbase-adapter-wx_mp/-/cloudbase-adapter-wx_mp-0.1.2.tgz#de1b4e58613aa03cf9f5eff0028fe6ce455d3169"
-  integrity sha512-RRWQFeUUtih/wPpA/5sIlqc+nTm8nWei2eMJvEEnZjflr1EzbVCjkzgzzosGCbjgzT5QTU+ql3zSEotepaMmpA==
+cloudbase-adapter-wx_mp@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.npmjs.org/cloudbase-adapter-wx_mp/-/cloudbase-adapter-wx_mp-0.1.3.tgz#858f3c142eaedd9777519488eea93f5708af6591"
+  integrity sha512-/Qy0ZivzaLQ4emEDaPDjn/sqmLHOTlzkl1gDXSt0mOHelusAI6xWRwKM8wviLn4oT5RaYsESyhKIiMrpvjUqMw==
   dependencies:
     "@cloudbase/adapter-interface" "^0.4.0"
 

@@ -21,7 +21,7 @@ declare class IRequest {
     upload(options: IUploadRequestOptions): Promise<ResponseObject>;
     download(options: IRequestOptions): Promise<ResponseObject>;
     refreshAccessToken(): Promise<GetAccessTokenResult>;
-    _refreshAccessToken(): Promise<GetAccessTokenResult>;
+    _refreshAccessToken(retryNum?: number): Promise<GetAccessTokenResult>;
     getAccessToken(): Promise<GetAccessTokenResult>;
     request(action: any, params: any, options?: any): Promise<any>;
     send(action: string, data?: any): Promise<any>;

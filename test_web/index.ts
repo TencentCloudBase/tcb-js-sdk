@@ -17,9 +17,9 @@ import tcb from '../dist/index';
 // import * as extCi from '@cloudbase/extension-ci';
 
 let app;
-const appid = 'wxacfb81f2ced64e70';
+const appid = 'wxf4cf4a6bfa6320fb';
 
-let init = async function() {
+let init = async function () {
   console.log('web test starting init');
   // 初始化
   app = tcb.init({
@@ -32,8 +32,8 @@ let init = async function() {
     // env: 'test-2a63aa'
     // env: 'feature-env-billing-004'
     // env: 'dev-withnate-a76f76',
-    env: 'hjjhjg-cfd2b6',
-    // env: '',
+    // env: 'hjjhjg-cfd2b6',
+    env: 'test-2a63aa',
 
     // 账号密码登录云环境
     // env: 'peter2005271641', // @明明 @董沅鑫 未在控制台开通账号密码登录
@@ -41,6 +41,10 @@ let init = async function() {
 
     timeout: 150000
     // env: 'luke-3de127'
+  });
+
+  const auth = app.auth({
+    persistence: 'local'
   });
 
   // testUsernameAuthClose(app, {
@@ -64,30 +68,34 @@ let init = async function() {
 
   await test_database(app);
 
+  auth.signInAnonymously().then(res => {
+    console.log('res', res);
+  });
+
   // app.auth().onLoginStateExpire(() => {
   //   console.log("LoginStateExpire....");
   // });
 };
 
-window['initStorage'] = function() {
-  document.getElementById('uploadFile').onclick = function() {
+window['initStorage'] = function () {
+  document.getElementById('uploadFile').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>(
       document.getElementById('returnType')
     );
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
     uploadFile(app, returnType);
   };
-  document.getElementById('getTempFileURL').onclick = function() {
+  document.getElementById('getTempFileURL').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>(
       document.getElementById('returnType')
     );
     let returnType = returnTypeEle.options[returnTypeEle.selectedIndex].value;
     getTempFileURL(app, returnType);
   };
-  document.getElementById('downloadFile').onclick = function() {
+  document.getElementById('downloadFile').onclick = function () {
     downloadFile(app);
   };
-  document.getElementById('deleteFile').onclick = function() {
+  document.getElementById('deleteFile').onclick = function () {
     let returnTypeEle = <HTMLSelectElement>(
       document.getElementById('returnType')
     );
@@ -96,8 +104,8 @@ window['initStorage'] = function() {
   };
 };
 
-window['initIndex'] = function() {
-  document.getElementById('runSelectedTestCase').onclick = function() {
+window['initIndex'] = function () {
+  document.getElementById('runSelectedTestCase').onclick = function () {
     let selectEle = <HTMLSelectElement>(
       document.getElementById('testCaseSelect')
     );
@@ -109,7 +117,7 @@ window['initIndex'] = function() {
     let selectIndex = selectEle.options[selectEle.selectedIndex].value;
     runSelectedTestCase(Number(selectIndex));
   };*/
-  document.getElementById('runAllTestCases').onclick = function() {
+  document.getElementById('runAllTestCases').onclick = function () {
     runAllTestCases();
   };
 

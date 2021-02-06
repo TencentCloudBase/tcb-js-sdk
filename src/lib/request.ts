@@ -342,8 +342,13 @@ class IRequest {
       ...inQuery,
       ...formatQuery
     });
+
+
+    const hostname = BASE_URL.slice(2);
+    const transformEnv = `//${this.config.env}.${hostname}`;
+
     // 生成请求 url
-    let newUrl = formatUrl(protocol, BASE_URL, formatQuery);
+    let newUrl = formatUrl(protocol, transformEnv, formatQuery);
 
     if (search) {
       newUrl += search;

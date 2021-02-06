@@ -293,7 +293,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, hostname, transformEnv, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -358,7 +358,9 @@ var IRequest = (function () {
                         };
                         parse && (formatQuery.parse = true);
                         inQuery && (formatQuery = __assign(__assign({}, inQuery), formatQuery));
-                        newUrl = util_1.formatUrl(types_1.protocol, types_1.BASE_URL, formatQuery);
+                        hostname = types_1.BASE_URL.slice(2);
+                        transformEnv = "//" + this.config.env + "." + hostname;
+                        newUrl = util_1.formatUrl(types_1.protocol, transformEnv, formatQuery);
                         if (search) {
                             newUrl += search;
                         }

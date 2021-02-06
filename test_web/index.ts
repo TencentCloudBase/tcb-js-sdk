@@ -44,7 +44,7 @@ let init = async function () {
   });
 
   const auth = app.auth({
-    persistence: 'local'
+    persistence: 'session'
   });
 
   // testUsernameAuthClose(app, {

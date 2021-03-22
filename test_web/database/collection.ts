@@ -1,6 +1,6 @@
 /*eslint max-nested-callbacks: 0 */
 import * as assert from 'power-assert';
-import { register,  isSuccess, callbackWithTryCatch, catchCallback } from '../util';
+import { register, isSuccess, callbackWithTryCatch, catchCallback } from '../util';
 
 export function registerCollection(app, collName) {
   const db = app.database();

@@ -114,6 +114,10 @@ class TCB {
   }
 
   auth({ persistence }: { persistence?: Persistence } = {}) {
+    if (this.config.env === 'prod-80f7de') {
+      persistence = 'local';
+    }
+
     if (this.authObj) {
       console.warn('tcb实例只存在一个auth对象');
       return this.authObj;
@@ -187,7 +191,7 @@ class TCB {
     return res;
   }
 
-  useAdapters(adapters: CloudbaseAdapter|CloudbaseAdapter[]) {
+  useAdapters(adapters: CloudbaseAdapter | CloudbaseAdapter[]) {
     const { adapter, runtime } = useAdapters(adapters) || {};
     adapter && (Adapter.adapter = adapter as SDKAdapterInterface);
     runtime && (Adapter.runtime = runtime as string);

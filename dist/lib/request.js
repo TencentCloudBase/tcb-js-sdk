@@ -187,7 +187,8 @@ var IRequest = (function () {
             });
         });
     };
-    IRequest.prototype._refreshAccessToken = function () {
+    IRequest.prototype._refreshAccessToken = function (retryNum) {
+        if (retryNum === void 0) { retryNum = 1; }
         return __awaiter(this, void 0, void 0, function () {
             var _a, accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey, refreshToken, params, response, code, isAnonymous, anonymous_uuid, refresh_token, res;
             return __generator(this, function (_b) {
@@ -220,7 +221,13 @@ var IRequest = (function () {
                     case 2:
                         res = _b.sent();
                         this.setRefreshToken(res.refresh_token);
-                        return [2, this._refreshAccessToken()];
+                        if (retryNum >= 1) {
+                            return [2, this._refreshAccessToken(--retryNum)];
+                        }
+                        else {
+                            throw new Error("[tcb-js-sdk] \u91CD\u8BD5\u83B7\u53D6 refresh token \u5931\u8D25");
+                        }
+                        _b.label = 3;
                     case 3:
                         events_1.activateEvent(events_1.EVENTS.LOGIN_STATE_EXPIRED);
                         this._cache.removeStore(refreshTokenKey);
@@ -286,7 +293,7 @@ var IRequest = (function () {
     };
     IRequest.prototype.request = function (action, params, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, newUrl, res, resTraceHeader;
+            var tcbTraceKey, contentType, tmpObj, refreshTokenKey, refreshToken, _a, payload, key, key, opts, traceHeader, _b, appSign, appSecret, timestamp, appAccessKey, appAccessKeyId, sign, parse, inQuery, search, formatQuery, hostname, transformEnv, newUrl, res, resTraceHeader;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -351,7 +358,9 @@ var IRequest = (function () {
                         };
                         parse && (formatQuery.parse = true);
                         inQuery && (formatQuery = __assign(__assign({}, inQuery), formatQuery));
-                        newUrl = util_1.formatUrl(types_1.protocol, types_1.BASE_URL, formatQuery);
+                        hostname = types_1.BASE_URL.slice(2);
+                        transformEnv = "//" + this.config.env + "." + hostname;
+                        newUrl = util_1.formatUrl(types_1.protocol, transformEnv, formatQuery);
                         if (search) {
                             newUrl += search;
                         }

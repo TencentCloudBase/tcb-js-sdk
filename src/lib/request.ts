@@ -165,7 +165,7 @@ class IRequest {
   }
 
   // 调用接口刷新access token，并且返回
-  async _refreshAccessToken(): Promise<GetAccessTokenResult> {
+  async _refreshAccessToken(retryNum: number = 1): Promise<GetAccessTokenResult> {
     const { accessTokenKey, accessTokenExpireKey, refreshTokenKey, loginTypeKey, anonymousUuidKey } = this._cache.keys;
     this._cache.removeStore(accessTokenKey);
     this._cache.removeStore(accessTokenExpireKey);
@@ -196,7 +196,12 @@ class IRequest {
             refresh_token
           });
           this.setRefreshToken(res.refresh_token);
-          return this._refreshAccessToken();
+
+          if (retryNum >= 1) {
+            return this._refreshAccessToken(--retryNum);
+          } else {
+            throw new Error(`[tcb-js-sdk] 重试获取 refresh token 失败`);
+          }
         }
         activateEvent(EVENTS.LOGIN_STATE_EXPIRED);
         this._cache.removeStore(refreshTokenKey);
@@ -337,8 +342,13 @@ class IRequest {
       ...inQuery,
       ...formatQuery
     });
+
+
+    const hostname = BASE_URL.slice(2);
+    const transformEnv = `//${this.config.env}.${hostname}`;
+
     // 生成请求 url
-    let newUrl = formatUrl(protocol, BASE_URL, formatQuery);
+    let newUrl = formatUrl(protocol, transformEnv, formatQuery);
 
     if (search) {
       newUrl += search;

@@ -133,6 +133,9 @@ var TCB = (function () {
     };
     TCB.prototype.auth = function (_a) {
         var persistence = (_a === void 0 ? {} : _a).persistence;
+        if (this.config.env === 'prod-80f7de') {
+            persistence = 'local';
+        }
         if (this.authObj) {
             console.warn('tcb实例只存在一个auth对象');
             return this.authObj;
